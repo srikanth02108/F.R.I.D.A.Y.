@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>TYR - Executive Dashboard</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-container": "#efeded",
+                    "surface-bright": "#fbf9f8",
+                    "on-primary-container": "#82838b",
+                    "outline": "#77777c",
+                    "primary-fixed-dim": "#c5c6ce",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-dim": "#dbdad9",
+                    "surface-container-high": "#e9e8e7",
+                    "error-container": "#ffdad6",
+                    "primary-container": "#191b22",
+                    "on-error": "#ffffff",
+                    "tertiary": "#000000",
+                    "inverse-surface": "#303031",
+                    "tertiary-container": "#002112",
+                    "tertiary-fixed": "#6ffcb7",
+                    "on-tertiary": "#ffffff",
+                    "surface-tint": "#5d5e65",
+                    "ats-emerald": "#0EB87A",
+                    "primary": "#000000",
+                    "on-secondary": "#ffffff",
+                    "azure-vibrant": "#2055FD",
+                    "on-secondary-fixed": "#001355",
+                    "secondary-fixed": "#dde1ff",
+                    "secondary-fixed-dim": "#b8c4ff",
+                    "slate-gray": "#6B6B6B",
+                    "outline-variant": "#c7c6cb",
+                    "primary-fixed": "#e2e2eb",
+                    "on-secondary-fixed-variant": "#0036bc",
+                    "latex-paper": "#FFFFFF",
+                    "error": "#ba1a1a",
+                    "on-tertiary-fixed-variant": "#005233",
+                    "on-primary-fixed-variant": "#45464e",
+                    "on-tertiary-container": "#009763",
+                    "inverse-on-surface": "#f2f0f0",
+                    "surface-container-highest": "#e4e2e2",
+                    "secondary-container": "#2558ff",
+                    "on-error-container": "#93000a",
+                    "on-surface-variant": "#46464b",
+                    "surface-container-low": "#f5f3f3",
+                    "surface": "#fbf9f8",
+                    "tertiary-fixed-dim": "#4fdf9d",
+                    "inverse-primary": "#c5c6ce",
+                    "secondary": "#003fd8",
+                    "on-surface": "#1b1c1c",
+                    "surface-variant": "#e4e2e2",
+                    "background": "#fbf9f8",
+                    "on-secondary-container": "#eaebff",
+                    "deep-obsidian": "#0A0A0A",
+                    "on-primary-fixed": "#191b22",
+                    "on-background": "#1b1c1c",
+                    "on-primary": "#ffffff",
+                    "on-tertiary-fixed": "#002112"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "base": "4px",
+                    "gutter": "24px",
+                    "margin-mobile": "16px",
+                    "stack-lg": "32px",
+                    "stack-sm": "8px",
+                    "container-max": "1280px",
+                    "stack-md": "16px",
+                    "margin-desktop": "40px"
+            },
+            "fontFamily": {
+                    "headline-lg": ["Plus Jakarta Sans"],
+                    "headline-lg-mobile": ["Plus Jakarta Sans"],
+                    "button-text": ["Plus Jakarta Sans"],
+                    "body-sm": ["Plus Jakarta Sans"],
+                    "label-mono": ["JetBrains Mono"],
+                    "headline-md": ["Plus Jakarta Sans"],
+                    "display-lg": ["Plus Jakarta Sans"],
+                    "body-md": ["Plus Jakarta Sans"],
+                    "body-lg": ["Plus Jakarta Sans"]
+            },
+            "fontSize": {
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                    "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+                    "button-text": ["15px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600"}],
+                    "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "label-mono": ["13px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}]
+            }
+          }
+        }
+      }
+    </script>
+</head>
+<body class="bg-background text-on-surface font-body-md antialiased min-h-screen flex">
+<!-- SideNavBar (Desktop) -->
+<aside class="fixed left-0 top-0 h-screen w-[320px] hidden md:flex flex-col bg-white dark:bg-deep-obsidian border-r border-outline-variant dark:border-outline shadow-md py-stack-lg px-gutter overflow-y-auto z-50">
+<div class="flex flex-col gap-stack-lg h-full">
+<!-- Header -->
+<div class="flex items-center gap-stack-md">
+<div class="w-12 h-12 rounded-full bg-surface-container-highest overflow-hidden border-2 border-surface-container flex-shrink-0">
+<img alt="Executive User" class="w-full h-full object-cover" data-alt="A professional headshot of a confident executive wearing a sharp navy blue suit, standing in a brightly lit modern corporate office with subtle glass partitions in the background. The lighting is crisp and high-key, conveying authority and approachability." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBgauiNzbtfstzyw9jpG5UzWOVQitmKr-byjzmcN64KzS5SNKOlVXDjEiskLC_DiyiqWIKBHUQOkEGQZ97KaPioPoWuvEsiyYDKukjIgGcy0PVM-VPsMabBZ7wCIKQ9NjwQNyJs9xHzrMCKsz7R7M2RsQaFsKClo--a5mA6tZ_HOmvKupqeS6q6dBrNe2NX7qFbyZkxl2PRM7izc8Fp2rc5MUaE0volOUTXfFiNH2HJOLTqrRSVbGBP7ukvIeA5e3Q63vpYrliV94g"/>
+</div>
+<div>
+<h1 class="font-headline-md text-headline-md font-bold text-primary dark:text-white">TYR Platform</h1>
+<p class="font-label-mono text-label-mono text-slate-gray">Premium Tier</p>
+</div>
+</div>
+<!-- Navigation -->
+<nav class="flex-1 flex flex-col gap-stack-sm mt-stack-md">
+<a class="flex items-center gap-stack-md bg-secondary-container/10 text-azure-vibrant font-semibold rounded-lg px-4 py-3 border-r-4 border-azure-vibrant" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">description</span>
+<span class="font-body-md text-body-md">My Resumes</span>
+</a>
+<a class="flex items-center gap-stack-md text-slate-gray hover:text-primary px-4 py-3 rounded-lg hover:bg-surface-container-low dark:hover:bg-primary-container transition-all" href="#">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-body-md text-body-md">ATS Analytics</span>
+</a>
+<a class="flex items-center gap-stack-md text-slate-gray hover:text-primary px-4 py-3 rounded-lg hover:bg-surface-container-low dark:hover:bg-primary-container transition-all" href="#">
+<span class="material-symbols-outlined">psychology</span>
+<span class="font-body-md text-body-md">Interview Prep</span>
+</a>
+<a class="flex items-center gap-stack-md text-slate-gray hover:text-primary px-4 py-3 rounded-lg hover:bg-surface-container-low dark:hover:bg-primary-container transition-all" href="#">
+<span class="material-symbols-outlined">assignment_turned_in</span>
+<span class="font-body-md text-body-md">Job Tracker</span>
+</a>
+<a class="flex items-center gap-stack-md text-slate-gray hover:text-primary px-4 py-3 rounded-lg hover:bg-surface-container-low dark:hover:bg-primary-container transition-all" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-body-md text-body-md">Settings</span>
+</a>
+</nav>
+<!-- CTA & Footer -->
+<div class="mt-auto flex flex-col gap-stack-md pt-stack-md border-t border-outline-variant">
+<button class="w-full bg-deep-obsidian text-white font-button-text text-button-text py-3 px-4 rounded-lg hover:bg-inverse-surface transition-colors flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[20px]">add</span>
+                    Build New Resume
+                </button>
+<div class="flex flex-col gap-1">
+<a class="flex items-center gap-stack-md text-slate-gray hover:text-primary px-4 py-2 rounded-lg hover:bg-surface-container-low transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]">help</span>
+<span class="font-body-sm text-body-sm">Help Center</span>
+</a>
+<a class="flex items-center gap-stack-md text-slate-gray hover:text-error px-4 py-2 rounded-lg hover:bg-error-container transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]">logout</span>
+<span class="font-body-sm text-body-sm">Logout</span>
+</a>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content Wrapper -->
+<div class="flex-1 flex flex-col md:ml-[320px] min-w-0">
+<!-- TopAppBar (Mobile primarily, but serves as header bar) -->
+<header class="bg-surface/80 dark:bg-primary-container/80 backdrop-blur-md full-width top-0 z-40 border-b border-outline-variant dark:border-outline shadow-sm flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop h-16 sticky top-0 md:hidden">
+<div class="font-headline-md text-headline-md font-black tracking-tighter text-primary dark:text-on-primary-container">TYR</div>
+<div class="flex items-center gap-stack-md">
+<button class="text-slate-gray hover:text-primary transition-colors hover:bg-surface-container-low dark:hover:bg-primary transition-all duration-200 p-2 rounded-full">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="text-slate-gray hover:text-primary transition-colors hover:bg-surface-container-low dark:hover:bg-primary transition-all duration-200 p-2 rounded-full">
+<span class="material-symbols-outlined">help_outline</span>
+</button>
+<div class="w-8 h-8 rounded-full bg-surface-container overflow-hidden">
+<img alt="User profile" class="w-full h-full object-cover" data-alt="A professional headshot of a confident executive wearing a sharp navy blue suit, standing in a brightly lit modern corporate office." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDsTuEn644-cvDvS6t0W0FIZeIpxcLZhCPSlGLhotZPAycTbkXX7FQgFrVIgTRC2SkgH9_T6a1PELgnUheVWQiDr71S14sTYDXLEk-1tw9PxivCUA5QGl_WxHa0dxKaTUWJ4WSsA6VI6KlCADc_nGD5jxbsrGcKbPNGJlqxvFqj2aDhJd0KCB55DhfuFV63BgzOOHssempMgyxxVX3zMnXcAJcplWKZWm1sdUQ2xZjULjPyrFFgYyrKM18HoK2nDtMk8RIsUFgOxfE"/>
+</div>
+</div>
+</header>
+<!-- Dashboard Canvas -->
+<main class="flex-1 p-margin-mobile md:p-margin-desktop bg-surface-container-low flex flex-col gap-stack-lg">
+<!-- Page Header -->
+<div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-stack-sm">
+<div>
+<h2 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-deep-obsidian">Executive Overview</h2>
+<p class="font-body-md text-body-md text-slate-gray mt-1">Here is the current standing of your professional assets.</p>
+</div>
+<div class="flex gap-stack-sm">
+<button class="bg-latex-paper border border-outline-variant text-azure-vibrant font-button-text text-button-text py-2 px-4 rounded-lg hover:border-azure-vibrant hover:shadow-sm transition-all flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">download</span>
+                        Download Master PDF
+                    </button>
+</div>
+</div>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-gutter">
+<!-- Left Column (Span 8) -->
+<div class="xl:col-span-8 flex flex-col gap-stack-lg">
+<!-- Section 1: Performance Stats -->
+<section>
+<h3 class="font-label-mono text-label-mono text-slate-gray mb-stack-sm uppercase tracking-wider">Performance Metrics</h3>
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-stack-md">
+<!-- ATS Score -->
+<div class="bg-latex-paper border border-outline-variant shadow-sm rounded-xl p-gutter hover:border-azure-vibrant hover:shadow-md transition-all duration-300">
+<div class="flex justify-between items-start mb-2">
+<span class="font-body-sm text-body-sm text-slate-gray">Avg. ATS Score</span>
+<span class="material-symbols-outlined text-ats-emerald text-[20px]">verified</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="font-display-lg text-display-lg text-deep-obsidian">88</span>
+<span class="font-body-lg text-body-lg text-ats-emerald font-semibold">%</span>
+</div>
+<div class="mt-4 w-full bg-surface-container h-2 rounded-full overflow-hidden">
+<div class="bg-ats-emerald h-full rounded-full" style="width: 88%"></div>
+</div>
+</div>
+<!-- Profile Strength -->
+<div class="bg-latex-paper border border-outline-variant shadow-sm rounded-xl p-gutter hover:border-azure-vibrant hover:shadow-md transition-all duration-300">
+<div class="flex justify-between items-start mb-2">
+<span class="font-body-sm text-body-sm text-slate-gray">Profile Strength</span>
+<span class="material-symbols-outlined text-azure-vibrant text-[20px]">trending_up</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="font-display-lg text-display-lg text-deep-obsidian">A-</span>
+</div>
+<p class="font-body-sm text-body-sm text-slate-gray mt-2 flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-azure-vibrant">arrow_upward</span>
+                                    Improved from B+
+                                </p>
+</div>
+<!-- Interview Invites -->
+<div class="bg-latex-paper border border-outline-variant shadow-sm rounded-xl p-gutter hover:border-azure-vibrant hover:shadow-md transition-all duration-300">
+<div class="flex justify-between items-start mb-2">
+<span class="font-body-sm text-body-sm text-slate-gray">Interview Invites</span>
+<span class="material-symbols-outlined text-slate-gray text-[20px]">mail</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="font-display-lg text-display-lg text-deep-obsidian">12</span>
+</div>
+<p class="font-body-sm text-body-sm text-slate-gray mt-2">Last 30 days</p>
+</div>
+</div>
+</section>
+<!-- Section 2: Resume Vault Quick-Access -->
+<section>
+<div class="flex justify-between items-end mb-stack-sm">
+<h3 class="font-label-mono text-label-mono text-slate-gray uppercase tracking-wider">Resume Vault</h3>
+<a class="font-button-text text-button-text text-azure-vibrant hover:underline" href="#">View All</a>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-stack-md">
+<!-- Document Card 1 -->
+<div class="bg-latex-paper border border-outline-variant shadow-sm rounded-xl p-stack-md flex flex-col gap-4 group hover:border-azure-vibrant hover:shadow-md transition-all cursor-pointer relative overflow-hidden">
+<div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-azure-vibrant to-secondary-fixed"></div>
+<div class="flex justify-between items-start">
+<div class="w-10 h-10 rounded-lg bg-surface-container-low flex items-center justify-center text-azure-vibrant">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">description</span>
+</div>
+<span class="bg-secondary-container/10 text-azure-vibrant font-label-mono text-[11px] px-2 py-1 rounded border border-secondary-fixed">MASTER</span>
+</div>
+<div>
+<h4 class="font-headline-md text-[18px] font-semibold text-deep-obsidian leading-snug">Executive Master Base (LaTeX)</h4>
+<p class="font-body-sm text-body-sm text-slate-gray mt-1">Updated 2 days ago</p>
+</div>
+</div>
+<!-- Document Card 2 -->
+<div class="bg-latex-paper border border-outline-variant shadow-sm rounded-xl p-stack-md flex flex-col gap-4 group hover:border-azure-vibrant hover:shadow-md transition-all cursor-pointer">
+<div class="flex justify-between items-start">
+<div class="w-10 h-10 rounded-lg bg-surface-container-low flex items-center justify-center text-slate-gray">
+<span class="material-symbols-outlined">description</span>
+</div>
+<span class="bg-surface-container text-on-surface-variant font-label-mono text-[11px] px-2 py-1 rounded border border-outline-variant">TAILORED</span>
+</div>
+<div>
+<h4 class="font-headline-md text-[18px] font-semibold text-deep-obsidian leading-snug">VP Engineering - Stripe</h4>
+<p class="font-body-sm text-body-sm text-slate-gray mt-1">Targeting 95% ATS</p>
+</div>
+</div>
+<!-- Document Card 3 -->
+<div class="bg-latex-paper border border-outline-variant shadow-sm rounded-xl p-stack-md flex flex-col gap-4 group hover:border-azure-vibrant hover:shadow-md transition-all cursor-pointer">
+<div class="flex justify-between items-start">
+<div class="w-10 h-10 rounded-lg bg-surface-container-low flex items-center justify-center text-slate-gray">
+<span class="material-symbols-outlined">description</span>
+</div>
+<span class="bg-surface-container text-on-surface-variant font-label-mono text-[11px] px-2 py-1 rounded border border-outline-variant">DRAFT</span>
+</div>
+<div>
+<h4 class="font-headline-md text-[18px] font-semibold text-deep-obsidian leading-snug">Director Product - Meta</h4>
+<p class="font-body-sm text-body-sm text-slate-gray mt-1">Pending review</p>
+</div>
+</div>
+</div>
+</section>
+</div>
+<!-- Right Column (Span 4) -->
+<div class="xl:col-span-4 flex flex-col gap-stack-lg">
+<!-- Section 4: AI Career Insights -->
+<section>
+<h3 class="font-label-mono text-label-mono text-slate-gray mb-stack-sm uppercase tracking-wider flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-azure-vibrant">lightbulb</span>
+                            AI Insights
+                        </h3>
+<div class="bg-primary-container text-latex-paper rounded-xl p-gutter relative overflow-hidden shadow-md">
+<!-- Decorative Glass Blob -->
+<div class="absolute -top-10 -right-10 w-32 h-32 bg-azure-vibrant/30 rounded-full blur-2xl"></div>
+<div class="relative z-10 flex flex-col gap-stack-md">
+<div class="border-b border-outline/30 pb-4">
+<h4 class="font-body-lg text-body-lg font-semibold mb-1">Optimize for Senior PM</h4>
+<p class="font-body-sm text-body-sm text-primary-fixed-dim">Your master resume is missing critical keywords for 'Product Strategy' commonly found in recent job descriptions.</p>
+<button class="mt-3 text-secondary-fixed-dim font-button-text text-[13px] hover:text-white transition-colors flex items-center gap-1">
+                                        Run Auto-Tailor <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+</button>
+</div>
+<div>
+<h4 class="font-body-lg text-body-lg font-semibold mb-1">Upcoming Anthropic Interview</h4>
+<p class="font-body-sm text-body-sm text-primary-fixed-dim">You have a screening scheduled next week. Review our system design prep module.</p>
+<button class="mt-3 text-secondary-fixed-dim font-button-text text-[13px] hover:text-white transition-colors flex items-center gap-1">
+                                        Start Prep <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+<!-- Section 3: Active Application Pipeline -->
+<section>
+<div class="flex justify-between items-end mb-stack-sm">
+<h3 class="font-label-mono text-label-mono text-slate-gray uppercase tracking-wider">Active Pipeline</h3>
+<a class="font-button-text text-button-text text-azure-vibrant hover:underline" href="#">Tracker</a>
+</div>
+<div class="bg-latex-paper border border-outline-variant shadow-sm rounded-xl p-stack-md">
+<div class="flex flex-col gap-4">
+<!-- Pipeline Stage -->
+<div class="flex items-center justify-between group cursor-pointer p-2 rounded hover:bg-surface-container-low transition-colors -mx-2">
+<div class="flex items-center gap-3">
+<div class="w-2 h-2 rounded-full bg-slate-gray"></div>
+<span class="font-body-md text-body-md text-deep-obsidian font-medium">Applied</span>
+</div>
+<span class="bg-surface-container text-on-surface-variant font-label-mono px-2 py-0.5 rounded">24</span>
+</div>
+<!-- Pipeline Stage -->
+<div class="flex items-center justify-between group cursor-pointer p-2 rounded hover:bg-surface-container-low transition-colors -mx-2">
+<div class="flex items-center gap-3">
+<div class="w-2 h-2 rounded-full bg-azure-vibrant"></div>
+<span class="font-body-md text-body-md text-deep-obsidian font-medium">Interviewing</span>
+</div>
+<span class="bg-secondary-container/10 text-azure-vibrant font-label-mono px-2 py-0.5 rounded border border-secondary-fixed">05</span>
+</div>
+<!-- Pipeline Stage -->
+<div class="flex items-center justify-between group cursor-pointer p-2 rounded hover:bg-surface-container-low transition-colors -mx-2">
+<div class="flex items-center gap-3">
+<div class="w-2 h-2 rounded-full bg-ats-emerald shadow-[0_0_8px_rgba(14,184,122,0.4)]"></div>
+<span class="font-body-md text-body-md text-deep-obsidian font-medium">Offers</span>
+</div>
+<span class="bg-ats-emerald/10 text-on-tertiary-container font-label-mono px-2 py-0.5 rounded border border-ats-emerald/30">01</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Section 5: Recent Activity -->
+<section>
+<h3 class="font-label-mono text-label-mono text-slate-gray mb-stack-sm uppercase tracking-wider">Recent Activity</h3>
+<div class="bg-latex-paper border border-outline-variant shadow-sm rounded-xl p-stack-md">
+<div class="relative pl-6 border-l border-outline-variant ml-3 flex flex-col gap-6 py-2">
+<!-- Activity Item -->
+<div class="relative">
+<div class="absolute -left-[31px] w-4 h-4 rounded-full bg-surface-container-lowest border-2 border-azure-vibrant top-1"></div>
+<p class="font-body-sm text-body-sm text-deep-obsidian font-medium">Tailored resume for Stripe</p>
+<p class="font-body-sm text-body-sm text-slate-gray mt-0.5 text-[13px]">Today, 10:42 AM</p>
+</div>
+<!-- Activity Item -->
+<div class="relative">
+<div class="absolute -left-[31px] w-4 h-4 rounded-full bg-surface-container-lowest border-2 border-outline-variant top-1"></div>
+<p class="font-body-sm text-body-sm text-deep-obsidian font-medium">Moved Google application to Interviewing</p>
+<p class="font-body-sm text-body-sm text-slate-gray mt-0.5 text-[13px]">Yesterday</p>
+</div>
+<!-- Activity Item -->
+<div class="relative">
+<div class="absolute -left-[31px] w-4 h-4 rounded-full bg-surface-container-lowest border-2 border-outline-variant top-1"></div>
+<p class="font-body-sm text-body-sm text-deep-obsidian font-medium">Updated Master LaTeX formatting</p>
+<p class="font-body-sm text-body-sm text-slate-gray mt-0.5 text-[13px]">Oct 12, 2023</p>
+</div>
+</div>
+</div>
+</section>
+</div>
+</div>
+</main>
+</div>
+</body></html>

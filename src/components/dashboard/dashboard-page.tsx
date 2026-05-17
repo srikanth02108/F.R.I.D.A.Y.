@@ -2,31 +2,22 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
-import { format } from "date-fns";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { format, formatDistanceToNow } from "date-fns";
 import {
-  BarChart3,
-  Briefcase,
-  CalendarCheck,
+  ArrowRight,
+  ArrowUp,
+  BadgeCheck,
+  Download,
   FileText,
   Lightbulb,
-  ListChecks,
-  Pencil,
+  Mail,
   Sparkles,
-  Target,
   TrendingUp,
-  Zap,
 } from "lucide-react";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
@@ -39,6 +30,9 @@ type DashboardMetrics = {
   jobsApplied: number;
   avgAtsScore: number | null;
   interviewsScheduled: number;
+  pipelineApplied: number;
+  pipelineInterviewing: number;
+  pipelineOffers: number;
 };
 
 type RecentResume = {
@@ -49,6 +43,13 @@ type RecentResume = {
   atsScore: number | null;
 };
 
+type ActivityItem = {
+  id: string;
+  title: string;
+  timestamp: Date;
+  accent: "azure" | "muted";
+};
+
 function getGreeting() {
   const hour = new Date().getHours();
   if (hour < 12) return "Good morning";
@@ -56,85 +57,229 @@ function getGreeting() {
   return "Good evening";
 }
 
-const quickActions = [
-  {
-    title: "Generate Resume with AI",
-    description: "Create a polished resume in minutes with AI assistance",
-    href: "/app/generate",
-    icon: Sparkles,
-    gradient: "from-violet-600 to-purple-700",
-    hover: "hover:from-violet-700 hover:to-purple-800",
-  },
-  {
-    title: "Tailor for a Job",
-    description: "Match your resume to a specific job description",
-    href: "/app/tailor",
-    icon: Target,
-    gradient: "from-blue-600 to-cyan-600",
-    hover: "hover:from-blue-700 hover:to-cyan-700",
-  },
-  {
-    title: "Test ATS Score",
-    description: "See how well your resume passes applicant tracking systems",
-    href: "/app/ats-score",
-    icon: BarChart3,
-    gradient: "from-emerald-600 to-teal-600",
-    hover: "hover:from-emerald-700 hover:to-teal-700",
-  },
-] as const;
+function getProfileStrengthGrade(
+  avgAts: number | null,
+  resumeCount: number,
+): string {
+  if (resumeCount === 0) return "—";
+  if (avgAts === null) return "B";
+  if (avgAts >= 90) return "A";
+  if (avgAts >= 85) return "A-";
+  if (avgAts >= 75) return "B+";
+  if (avgAts >= 65) return "B";
+  return "C+";
+}
 
-const tips = [
-  {
-    title: "Lead with impact",
-    description:
-      "Start bullet points with strong action verbs and quantify results whenever possible.",
-    icon: Zap,
-    iconClass: "bg-violet-100 text-violet-600",
-  },
-  {
-    title: "Match keywords",
-    description:
-      "Mirror important skills and phrases from the job posting to improve ATS compatibility.",
-    icon: ListChecks,
-    iconClass: "bg-blue-100 text-blue-600",
-  },
-  {
-    title: "Keep it scannable",
-    description:
-      "Use clear headings, consistent formatting, and one page when you have under 10 years of experience.",
-    icon: Lightbulb,
-    iconClass: "bg-amber-100 text-amber-600",
-  },
-] as const;
+function getResumeBadge(
+  index: number,
+  atsScore: number | null,
+): { label: string; variant: "master" | "tailored" | "draft" } {
+  if (index === 0) {
+    return { label: "MASTER", variant: "master" };
+  }
+  if (typeof atsScore === "number" && atsScore >= 70) {
+    return { label: "TAILORED", variant: "tailored" };
+  }
+  return { label: "DRAFT", variant: "draft" };
+}
 
-function atsBadgeClass(score: number | null) {
-  if (score === null) return "bg-slate-100 text-slate-600";
-  if (score >= 80) return "bg-emerald-100 text-emerald-700";
-  if (score >= 60) return "bg-amber-100 text-amber-700";
-  return "bg-red-100 text-red-700";
+function SectionLabel({
+  children,
+  icon: Icon,
+}: {
+  children: React.ReactNode;
+  icon?: React.ComponentType<{ className?: string }>;
+}) {
+  return (
+    <h3 className="mb-2 flex items-center gap-2 font-mono text-[13px] font-medium tracking-wider text-[#6B6B6B] uppercase">
+      {Icon ? <Icon className="size-4 text-[#2055FD]" /> : null}
+      {children}
+    </h3>
+  );
 }
 
 function MetricValue({
   loading,
   value,
   formatValue,
+  className,
 }: {
   loading: boolean;
   value: number | null;
   formatValue?: (v: number) => string;
+  className?: string;
 }) {
   if (loading) {
-    return <Skeleton className="h-8 w-14 rounded-md" />;
+    return <Skeleton className="h-12 w-20 rounded-md" />;
   }
 
   if (value === null) {
-    return <p className="text-2xl font-semibold tabular-nums text-slate-900">—</p>;
+    return (
+      <span
+        className={cn(
+          "text-5xl font-extrabold tracking-tight text-[#0A0A0A]",
+          className,
+        )}
+      >
+        —
+      </span>
+    );
   }
 
   return (
-    <p className="text-2xl font-semibold tabular-nums text-slate-900">
+    <span
+      className={cn(
+        "text-5xl font-extrabold tracking-tight text-[#0A0A0A]",
+        className,
+      )}
+    >
       {formatValue ? formatValue(value) : value}
-    </p>
+    </span>
+  );
+}
+
+function PerformanceMetricCard({
+  loading,
+  label,
+  icon: Icon,
+  iconClassName,
+  children,
+}: {
+  loading: boolean;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+  iconClassName?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <Card className="rounded-xl border-[#c7c6cb] bg-white p-6 shadow-sm transition-all duration-300 hover:border-[#2055FD] hover:shadow-md">
+      <CardContent className="p-0">
+        <div className="mb-2 flex items-start justify-between">
+          <span className="text-sm text-[#6B6B6B]">{label}</span>
+          {loading ? (
+            <Skeleton className="size-5 rounded" />
+          ) : (
+            <Icon className={cn("size-5", iconClassName)} />
+          )}
+        </div>
+        {children}
+      </CardContent>
+    </Card>
+  );
+}
+
+function ResumeVaultCard({
+  resume,
+  index,
+  loading,
+}: {
+  resume: RecentResume;
+  index: number;
+  loading: boolean;
+}) {
+  const badge = getResumeBadge(index, resume.atsScore);
+
+  if (loading) {
+    return (
+      <Card className="rounded-xl border-[#c7c6cb] bg-white p-4 shadow-sm">
+        <CardContent className="space-y-4 p-0">
+          <Skeleton className="h-10 w-10 rounded-lg" />
+          <Skeleton className="h-5 w-3/4" />
+          <Skeleton className="h-4 w-1/2" />
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <Link href={`/app/editor?id=${resume.id}`}>
+      <Card
+        className={cn(
+          "group relative cursor-pointer overflow-hidden rounded-xl border-[#c7c6cb] bg-white p-4 shadow-sm transition-all hover:border-[#2055FD] hover:shadow-md",
+          badge.variant === "master" && "overflow-hidden",
+        )}
+      >
+        {badge.variant === "master" ? (
+          <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-[#2055FD] to-[#dde1ff]" />
+        ) : null}
+        <CardContent className="flex flex-col gap-4 p-0">
+          <div className="flex items-start justify-between">
+            <div
+              className={cn(
+                "flex size-10 items-center justify-center rounded-lg",
+                badge.variant === "master"
+                  ? "bg-[#f5f3f3] text-[#2055FD]"
+                  : "bg-[#f5f3f3] text-[#6B6B6B]",
+              )}
+            >
+              <FileText className="size-5" />
+            </div>
+            <span
+              className={cn(
+                "rounded border px-2 py-1 font-mono text-[11px] font-medium",
+                badge.variant === "master" &&
+                  "border-[#dde1ff] bg-[#2055FD]/10 text-[#2055FD]",
+                badge.variant === "tailored" &&
+                  "border-[#c7c6cb] bg-[#efeded] text-[#46464b]",
+                badge.variant === "draft" &&
+                  "border-[#c7c6cb] bg-[#efeded] text-[#46464b]",
+              )}
+            >
+              {badge.label}
+            </span>
+          </div>
+          <div>
+            <h4 className="text-lg leading-snug font-semibold text-[#0A0A0A] group-hover:text-[#2055FD]">
+              {resume.name}
+            </h4>
+            <p className="mt-1 text-sm text-[#6B6B6B] capitalize">
+              {resume.template} · Updated{" "}
+              {formatDistanceToNow(resume.modified, { addSuffix: true })}
+            </p>
+            {typeof resume.atsScore === "number" ? (
+              <p className="mt-1 font-mono text-xs text-[#0EB87A]">
+                ATS {resume.atsScore}%
+              </p>
+            ) : null}
+          </div>
+        </CardContent>
+      </Card>
+    </Link>
+  );
+}
+
+function PipelineRow({
+  label,
+  count,
+  loading,
+  dotClassName,
+  badgeClassName,
+}: {
+  label: string;
+  count: number;
+  loading: boolean;
+  dotClassName: string;
+  badgeClassName: string;
+}) {
+  return (
+    <div className="-mx-2 flex cursor-pointer items-center justify-between rounded-lg p-2 transition-colors hover:bg-[#f5f3f3]">
+      <div className="flex items-center gap-3">
+        <div className={cn("size-2 rounded-full", dotClassName)} />
+        <span className="font-medium text-[#1b1c1c]">{label}</span>
+      </div>
+      {loading ? (
+        <Skeleton className="h-6 w-8 rounded" />
+      ) : (
+        <span
+          className={cn(
+            "rounded px-2 py-0.5 font-mono text-xs font-medium",
+            badgeClassName,
+          )}
+        >
+          {count.toString().padStart(2, "0")}
+        </span>
+      )}
+    </div>
   );
 }
 
@@ -149,6 +294,9 @@ export function DashboardPage() {
     jobsApplied: 0,
     avgAtsScore: null,
     interviewsScheduled: 0,
+    pipelineApplied: 0,
+    pipelineInterviewing: 0,
+    pipelineOffers: 0,
   });
   const [recentResumes, setRecentResumes] = useState<RecentResume[]>([]);
 
@@ -169,6 +317,9 @@ export function DashboardPage() {
           jobsApplied: 0,
           avgAtsScore: null,
           interviewsScheduled: 0,
+          pipelineApplied: 0,
+          pipelineInterviewing: 0,
+          pipelineOffers: 0,
         });
         setRecentResumes([]);
         return;
@@ -213,12 +364,24 @@ export function DashboardPage() {
       const interviewsScheduled = applicationRows.filter(
         (row) => row.status === "interview",
       ).length;
+      const pipelineApplied = applicationRows.filter((row) =>
+        ["applied", "screening"].includes(row.status),
+      ).length;
+      const pipelineInterviewing = applicationRows.filter(
+        (row) => row.status === "interview",
+      ).length;
+      const pipelineOffers = applicationRows.filter(
+        (row) => row.status === "offer",
+      ).length;
 
       setMetrics({
         resumesCreated: visibleResumes.length,
         jobsApplied,
         avgAtsScore,
         interviewsScheduled,
+        pipelineApplied,
+        pipelineInterviewing,
+        pipelineOffers,
       });
 
       setRecentResumes(
@@ -237,6 +400,9 @@ export function DashboardPage() {
         jobsApplied: 0,
         avgAtsScore: null,
         interviewsScheduled: 0,
+        pipelineApplied: 0,
+        pipelineInterviewing: 0,
+        pipelineOffers: 0,
       });
       setRecentResumes([]);
     } finally {
@@ -249,229 +415,317 @@ export function DashboardPage() {
     void loadDashboardData();
   }, [loadDashboardData]);
 
-  const statCards = [
-    {
-      label: "Resumes Created",
-      value: metrics.resumesCreated,
-      icon: FileText,
-      iconClass: "bg-violet-100 text-violet-600",
-      format: undefined,
-    },
-    {
-      label: "Jobs Applied",
-      value: metrics.jobsApplied,
-      icon: Briefcase,
-      iconClass: "bg-blue-100 text-blue-600",
-      format: undefined,
-    },
-    {
-      label: "Avg ATS Score",
-      value: metrics.avgAtsScore,
-      icon: TrendingUp,
-      iconClass: "bg-emerald-100 text-emerald-600",
-      format: (v: number) => `${v}%`,
-    },
-    {
-      label: "Interviews Scheduled",
-      value: metrics.interviewsScheduled,
-      icon: CalendarCheck,
-      iconClass: "bg-amber-100 text-amber-600",
-      format: undefined,
-    },
-  ] as const;
+  const profileGrade = getProfileStrengthGrade(
+    metrics.avgAtsScore,
+    metrics.resumesCreated,
+  );
+
+  const activityItems = useMemo<ActivityItem[]>(() => {
+    return recentResumes.map((resume, index) => ({
+      id: resume.id,
+      title:
+        index === 0
+          ? `Updated ${resume.name}`
+          : `Edited ${resume.name}`,
+      timestamp: resume.modified,
+      accent: index === 0 ? "azure" : "muted",
+    }));
+  }, [recentResumes]);
+
+  const editorHref =
+    recentResumes.length > 0
+      ? `/app/editor?id=${recentResumes[0].id}`
+      : "/app/editor";
 
   return (
     <>
-      <div className="relative mx-auto h-full w-full max-w-6xl space-y-8 overflow-y-auto px-6 py-8 pb-24 lg:px-8">
-        <header>
-          <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
-            {getGreeting()}! Ready to land your next job?
-          </h2>
-          <p className="mt-1 text-sm text-slate-500">{today}</p>
+      <div className="flex min-h-full flex-1 flex-col gap-8 overflow-y-auto bg-[#f5f3f3] p-4 pb-24 md:p-10">
+        <header className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-end">
+          <div>
+            <p className="font-mono text-[13px] font-medium tracking-[0.05em] text-[#2055FD] uppercase">
+              {getGreeting()}
+            </p>
+            <h2 className="mt-1 text-[28px] font-bold leading-9 tracking-tight text-[#0A0A0A] md:text-[32px] md:leading-10">
+              Executive Overview
+            </h2>
+            <p className="mt-1 text-base text-[#6B6B6B]">
+              Here is the current standing of your professional assets.
+            </p>
+            <p className="mt-1 text-sm text-[#82838b]">{today}</p>
+          </div>
+          <Button
+            variant="outline"
+            asChild
+            className="rounded-lg border-[#c7c6cb] bg-white text-[15px] font-semibold text-[#2055FD] shadow-sm hover:border-[#2055FD] hover:bg-white"
+          >
+            <Link href={editorHref}>
+              <Download className="size-[18px]" />
+              Download Master PDF
+            </Link>
+          </Button>
         </header>
 
-        <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          {statCards.map((stat) => {
-            const Icon = stat.icon;
-            return (
-              <Card key={stat.label} className="shadow-sm">
-                <CardContent className="flex items-center gap-4">
-                  <div
-                    className={cn(
-                      "flex size-11 shrink-0 items-center justify-center rounded-lg",
-                      stat.iconClass,
-                    )}
-                  >
-                    <Icon className="size-5" />
-                  </div>
-                  <div>
+        <div className="grid grid-cols-1 gap-6 xl:grid-cols-12">
+          <div className="flex flex-col gap-8 xl:col-span-8">
+            <section>
+              <SectionLabel>Performance Metrics</SectionLabel>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                <PerformanceMetricCard
+                  loading={metricsLoading}
+                  label="Avg. ATS Score"
+                  icon={BadgeCheck}
+                  iconClassName="text-[#0EB87A]"
+                >
+                  <div className="flex items-baseline gap-1">
                     <MetricValue
                       loading={metricsLoading}
-                      value={stat.value}
-                      formatValue={stat.format}
+                      value={metrics.avgAtsScore}
                     />
-                    <p className="text-sm text-slate-500">{stat.label}</p>
+                    {!metricsLoading && metrics.avgAtsScore !== null ? (
+                      <span className="text-lg font-semibold text-[#0EB87A]">
+                        %
+                      </span>
+                    ) : null}
+                  </div>
+                  <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-[#efeded]">
+                    {metricsLoading ? (
+                      <Skeleton className="h-full w-full" />
+                    ) : (
+                      <div
+                        className="h-full rounded-full bg-[#0EB87A] transition-all duration-500"
+                        style={{
+                          width: `${metrics.avgAtsScore ?? 0}%`,
+                        }}
+                      />
+                    )}
+                  </div>
+                </PerformanceMetricCard>
+
+                <PerformanceMetricCard
+                  loading={metricsLoading}
+                  label="Profile Strength"
+                  icon={TrendingUp}
+                  iconClassName="text-[#2055FD]"
+                >
+                  {metricsLoading ? (
+                    <Skeleton className="h-12 w-16" />
+                  ) : (
+                    <span className="text-5xl font-extrabold tracking-tight text-[#0A0A0A]">
+                      {profileGrade}
+                    </span>
+                  )}
+                  <p className="mt-2 flex items-center gap-1 text-sm text-[#6B6B6B]">
+                    <ArrowUp className="size-4 text-[#2055FD]" />
+                    {metrics.resumesCreated} resume
+                    {metrics.resumesCreated === 1 ? "" : "s"} in vault
+                  </p>
+                </PerformanceMetricCard>
+
+                <PerformanceMetricCard
+                  loading={metricsLoading}
+                  label="Interview Invites"
+                  icon={Mail}
+                  iconClassName="text-[#6B6B6B]"
+                >
+                  <MetricValue
+                    loading={metricsLoading}
+                    value={metrics.interviewsScheduled}
+                  />
+                  <p className="mt-2 text-sm text-[#6B6B6B]">
+                    {metrics.jobsApplied} active application
+                    {metrics.jobsApplied === 1 ? "" : "s"}
+                  </p>
+                </PerformanceMetricCard>
+              </div>
+            </section>
+
+            <section>
+              <div className="mb-2 flex items-end justify-between">
+                <SectionLabel>Resume Vault</SectionLabel>
+                <Link
+                  href="/app/editor"
+                  className="text-[15px] font-semibold text-[#2055FD] hover:underline"
+                >
+                  View All
+                </Link>
+              </div>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {resumesLoading ? (
+                  Array.from({ length: 3 }).map((_, i) => (
+                    <ResumeVaultCard
+                      key={i}
+                      resume={{
+                        id: String(i),
+                        name: "",
+                        template: "",
+                        modified: new Date(),
+                        atsScore: null,
+                      }}
+                      index={i}
+                      loading
+                    />
+                  ))
+                ) : recentResumes.length === 0 ? (
+                  <Card className="col-span-full rounded-xl border-[#c7c6cb] bg-white p-8 shadow-sm">
+                    <CardContent className="flex flex-col items-center gap-4 p-0 text-center">
+                      <div className="flex size-12 items-center justify-center rounded-lg bg-[#f5f3f3] text-[#2055FD]">
+                        <FileText className="size-6" />
+                      </div>
+                      <p className="text-sm text-[#6B6B6B]">
+                        No resumes yet. Build your master LaTeX base to get
+                        started.
+                      </p>
+                      <Button
+                        type="button"
+                        className="rounded-lg bg-[#0A0A0A] text-white hover:bg-[#191b22]"
+                        onClick={() => router.push("/app/generate")}
+                      >
+                        Build New Resume
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  recentResumes.map((resume, index) => (
+                    <ResumeVaultCard
+                      key={resume.id}
+                      resume={resume}
+                      index={index}
+                      loading={false}
+                    />
+                  ))
+                )}
+              </div>
+            </section>
+          </div>
+
+          <div className="flex flex-col gap-8 xl:col-span-4">
+            <section>
+              <SectionLabel icon={Lightbulb}>AI Insights</SectionLabel>
+              <Card className="relative overflow-hidden rounded-xl border-0 bg-[#191b22] text-white shadow-md">
+                <div className="pointer-events-none absolute -top-10 -right-10 size-32 rounded-full bg-[#2055FD]/30 blur-2xl" />
+                <CardContent className="relative z-10 space-y-4 p-6">
+                  <div className="border-b border-white/20 pb-4">
+                    <h4 className="mb-1 text-lg font-semibold">
+                      Optimize for your next role
+                    </h4>
+                    <p className="text-sm text-[#c5c6ce]">
+                      Tailor your master resume against a target job description
+                      to lift ATS keyword alignment.
+                    </p>
+                    <Button
+                      variant="link"
+                      asChild
+                      className="mt-3 h-auto p-0 text-[13px] font-semibold text-[#b8c4ff] hover:text-white"
+                    >
+                      <Link href="/app/tailor" className="gap-1">
+                        Run Auto-Tailor
+                        <ArrowRight className="size-3.5" />
+                      </Link>
+                    </Button>
+                  </div>
+                  <div>
+                    <h4 className="mb-1 text-lg font-semibold">
+                      Interview readiness
+                    </h4>
+                    <p className="text-sm text-[#c5c6ce]">
+                      {metrics.interviewsScheduled > 0
+                        ? `You have ${metrics.interviewsScheduled} interview${metrics.interviewsScheduled === 1 ? "" : "s"} in your pipeline. Review STAR coaching modules.`
+                        : "Practice with AI interviewers trained on your resume and target roles."}
+                    </p>
+                    <Button
+                      variant="link"
+                      asChild
+                      className="mt-3 h-auto p-0 text-[13px] font-semibold text-[#b8c4ff] hover:text-white"
+                    >
+                      <Link href="/app/interview" className="gap-1">
+                        Start Prep
+                        <ArrowRight className="size-3.5" />
+                      </Link>
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
-            );
-          })}
-        </section>
+            </section>
 
-        <section className="space-y-4">
-          <div>
-            <h3 className="text-base font-semibold text-slate-900">
-              Quick Actions
-            </h3>
-            <p className="text-sm text-slate-500">
-              Jump straight into what matters most
-            </p>
-          </div>
-          <div className="grid gap-4 md:grid-cols-3">
-            {quickActions.map((action) => {
-              const Icon = action.icon;
-              return (
-                <Link key={action.href} href={action.href} className="group">
-                  <Card
-                    className={cn(
-                      "h-full border-0 bg-gradient-to-br text-white shadow-md transition-all",
-                      action.gradient,
-                      action.hover,
-                      "group-hover:-translate-y-0.5 group-hover:shadow-lg",
-                    )}
-                  >
-                    <CardContent className="flex h-full flex-col gap-4 pt-1">
-                      <div className="flex size-11 items-center justify-center rounded-lg bg-white/20 backdrop-blur-sm">
-                        <Icon className="size-6" />
-                      </div>
-                      <div>
-                        <p className="text-base font-semibold">{action.title}</p>
-                        <p className="mt-1 text-sm leading-relaxed text-white/80">
-                          {action.description}
-                        </p>
-                      </div>
-                    </CardContent>
-                  </Card>
+            <section>
+              <div className="mb-2 flex items-end justify-between">
+                <SectionLabel>Active Pipeline</SectionLabel>
+                <Link
+                  href="/app/tracker"
+                  className="text-[15px] font-semibold text-[#2055FD] hover:underline"
+                >
+                  Tracker
                 </Link>
-              );
-            })}
-          </div>
-        </section>
-
-        <section className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-base font-semibold text-slate-900">
-                Recent Resumes
-              </h3>
-              <p className="text-sm text-slate-500">
-                Pick up where you left off
-              </p>
-            </div>
-            <Button variant="outline" size="sm" asChild>
-              <Link href="/app/editor">View all</Link>
-            </Button>
-          </div>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {resumesLoading ? (
-              Array.from({ length: 3 }).map((_, i) => (
-                <Card key={i} className="shadow-sm">
-                  <CardContent className="space-y-3 pt-6">
-                    <Skeleton className="h-5 w-3/4" />
-                    <Skeleton className="h-4 w-1/2" />
-                    <Skeleton className="h-8 w-full" />
-                  </CardContent>
-                </Card>
-              ))
-            ) : recentResumes.length === 0 ? (
-              <Card className="md:col-span-2 lg:col-span-3">
-                <CardContent className="py-10 text-center text-sm text-slate-500">
-                  No resumes yet.{" "}
-                  <button
-                    type="button"
-                    className="font-medium text-violet-600 hover:underline"
-                    onClick={() => router.push("/app/generate")}
-                  >
-                    Generate your first resume
-                  </button>
+              </div>
+              <Card className="rounded-xl border-[#c7c6cb] bg-white p-4 shadow-sm">
+                <CardContent className="flex flex-col gap-1 p-0">
+                  <PipelineRow
+                    label="Applied"
+                    count={metrics.pipelineApplied}
+                    loading={metricsLoading}
+                    dotClassName="bg-[#6B6B6B]"
+                    badgeClassName="bg-[#efeded] text-[#46464b]"
+                  />
+                  <PipelineRow
+                    label="Interviewing"
+                    count={metrics.pipelineInterviewing}
+                    loading={metricsLoading}
+                    dotClassName="bg-[#2055FD]"
+                    badgeClassName="border border-[#dde1ff] bg-[#2055FD]/10 text-[#2055FD]"
+                  />
+                  <PipelineRow
+                    label="Offers"
+                    count={metrics.pipelineOffers}
+                    loading={metricsLoading}
+                    dotClassName="bg-[#0EB87A] shadow-[0_0_8px_rgba(14,184,122,0.4)]"
+                    badgeClassName="border border-[#0EB87A]/30 bg-[#0EB87A]/10 text-[#009763]"
+                  />
                 </CardContent>
               </Card>
-            ) : (
-              recentResumes.map((resume) => (
-                <Card
-                  key={resume.id}
-                  className="shadow-sm transition-shadow hover:shadow-md"
-                >
-                  <CardHeader className="flex flex-row items-start justify-between gap-3 space-y-0 pb-2">
-                    <div className="min-w-0 flex-1 space-y-1">
-                      <CardTitle className="truncate text-slate-900">
-                        {resume.name}
-                      </CardTitle>
-                      <CardDescription className="capitalize">
-                        {resume.template}
-                      </CardDescription>
-                    </div>
-                    <Badge
-                      className={cn(
-                        "shrink-0 border-0 font-medium",
-                        atsBadgeClass(resume.atsScore),
-                      )}
-                    >
-                      ATS {resume.atsScore ?? "—"}
-                    </Badge>
-                  </CardHeader>
-                  <CardContent className="flex items-center justify-between pt-0">
-                    <p className="text-xs text-slate-500">
-                      Modified {format(resume.modified, "MMM d, yyyy")}
-                    </p>
-                    <Button variant="outline" size="sm" asChild>
-                      <Link href={`/app/editor?id=${resume.id}`}>
-                        <Pencil className="size-3.5" />
-                        Edit
-                      </Link>
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))
-            )}
-          </div>
-        </section>
+            </section>
 
-        <section className="space-y-4">
-          <div>
-            <h3 className="text-base font-semibold text-slate-900">
-              Pro Tips for a Better Resume
-            </h3>
-            <p className="text-sm text-slate-500">
-              Small changes that make a big difference
-            </p>
-          </div>
-          <div className="grid gap-4 md:grid-cols-3">
-            {tips.map((tip) => {
-              const Icon = tip.icon;
-              return (
-                <Card key={tip.title} className="shadow-sm">
-                  <CardContent className="space-y-3">
-                    <div
-                      className={cn(
-                        "flex size-10 items-center justify-center rounded-lg",
-                        tip.iconClass,
-                      )}
-                    >
-                      <Icon className="size-5" />
+            <section>
+              <SectionLabel>Recent Activity</SectionLabel>
+              <Card className="rounded-xl border-[#c7c6cb] bg-white p-4 shadow-sm">
+                <CardContent className="p-0">
+                  {resumesLoading ? (
+                    <div className="space-y-4 py-2">
+                      {Array.from({ length: 3 }).map((_, i) => (
+                        <Skeleton key={i} className="h-10 w-full" />
+                      ))}
                     </div>
-                    <div>
-                      <p className="font-medium text-slate-900">{tip.title}</p>
-                      <p className="mt-1 text-sm leading-relaxed text-slate-500">
-                        {tip.description}
-                      </p>
+                  ) : activityItems.length === 0 ? (
+                    <p className="py-4 text-center text-sm text-[#6B6B6B]">
+                      Activity will appear as you edit resumes and track
+                      applications.
+                    </p>
+                  ) : (
+                    <div className="relative ml-3 flex flex-col gap-6 border-l border-[#c7c6cb] py-2 pl-6">
+                      {activityItems.map((item) => (
+                        <div key={item.id} className="relative">
+                          <div
+                            className={cn(
+                              "absolute top-1 -left-[31px] size-4 rounded-full border-2 bg-white",
+                              item.accent === "azure"
+                                ? "border-[#2055FD]"
+                                : "border-[#c7c6cb]",
+                            )}
+                          />
+                          <p className="text-sm font-medium text-[#1b1c1c]">
+                            {item.title}
+                          </p>
+                          <p className="mt-0.5 text-[13px] text-[#6B6B6B]">
+                            {format(item.timestamp, "MMM d, yyyy · h:mm a")}
+                          </p>
+                        </div>
+                      ))}
                     </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
+                  )}
+                </CardContent>
+              </Card>
+            </section>
           </div>
-        </section>
+        </div>
       </div>
 
       <Button
@@ -479,9 +733,9 @@ export function DashboardPage() {
         onClick={() => router.push("/app/generate")}
         className={cn(
           "group fixed bottom-6 right-6 z-50 h-14 gap-0 overflow-hidden rounded-full",
-          "bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600",
-          "px-4 text-white shadow-lg shadow-violet-500/40",
-          "animate-pulse hover:animate-none hover:from-violet-700 hover:via-purple-700 hover:to-fuchsia-700",
+          "bg-gradient-to-r from-[#2055FD] via-[#2558ff] to-[#003fd8]",
+          "px-4 text-white shadow-lg shadow-[#2055FD]/40",
+          "animate-pulse hover:animate-none hover:from-[#003fd8] hover:via-[#2055FD] hover:to-[#2558ff]",
           "transition-all duration-300 hover:gap-2 hover:pr-5",
         )}
         aria-label="Quick Tailor AI"
