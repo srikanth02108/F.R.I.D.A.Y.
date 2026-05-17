@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>TYR - My Profile</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Config -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "secondary-fixed-dim": "#b8c4ff",
+                    "surface": "#fbf9f8",
+                    "latex-paper": "#FFFFFF",
+                    "secondary-container": "#2558ff",
+                    "on-secondary-fixed": "#001355",
+                    "tertiary-fixed-dim": "#4fdf9d",
+                    "primary": "#000000",
+                    "ats-emerald": "#0EB87A",
+                    "on-secondary": "#ffffff",
+                    "surface-container-lowest": "#ffffff",
+                    "primary-fixed-dim": "#c5c6ce",
+                    "inverse-on-surface": "#f2f0f0",
+                    "on-primary-container": "#82838b",
+                    "surface-bright": "#fbf9f8",
+                    "secondary": "#003fd8",
+                    "inverse-surface": "#303031",
+                    "slate-gray": "#6B6B6B",
+                    "surface-container-high": "#e9e8e7",
+                    "outline-variant": "#c7c6cb",
+                    "on-error-container": "#93000a",
+                    "surface-container-low": "#f5f3f3",
+                    "on-error": "#ffffff",
+                    "error-container": "#ffdad6",
+                    "surface-container": "#efeded",
+                    "tertiary": "#000000",
+                    "on-surface-variant": "#46464b",
+                    "on-background": "#1b1c1c",
+                    "on-tertiary-fixed-variant": "#005233",
+                    "on-secondary-container": "#eaebff",
+                    "outline": "#77777c",
+                    "tertiary-container": "#002112",
+                    "on-tertiary-container": "#009763",
+                    "primary-fixed": "#e2e2eb",
+                    "on-secondary-fixed-variant": "#0036bc",
+                    "error": "#ba1a1a",
+                    "inverse-primary": "#c5c6ce",
+                    "tertiary-fixed": "#6ffcb7",
+                    "secondary-fixed": "#dde1ff",
+                    "background": "#fbf9f8",
+                    "surface-container-highest": "#e4e2e2",
+                    "surface-variant": "#e4e2e2",
+                    "deep-obsidian": "#0A0A0A",
+                    "primary-container": "#191b22",
+                    "surface-tint": "#5d5e65",
+                    "on-primary-fixed-variant": "#45464e",
+                    "on-surface": "#1b1c1c",
+                    "surface-dim": "#dbdad9",
+                    "azure-vibrant": "#2055FD",
+                    "on-tertiary-fixed": "#002112",
+                    "on-tertiary": "#ffffff",
+                    "on-primary": "#ffffff",
+                    "on-primary-fixed": "#191b22"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "stack-sm": "8px",
+                    "container-max": "1280px",
+                    "stack-lg": "32px",
+                    "base": "4px",
+                    "gutter": "24px",
+                    "stack-md": "16px",
+                    "margin-desktop": "40px",
+                    "margin-mobile": "16px"
+            },
+            "fontFamily": {
+                    "headline-lg": [
+                            "Plus Jakarta Sans"
+                    ],
+                    "body-md": [
+                            "Plus Jakarta Sans"
+                    ],
+                    "body-sm": [
+                            "Plus Jakarta Sans"
+                    ],
+                    "headline-lg-mobile": [
+                            "Plus Jakarta Sans"
+                    ],
+                    "label-mono": [
+                            "JetBrains Mono"
+                    ],
+                    "body-lg": [
+                            "Plus Jakarta Sans"
+                    ],
+                    "display-lg": [
+                            "Plus Jakarta Sans"
+                    ],
+                    "headline-md": [
+                            "Plus Jakarta Sans"
+                    ],
+                    "button-text": [
+                            "Plus Jakarta Sans"
+                    ]
+            },
+            "fontSize": {
+                    "headline-lg": [
+                            "32px",
+                            {
+                                    "lineHeight": "40px",
+                                    "letterSpacing": "-0.01em",
+                                    "fontWeight": "700"
+                            }
+                    ],
+                    "body-md": [
+                            "16px",
+                            {
+                                    "lineHeight": "24px",
+                                    "fontWeight": "400"
+                            }
+                    ],
+                    "body-sm": [
+                            "14px",
+                            {
+                                    "lineHeight": "20px",
+                                    "fontWeight": "400"
+                            }
+                    ],
+                    "headline-lg-mobile": [
+                            "28px",
+                            {
+                                    "lineHeight": "36px",
+                                    "fontWeight": "700"
+                            }
+                    ],
+                    "label-mono": [
+                            "13px",
+                            {
+                                    "lineHeight": "16px",
+                                    "letterSpacing": "0.05em",
+                                    "fontWeight": "500"
+                            }
+                    ],
+                    "body-lg": [
+                            "18px",
+                            {
+                                    "lineHeight": "28px",
+                                    "fontWeight": "400"
+                            }
+                    ],
+                    "display-lg": [
+                            "48px",
+                            {
+                                    "lineHeight": "56px",
+                                    "letterSpacing": "-0.02em",
+                                    "fontWeight": "800"
+                            }
+                    ],
+                    "headline-md": [
+                            "24px",
+                            {
+                                    "lineHeight": "32px",
+                                    "fontWeight": "600"
+                            }
+                    ],
+                    "button-text": [
+                            "15px",
+                            {
+                                    "lineHeight": "20px",
+                                    "letterSpacing": "0.01em",
+                                    "fontWeight": "600"
+                            }
+                    ]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        /* Custom scrollbar for a cleaner look */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background-color: #e4e2e2;
+            border-radius: 4px;
+        }
+        body {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md text-body-md h-screen w-full flex overflow-hidden">
+<!-- Desktop SideNavBar -->
+<aside class="fixed left-0 top-0 h-screen w-[320px] hidden md:flex flex-col border-r border-outline-variant bg-white shadow-md flex flex-col justify-between py-stack-lg px-gutter h-full overflow-y-auto z-50">
+<div>
+<!-- Brand Header -->
+<div class="mb-stack-lg flex items-center gap-stack-md px-4">
+<div class="w-10 h-10 rounded-lg bg-deep-obsidian flex items-center justify-center text-white">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">account_balance</span>
+</div>
+<div>
+<h1 class="font-headline-md text-headline-md font-bold text-primary">TYR Platform</h1>
+<p class="font-label-mono text-label-mono text-azure-vibrant mt-1">Premium Tier</p>
+</div>
+</div>
+<!-- Primary Action -->
+<button class="w-full mb-stack-lg bg-deep-obsidian text-on-primary font-button-text text-button-text py-3 px-4 rounded-lg flex items-center justify-center gap-2 hover:bg-inverse-surface transition-colors">
+<span class="material-symbols-outlined">add</span>
+                Build New Resume
+            </button>
+<!-- Navigation Links -->
+<nav class="flex flex-col gap-2">
+<a class="flex items-center gap-stack-md text-slate-gray hover:text-primary px-4 py-3 rounded-lg hover:bg-surface-container-low transition-all" href="#">
+<span class="material-symbols-outlined">description</span>
+<span class="font-body-md text-body-md">My Resumes</span>
+</a>
+<a class="flex items-center gap-stack-md text-slate-gray hover:text-primary px-4 py-3 rounded-lg hover:bg-surface-container-low transition-all" href="#">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-body-md text-body-md">ATS Analytics</span>
+</a>
+<a class="flex items-center gap-stack-md text-slate-gray hover:text-primary px-4 py-3 rounded-lg hover:bg-surface-container-low transition-all" href="#">
+<span class="material-symbols-outlined">psychology</span>
+<span class="font-body-md text-body-md">Interview Prep</span>
+</a>
+<a class="flex items-center gap-stack-md text-slate-gray hover:text-primary px-4 py-3 rounded-lg hover:bg-surface-container-low transition-all" href="#">
+<span class="material-symbols-outlined">assignment_turned_in</span>
+<span class="font-body-md text-body-md">Job Tracker</span>
+</a>
+<!-- Active Item -->
+<a class="flex items-center gap-stack-md bg-secondary-container/10 text-azure-vibrant font-semibold rounded-lg px-4 py-3 border-r-4 border-azure-vibrant transition-all translate-x-1" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">settings</span>
+<span class="font-body-md text-body-md">Settings</span>
+</a>
+</nav>
+</div>
+<!-- Footer Actions -->
+<div class="border-t border-outline-variant pt-stack-md mt-stack-lg">
+<a class="flex items-center gap-stack-md text-slate-gray hover:text-primary px-4 py-3 rounded-lg hover:bg-surface-container-low transition-all" href="#">
+<span class="material-symbols-outlined">help</span>
+<span class="font-body-md text-body-md">Help Center</span>
+</a>
+<a class="flex items-center gap-stack-md text-slate-gray hover:text-primary px-4 py-3 rounded-lg hover:bg-surface-container-low transition-all" href="#">
+<span class="material-symbols-outlined">logout</span>
+<span class="font-body-md text-body-md">Logout</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 h-screen overflow-y-auto md:ml-[320px] bg-background">
+<!-- Mobile TopAppBar -->
+<header class="md:hidden flex justify-between items-center w-full px-margin-mobile h-16 sticky top-0 z-40 bg-surface/80 backdrop-blur-md border-b border-outline-variant shadow-sm">
+<div class="font-headline-md-mobile text-headline-lg-mobile font-black tracking-tighter text-primary">TYR</div>
+<div class="flex items-center gap-stack-md">
+<button class="text-slate-gray hover:text-primary transition-colors flex items-center justify-center p-2 rounded-full hover:bg-surface-container-low">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="text-slate-gray hover:text-primary transition-colors flex items-center justify-center p-2 rounded-full hover:bg-surface-container-low">
+<span class="material-symbols-outlined">help_outline</span>
+</button>
+</div>
+</header>
+<div class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-stack-lg md:py-margin-desktop">
+<!-- Page Header -->
+<div class="mb-stack-lg">
+<h2 class="font-headline-lg text-headline-lg text-primary md:font-headline-lg md:text-headline-lg font-headline-lg-mobile text-headline-lg-mobile">Profile Settings</h2>
+<p class="font-body-md text-body-md text-slate-gray mt-2">Manage your executive identity, professional links, and subscription preferences.</p>
+</div>
+<!-- Content Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter items-start">
+<!-- Left Column (Main Forms) -->
+<div class="lg:col-span-8 flex flex-col gap-stack-lg">
+<!-- Personal Information Form Card -->
+<section class="bg-latex-paper rounded-xl border border-outline-variant shadow-sm p-gutter md:p-stack-lg">
+<div class="flex items-center gap-2 mb-stack-md border-b border-surface-container-highest pb-4">
+<span class="material-symbols-outlined text-azure-vibrant">person</span>
+<h3 class="font-headline-md text-headline-md text-primary">Personal Information</h3>
+</div>
+<form class="grid grid-cols-1 md:grid-cols-2 gap-stack-md">
+<div class="flex flex-col gap-base col-span-1 md:col-span-2">
+<label class="font-label-mono text-label-mono text-slate-gray">FULL NAME</label>
+<input class="w-full bg-surface-bright border border-outline-variant rounded-lg px-4 py-3 font-body-md text-body-md text-primary focus:border-azure-vibrant focus:ring-1 focus:ring-azure-vibrant outline-none transition-all" type="text" value="Arjun Mehta"/>
+</div>
+<div class="flex flex-col gap-base">
+<label class="font-label-mono text-label-mono text-slate-gray">EMAIL ADDRESS</label>
+<input class="w-full bg-surface-bright border border-outline-variant rounded-lg px-4 py-3 font-body-md text-body-md text-primary focus:border-azure-vibrant focus:ring-1 focus:ring-azure-vibrant outline-none transition-all" type="email" value="arjun.mehta@executive.com"/>
+</div>
+<div class="flex flex-col gap-base">
+<label class="font-label-mono text-label-mono text-slate-gray">PHONE NUMBER</label>
+<input class="w-full bg-surface-bright border border-outline-variant rounded-lg px-4 py-3 font-body-md text-body-md text-primary focus:border-azure-vibrant focus:ring-1 focus:ring-azure-vibrant outline-none transition-all" type="tel" value="+91 98765 43210"/>
+</div>
+<div class="flex flex-col gap-base col-span-1 md:col-span-2">
+<label class="font-label-mono text-label-mono text-slate-gray">CURRENT LOCATION</label>
+<input class="w-full bg-surface-bright border border-outline-variant rounded-lg px-4 py-3 font-body-md text-body-md text-primary focus:border-azure-vibrant focus:ring-1 focus:ring-azure-vibrant outline-none transition-all" type="text" value="Bengaluru, India"/>
+</div>
+<div class="col-span-1 md:col-span-2 flex justify-end mt-stack-sm">
+<button class="bg-azure-vibrant text-on-secondary font-button-text text-button-text py-2 px-6 rounded-lg hover:bg-secondary transition-colors shadow-sm" type="button">
+                                    Save Changes
+                                </button>
+</div>
+</form>
+</section>
+<!-- Professional Links Card -->
+<section class="bg-latex-paper rounded-xl border border-outline-variant shadow-sm p-gutter md:p-stack-lg">
+<div class="flex items-center gap-2 mb-stack-md border-b border-surface-container-highest pb-4">
+<span class="material-symbols-outlined text-azure-vibrant">link</span>
+<h3 class="font-headline-md text-headline-md text-primary">Professional Links</h3>
+</div>
+<div class="flex flex-col gap-stack-md">
+<div class="flex flex-col gap-base">
+<label class="font-label-mono text-label-mono text-slate-gray">LINKEDIN URL</label>
+<div class="flex relative">
+<span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-gray material-symbols-outlined text-[20px]">public</span>
+<input class="w-full bg-surface-bright border border-outline-variant rounded-lg pl-12 pr-4 py-3 font-body-md text-body-md text-primary focus:border-azure-vibrant focus:ring-1 focus:ring-azure-vibrant outline-none transition-all" type="url" value="linkedin.com/in/arjunmehta"/>
+</div>
+</div>
+<div class="flex flex-col gap-base">
+<label class="font-label-mono text-label-mono text-slate-gray">GITHUB / PORTFOLIO</label>
+<div class="flex relative">
+<span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-gray material-symbols-outlined text-[20px]">code</span>
+<input class="w-full bg-surface-bright border border-outline-variant rounded-lg pl-12 pr-4 py-3 font-body-md text-body-md text-primary focus:border-azure-vibrant focus:ring-1 focus:ring-azure-vibrant outline-none transition-all" type="url" value="github.com/arjun-m"/>
+</div>
+</div>
+</div>
+</section>
+</div>
+<!-- Right Column (Profile Summary & Resume Vault) -->
+<div class="lg:col-span-4 flex flex-col gap-stack-lg">
+<!-- Executive Profile Summary (Glassmorphism Accent) -->
+<section class="relative overflow-hidden rounded-xl border border-outline-variant shadow-sm p-gutter bg-latex-paper">
+<!-- Abstract Glassmorphism bg element -->
+<div class="absolute -top-10 -right-10 w-32 h-32 bg-azure-vibrant/10 rounded-full blur-2xl pointer-events-none"></div>
+<div class="relative z-10 flex flex-col items-center text-center">
+<div class="relative mb-stack-md">
+<img alt="Executive Profile Avatar" class="w-24 h-24 rounded-full object-cover border-4 border-surface-bright shadow-sm" data-alt="A highly professional headshot of a confident corporate executive in their late 30s. The subject is wearing a sharply tailored dark navy blazer over a crisp white shirt, looking directly at the camera with a subtle, authoritative smile. The lighting is modern, bright, and flattering studio light, creating a clean 'light-mode' aesthetic. The background is a soft, completely out-of-focus modern office setting in cool gray and white tones. The image exudes high-performance, precision, and career success." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC7_bdODTLBwOcI9FAGfrbjUOGCxqeG1td3GdwarKR9Za3P-8xx4pCdatGZUMxj-6V2i9bAdD0eWXD4jAiOdj9PLTurAG1fpP_FW53bUY9SxE0kUnaHBZw2fpNkLq_Z8ZB49vrAfkZ9ijeLYbjlA9B2h7mTV_hkxEZh0qeYNDpQoBx7v5dg86-3LFFmkNrXc4ppcWNF-zQtIEIR1jsla3kWnsmXuhIERLmowsauUBLOCg5fYkv86skbU_OOnP5zaD0rnnd4ENPSqRg"/>
+<div class="absolute bottom-0 right-0 bg-ats-emerald text-white rounded-full p-1 border-2 border-latex-paper flex items-center justify-center" title="Verified Professional">
+<span class="material-symbols-outlined text-[14px] font-bold">check</span>
+</div>
+</div>
+<h3 class="font-headline-md text-headline-md text-primary mb-1">Arjun Mehta</h3>
+<p class="font-body-md text-body-md text-slate-gray mb-stack-md">VP of Engineering, FinTech</p>
+<div class="w-full bg-surface-container-low rounded-lg p-3 flex items-center justify-between border border-outline-variant/50">
+<div class="flex flex-col text-left">
+<span class="font-label-mono text-label-mono text-slate-gray">CURRENT PLAN</span>
+<span class="font-body-md text-body-md font-semibold text-primary">TYR Pro</span>
+</div>
+<span class="bg-azure-vibrant/10 text-azure-vibrant font-label-mono text-label-mono px-3 py-1 rounded-full font-bold">ACTIVE</span>
+</div>
+</div>
+</section>
+<!-- Resume Vault Bento Grid -->
+<section class="bg-latex-paper rounded-xl border border-outline-variant shadow-sm p-gutter flex flex-col">
+<div class="flex items-center justify-between mb-stack-md">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-azure-vibrant">folder_special</span>
+<h3 class="font-headline-md text-headline-md text-primary">Resume Vault</h3>
+</div>
+<button class="text-azure-vibrant hover:text-secondary text-sm font-semibold transition-colors">View All</button>
+</div>
+<p class="font-body-sm text-body-sm text-slate-gray mb-stack-sm">Your verified master versions ready for deployment.</p>
+<div class="flex flex-col gap-stack-sm mt-2">
+<!-- Vault Item 1 -->
+<div class="group flex items-center justify-between p-3 rounded-lg border border-outline-variant hover:border-azure-vibrant hover:shadow-sm bg-surface-bright transition-all cursor-pointer">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded bg-deep-obsidian flex items-center justify-center text-white shrink-0">
+<span class="material-symbols-outlined">description</span>
+</div>
+<div class="flex flex-col overflow-hidden">
+<span class="font-body-md text-body-md font-semibold text-primary truncate">VP_Eng_Master_2024</span>
+<span class="font-label-mono text-label-mono text-slate-gray">LaTeX • Updated 2d ago</span>
+</div>
+</div>
+<button class="text-slate-gray opacity-0 group-hover:opacity-100 transition-opacity hover:text-azure-vibrant">
+<span class="material-symbols-outlined">download</span>
+</button>
+</div>
+<!-- Vault Item 2 -->
+<div class="group flex items-center justify-between p-3 rounded-lg border border-outline-variant hover:border-azure-vibrant hover:shadow-sm bg-surface-bright transition-all cursor-pointer">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded bg-surface-container-highest flex items-center justify-center text-on-surface shrink-0">
+<span class="material-symbols-outlined">description</span>
+</div>
+<div class="flex flex-col overflow-hidden">
+<span class="font-body-md text-body-md font-semibold text-primary truncate">Director_Tech_Fallback</span>
+<span class="font-label-mono text-label-mono text-slate-gray">Standard • Updated 1mo ago</span>
+</div>
+</div>
+<button class="text-slate-gray opacity-0 group-hover:opacity-100 transition-opacity hover:text-azure-vibrant">
+<span class="material-symbols-outlined">download</span>
+</button>
+</div>
+</div>
+</section>
+</div>
+</div>
+</div>
+</main>
+</body></html>

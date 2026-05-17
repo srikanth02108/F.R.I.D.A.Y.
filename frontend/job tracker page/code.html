@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Job Tracker - TYR Executive Platform</title>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Configuration -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "secondary-fixed-dim": "#b8c4ff",
+                    "surface": "#fbf9f8",
+                    "latex-paper": "#FFFFFF",
+                    "secondary-container": "#2558ff",
+                    "on-secondary-fixed": "#001355",
+                    "tertiary-fixed-dim": "#4fdf9d",
+                    "primary": "#000000",
+                    "ats-emerald": "#0EB87A",
+                    "on-secondary": "#ffffff",
+                    "surface-container-lowest": "#ffffff",
+                    "primary-fixed-dim": "#c5c6ce",
+                    "inverse-on-surface": "#f2f0f0",
+                    "on-primary-container": "#82838b",
+                    "surface-bright": "#fbf9f8",
+                    "secondary": "#003fd8",
+                    "inverse-surface": "#303031",
+                    "slate-gray": "#6B6B6B",
+                    "surface-container-high": "#e9e8e7",
+                    "outline-variant": "#c7c6cb",
+                    "on-error-container": "#93000a",
+                    "surface-container-low": "#f5f3f3",
+                    "on-error": "#ffffff",
+                    "error-container": "#ffdad6",
+                    "surface-container": "#efeded",
+                    "tertiary": "#000000",
+                    "on-surface-variant": "#46464b",
+                    "on-background": "#1b1c1c",
+                    "on-tertiary-fixed-variant": "#005233",
+                    "on-secondary-container": "#eaebff",
+                    "outline": "#77777c",
+                    "tertiary-container": "#002112",
+                    "on-tertiary-container": "#009763",
+                    "primary-fixed": "#e2e2eb",
+                    "on-secondary-fixed-variant": "#0036bc",
+                    "error": "#ba1a1a",
+                    "inverse-primary": "#c5c6ce",
+                    "tertiary-fixed": "#6ffcb7",
+                    "secondary-fixed": "#dde1ff",
+                    "background": "#fbf9f8",
+                    "surface-container-highest": "#e4e2e2",
+                    "surface-variant": "#e4e2e2",
+                    "deep-obsidian": "#0A0A0A",
+                    "primary-container": "#191b22",
+                    "surface-tint": "#5d5e65",
+                    "on-primary-fixed-variant": "#45464e",
+                    "on-surface": "#1b1c1c",
+                    "surface-dim": "#dbdad9",
+                    "azure-vibrant": "#2055FD",
+                    "on-tertiary-fixed": "#002112",
+                    "on-tertiary": "#ffffff",
+                    "on-primary": "#ffffff",
+                    "on-primary-fixed": "#191b22"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "stack-sm": "8px",
+                    "container-max": "1280px",
+                    "stack-lg": "32px",
+                    "base": "4px",
+                    "gutter": "24px",
+                    "stack-md": "16px",
+                    "margin-desktop": "40px",
+                    "margin-mobile": "16px"
+            },
+            "fontFamily": {
+                    "headline-lg": ["Plus Jakarta Sans"],
+                    "body-md": ["Plus Jakarta Sans"],
+                    "body-sm": ["Plus Jakarta Sans"],
+                    "headline-lg-mobile": ["Plus Jakarta Sans"],
+                    "label-mono": ["JetBrains Mono"],
+                    "body-lg": ["Plus Jakarta Sans"],
+                    "display-lg": ["Plus Jakarta Sans"],
+                    "headline-md": ["Plus Jakarta Sans"],
+                    "button-text": ["Plus Jakarta Sans"]
+            },
+            "fontSize": {
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+                    "label-mono": ["13px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "button-text": ["15px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600"}]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        /* Base styles to ensure consistency with design tokens */
+        body {
+            background-color: #fbf9f8; /* surface */
+            color: #1b1c1c; /* on-surface */
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        /* Custom scrollbar for kanban board */
+        .kanban-scroll::-webkit-scrollbar {
+            height: 8px;
+            width: 8px;
+        }
+        .kanban-scroll::-webkit-scrollbar-track {
+            background: #efeded; /* surface-container */
+            border-radius: 4px;
+        }
+        .kanban-scroll::-webkit-scrollbar-thumb {
+            background: #c7c6cb; /* outline-variant */
+            border-radius: 4px;
+        }
+        .kanban-scroll::-webkit-scrollbar-thumb:hover {
+            background: #77777c; /* outline */
+        }
+    </style>
+</head>
+<body class="flex h-screen w-full overflow-hidden">
+<!-- SideNavBar (from JSON) -->
+<nav class="fixed left-0 top-0 h-screen w-[320px] hidden md:flex flex-col bg-white border-r border-outline-variant shadow-md py-stack-lg px-gutter justify-between overflow-y-auto z-50">
+<div>
+<!-- Header -->
+<div class="flex items-center gap-stack-md mb-stack-lg px-2">
+<img alt="Executive User" class="w-12 h-12 rounded-full border border-outline-variant" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAVJiFk-a-v0YuowmU8svT40Kd8IVbng3Blb6xbq2zhgQ28ADleQmzsTAqGKaxug6XIhXY1jdnjylQD6ciMu1blluXL_et7g-ybSFbdb7Azr8msHls3-2vXlKxMN-NRV0ttZMWgrEeB-SNCBjDsSFzM7aDC3FAaO3hIG2otuLyRFr7d7e_6DVNH-unHGTp5dQOUGQ83Mur_XdqATGhd41bMiYebMmQplpFz-K27gJk_9jTR_dkRhTo_Ga2dk541GcXp_ovCuyUU8LA"/>
+<div>
+<h1 class="font-headline-md text-headline-md font-bold text-primary">TYR Platform</h1>
+<p class="font-label-mono text-label-mono text-slate-gray uppercase tracking-widest text-[10px]">Premium Tier</p>
+</div>
+</div>
+<!-- Navigation Links -->
+<div class="flex flex-col gap-stack-sm font-body-md text-body-md">
+<a class="flex items-center gap-stack-md text-slate-gray hover:text-primary px-4 py-3 rounded-lg hover:bg-surface-container-low transition-all" href="#">
+<span class="material-symbols-outlined">description</span>
+                    My Resumes
+                </a>
+<a class="flex items-center gap-stack-md text-slate-gray hover:text-primary px-4 py-3 rounded-lg hover:bg-surface-container-low transition-all" href="#">
+<span class="material-symbols-outlined">analytics</span>
+                    ATS Analytics
+                </a>
+<a class="flex items-center gap-stack-md text-slate-gray hover:text-primary px-4 py-3 rounded-lg hover:bg-surface-container-low transition-all" href="#">
+<span class="material-symbols-outlined">psychology</span>
+                    Interview Prep
+                </a>
+<!-- ACTIVE NAV ITEM -->
+<a class="flex items-center gap-stack-md bg-secondary-container/10 text-azure-vibrant font-semibold rounded-lg px-4 py-3 border-r-4 border-azure-vibrant" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">assignment_turned_in</span>
+                    Job Tracker
+                </a>
+<a class="flex items-center gap-stack-md text-slate-gray hover:text-primary px-4 py-3 rounded-lg hover:bg-surface-container-low transition-all" href="#">
+<span class="material-symbols-outlined">settings</span>
+                    Settings
+                </a>
+</div>
+</div>
+<div class="mt-auto pt-stack-lg">
+<!-- CTA -->
+<button class="w-full bg-deep-obsidian text-on-primary font-button-text text-button-text py-3 px-4 rounded-lg flex items-center justify-center gap-2 mb-stack-md hover:bg-primary/90 transition-colors shadow-sm">
+<span class="material-symbols-outlined text-[18px]">add</span>
+                Build New Resume
+            </button>
+<!-- Footer Links -->
+<div class="flex flex-col gap-stack-sm font-body-md text-body-md border-t border-outline-variant pt-stack-md">
+<a class="flex items-center gap-stack-md text-slate-gray hover:text-primary px-4 py-3 rounded-lg hover:bg-surface-container-low transition-all" href="#">
+<span class="material-symbols-outlined">help</span>
+                    Help Center
+                </a>
+<a class="flex items-center gap-stack-md text-slate-gray hover:text-primary px-4 py-3 rounded-lg hover:bg-surface-container-low transition-all" href="#">
+<span class="material-symbols-outlined">logout</span>
+                    Logout
+                </a>
+</div>
+</div>
+</nav>
+<!-- Main Content Area -->
+<main class="flex-1 flex flex-col md:ml-[320px] h-screen overflow-hidden bg-surface relative">
+<!-- TopAppBar (from JSON) -->
+<header class="flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop h-16 sticky top-0 z-40 bg-surface/80 backdrop-blur-md shadow-sm">
+<!-- Mobile Brand Logo / Desktop Spacing -->
+<div class="md:hidden font-headline-md text-headline-md font-black tracking-tighter text-primary">
+                TYR
+            </div>
+<!-- Search Bar (on_left as per JSON, but pushed slightly right on mobile if logo is present) -->
+<div class="hidden md:flex relative items-center w-80">
+<span class="material-symbols-outlined absolute left-3 text-slate-gray">search</span>
+<input class="w-full pl-10 pr-4 py-2 bg-latex-paper border border-outline-variant rounded-lg font-body-sm text-body-sm focus:border-azure-vibrant focus:ring-1 focus:ring-azure-vibrant focus:outline-none transition-all placeholder:text-slate-gray" placeholder="Search roles, companies..." type="text"/>
+</div>
+<!-- Trailing Actions & Icons -->
+<div class="flex items-center gap-stack-md">
+<div class="hidden lg:flex items-center gap-stack-sm mr-stack-md border-r border-outline-variant pr-stack-md">
+<!-- Secondary Action (Ghost) -->
+<button class="font-button-text text-button-text text-slate-gray hover:text-primary px-4 py-2 rounded-lg hover:bg-surface-container-low transition-colors">
+                        Download PDF
+                    </button>
+<!-- Primary Action (Solid Azure) -->
+<button class="font-button-text text-button-text bg-azure-vibrant text-white px-4 py-2 rounded-lg hover:bg-secondary transition-colors shadow-sm">
+                        Tailor Now
+                    </button>
+</div>
+<!-- Trailing Icons -->
+<button class="text-slate-gray hover:text-primary transition-colors p-2 rounded-full hover:bg-surface-container-low relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full"></span>
+</button>
+<button class="text-slate-gray hover:text-primary transition-colors p-2 rounded-full hover:bg-surface-container-low">
+<span class="material-symbols-outlined">help_outline</span>
+</button>
+<!-- Mobile Menu Trigger (Optional, for completeness in responsive design) -->
+<button class="md:hidden text-slate-gray p-2">
+<span class="material-symbols-outlined">menu</span>
+</button>
+</div>
+</header>
+<!-- Page Canvas (Kanban Board) -->
+<div class="flex-1 overflow-y-auto overflow-x-hidden p-margin-mobile md:p-margin-desktop flex flex-col kanban-scroll">
+<!-- Page Header -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-stack-md mb-stack-lg">
+<div>
+<h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-primary mb-1">Job Tracker</h2>
+<p class="font-body-md text-body-md text-slate-gray">Manage your active applications across 4 structured stages.</p>
+</div>
+<button class="bg-deep-obsidian text-on-primary font-button-text text-button-text py-2 px-6 rounded-lg flex items-center justify-center gap-2 hover:bg-primary/90 transition-all shadow-sm w-full md:w-auto">
+<span class="material-symbols-outlined text-[18px]">add</span>
+                    New Application
+                </button>
+</div>
+<!-- Kanban Board Container -->
+<div class="flex flex-1 gap-gutter overflow-x-auto pb-stack-lg kanban-scroll items-start">
+<!-- Column: Wishlist -->
+<div class="flex flex-col flex-shrink-0 w-[320px] bg-surface-container-low rounded-xl p-stack-sm border border-outline-variant h-full max-h-full overflow-hidden">
+<div class="flex items-center justify-between px-2 py-3 mb-2">
+<h3 class="font-headline-md text-body-lg font-semibold text-primary">Wishlist</h3>
+<span class="bg-surface-container-high text-primary font-label-mono text-label-mono px-2 py-0.5 rounded-full border border-outline-variant">2</span>
+</div>
+<div class="flex flex-col gap-stack-md overflow-y-auto pr-1 kanban-scroll pb-2">
+<!-- Card 1 -->
+<div class="bg-latex-paper border border-outline-variant rounded-lg p-stack-md shadow-sm hover:shadow-md hover:border-azure-vibrant transition-all cursor-grab active:cursor-grabbing group relative">
+<!-- Drag Handle -->
+<div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity text-outline">
+<span class="material-symbols-outlined text-[18px]">drag_indicator</span>
+</div>
+<div class="flex items-center gap-stack-sm mb-stack-sm">
+<div class="w-8 h-8 rounded border border-outline-variant flex items-center justify-center bg-surface overflow-hidden">
+<img alt="Company Logo" class="w-full h-full object-cover" data-alt="A minimalist, modern corporate logo for a high-tech finance firm. The design features a geometric abstract shape in deep navy and vibrant azure blue, set against a clean white background. The overall aesthetic is professional, sharp, and aligned with a premium executive brand identity, avoiding any cartoonish elements." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAWj0y88rhXf0svNHSZtgSOXucIj3fz5qrKP86XX-5Yuoss_jFjuW6UKi_0X8z5y1p45EoOQZBg7ZS87lJi7bZh7txGrdNYFyWL11Ye_tGqRi4CS14T8dHzAAVXD_lwLvOOB2pF6SEe-cgCJNtD2pdClRFRD7BK_QpJIqOjbHwEzBJ6ETuRsNC4MqtDRJfMUnmti-tW6EnouTnatT_ldOGM2XGXTHcj4yO6Ky_F_LevHL4F-t7cbN80mRhQPxwAVw47ta_Pb4ofOc4"/>
+</div>
+<div class="flex flex-col">
+<span class="font-label-mono text-[11px] uppercase tracking-wider text-slate-gray">Stripe</span>
+</div>
+</div>
+<h4 class="font-headline-md text-body-md font-bold text-primary mb-stack-md leading-snug">Senior Product Marketing Manager</h4>
+<div class="flex items-center justify-between mt-auto pt-stack-sm border-t border-outline-variant border-dashed">
+<div class="flex items-center gap-1 font-body-sm text-[12px] text-slate-gray">
+<span class="material-symbols-outlined text-[14px]">description</span>
+                                    v3_Tech_PM.pdf
+                                </div>
+<div class="flex items-center gap-1 bg-ats-emerald/10 text-ats-emerald font-label-mono text-[11px] px-1.5 py-0.5 rounded border border-ats-emerald/20">
+<span class="material-symbols-outlined text-[12px] font-bold">bolt</span>
+                                    88%
+                                </div>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="bg-latex-paper border border-outline-variant rounded-lg p-stack-md shadow-sm hover:shadow-md hover:border-azure-vibrant transition-all cursor-grab active:cursor-grabbing group relative">
+<div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity text-outline">
+<span class="material-symbols-outlined text-[18px]">drag_indicator</span>
+</div>
+<div class="flex items-center gap-stack-sm mb-stack-sm">
+<div class="w-8 h-8 rounded border border-outline-variant flex items-center justify-center bg-surface overflow-hidden">
+<img alt="Company Logo" class="w-full h-full object-cover" data-alt="A sleek, monochromatic logo for an enterprise software company. The design utilizes sharp, angular typography and a subtle metallic sheen, set against a stark white square. The visual language conveys stability, precision, and high-tier corporate maturity suitable for a B2B SaaS platform." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDaJiil9mChZ4e44i92NUG9I_S6ajDaDBoEH9K-l4OcOrakR2oMPg7l1qrb19pJfn6eWMw18G9qXYz1idmyxNmFXu2M20pVogC4e05HVeXPDzZaWuyCdp0td2EefHIfGvwm3Ikrk_5O8elTCoHF6_NMCIgNg5YG-cqjdbAyP60EjK7xt1fFm-g4s7S9CxTlrWcAtJaK_fI3oV-YQwIdAA3ZUg5mTEHnn8XrA3BhKTKv-3No513B93jSn9SIC_O8YkMh5z9o9owFqRU"/>
+</div>
+<div class="flex flex-col">
+<span class="font-label-mono text-[11px] uppercase tracking-wider text-slate-gray">Palantir</span>
+</div>
+</div>
+<h4 class="font-headline-md text-body-md font-bold text-primary mb-stack-md leading-snug">Lead Deployment Strategist</h4>
+<div class="flex items-center justify-between mt-auto pt-stack-sm border-t border-outline-variant border-dashed">
+<div class="flex items-center gap-1 font-body-sm text-[12px] text-slate-gray">
+<span class="material-symbols-outlined text-[14px]">description</span>
+                                    Exec_Strategy_Final
+                                </div>
+<div class="flex items-center gap-1 bg-surface-container-high text-slate-gray font-label-mono text-[11px] px-1.5 py-0.5 rounded border border-outline-variant">
+<span class="material-symbols-outlined text-[12px]">pending</span>
+                                    --
+                                </div>
+</div>
+</div>
+</div>
+<!-- Add Card Button for Column -->
+<button class="mt-2 w-full py-2 flex items-center justify-center gap-2 text-slate-gray font-body-sm text-body-sm hover:bg-surface-container-high rounded transition-colors border border-transparent hover:border-outline-variant border-dashed">
+<span class="material-symbols-outlined text-[16px]">add</span> Add Role
+                    </button>
+</div>
+<!-- Column: Applied -->
+<div class="flex flex-col flex-shrink-0 w-[320px] bg-surface-container-low rounded-xl p-stack-sm border border-outline-variant h-full max-h-full overflow-hidden">
+<div class="flex items-center justify-between px-2 py-3 mb-2">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-azure-vibrant"></span>
+<h3 class="font-headline-md text-body-lg font-semibold text-primary">Applied</h3>
+</div>
+<span class="bg-surface-container-high text-primary font-label-mono text-label-mono px-2 py-0.5 rounded-full border border-outline-variant">1</span>
+</div>
+<div class="flex flex-col gap-stack-md overflow-y-auto pr-1 kanban-scroll pb-2">
+<!-- Card 3 -->
+<div class="bg-latex-paper border border-outline-variant rounded-lg p-stack-md shadow-sm hover:shadow-md hover:border-azure-vibrant transition-all cursor-grab active:cursor-grabbing group relative">
+<div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity text-outline">
+<span class="material-symbols-outlined text-[18px]">drag_indicator</span>
+</div>
+<div class="flex items-center justify-between mb-stack-sm">
+<div class="flex items-center gap-stack-sm">
+<div class="w-8 h-8 rounded border border-outline-variant flex items-center justify-center bg-surface overflow-hidden">
+<img alt="Company Logo" class="w-full h-full object-cover" data-alt="A refined, elegant logo mark for a management consulting firm. The imagery features a classic serif monogram 'M' intertwined with a subtle leaf motif, rendered in a sophisticated charcoal grey. The background is a crisp white, conveying authority, tradition, and intellectual rigor." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC1eokvMkaedL4m9C_iMtaHfq1lcbya367ryFzNAVkNg0QiMgNfWtx1bXNkGtSBNAXL8DblyxxYWdHwKUCTFzJtuQ7EiJ1uKxKKQF18Mytb5E7DG2BiTouFZcBZmTJ7ynr-n63x9JiyVsItyu_nD7n3J8COXUNoUXVUntex-pjyCvqs2pPd85NjdZBBS6nF0CHM0E1uqfua_avJ2u1awd3MujblSjnYnGyeAK6XNGbLO6rSpEvVTmjsESIKC4yltx8rlrp_CcPhP-4"/>
+</div>
+<span class="font-label-mono text-[11px] uppercase tracking-wider text-slate-gray">McKinsey &amp; Co.</span>
+</div>
+<span class="font-label-mono text-[10px] text-slate-gray bg-surface-container px-1.5 py-0.5 rounded">2d ago</span>
+</div>
+<h4 class="font-headline-md text-body-md font-bold text-primary mb-stack-md leading-snug">Engagement Manager, Digital</h4>
+<div class="flex items-center justify-between mt-auto pt-stack-sm border-t border-outline-variant border-dashed">
+<div class="flex items-center gap-1 font-body-sm text-[12px] text-slate-gray">
+<span class="material-symbols-outlined text-[14px]">description</span>
+                                    Consulting_v2.pdf
+                                </div>
+<div class="flex items-center gap-1 bg-ats-emerald/10 text-ats-emerald font-label-mono text-[11px] px-1.5 py-0.5 rounded border border-ats-emerald/20">
+<span class="material-symbols-outlined text-[12px] font-bold">bolt</span>
+                                    94%
+                                </div>
+</div>
+</div>
+</div>
+</div>
+<!-- Column: Interviewing -->
+<div class="flex flex-col flex-shrink-0 w-[320px] bg-surface-container-low rounded-xl p-stack-sm border border-outline-variant h-full max-h-full overflow-hidden">
+<div class="flex items-center justify-between px-2 py-3 mb-2">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-secondary-container"></span>
+<h3 class="font-headline-md text-body-lg font-semibold text-primary">Interviewing</h3>
+</div>
+<span class="bg-surface-container-high text-primary font-label-mono text-label-mono px-2 py-0.5 rounded-full border border-outline-variant">1</span>
+</div>
+<div class="flex flex-col gap-stack-md overflow-y-auto pr-1 kanban-scroll pb-2">
+<!-- Card 4 (Active Interview state) -->
+<div class="bg-latex-paper border-2 border-azure-vibrant/50 rounded-lg p-stack-md shadow-md relative group cursor-grab">
+<div class="absolute top-0 right-0 bg-azure-vibrant text-white font-label-mono text-[9px] uppercase px-2 py-0.5 rounded-bl-lg rounded-tr-sm font-bold tracking-wider">R2 Tomorrow</div>
+<div class="flex items-center gap-stack-sm mb-stack-sm mt-2">
+<div class="w-8 h-8 rounded border border-outline-variant flex items-center justify-center bg-surface overflow-hidden">
+<img alt="Company Logo" class="w-full h-full object-cover" data-alt="A modern, vibrant logo for an emerging AI startup. The design incorporates a stylized, flowing data wave in gradients of deep indigo and electric cyan. It sits squarely on a pristine white background, projecting innovation, speed, and cutting-edge technology characteristic of top-tier Silicon Valley firms." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBZCzIWj3sbqV_EYeE8-0SslN6RzEC1Wcs6wksQ2IBHsHhUQ2GsHhdMOhSVwFCZ9PZQwmKy8Zm9XcHJrU988hhwoU9Ys_efxWsrNWd18ca-9rF64_s3DK9OrFFtAbyaHxFBG3Nls6pbb3WLvA0awkEoLprzTaGV7dnZVnodku__l_idwhbSBlTxcMForv4OZTvWaU-w2DeetuFx2F4WBjjoJW-xLnRNF3p7Z8rkwmzyWWe6zr_RMQHRaOFWHLaDHFDi3UYAwU1n6-s"/>
+</div>
+<span class="font-label-mono text-[11px] uppercase tracking-wider text-slate-gray">Anthropic</span>
+</div>
+<h4 class="font-headline-md text-body-md font-bold text-primary mb-2 leading-snug">Director of AI Operations</h4>
+<!-- Interview Context Box -->
+<div class="bg-secondary-fixed-dim/20 rounded p-2 mb-stack-md border border-secondary-fixed-dim/30">
+<p class="font-body-sm text-[12px] text-on-secondary-fixed flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">event</span>
+                                    System Design Interview
+                                </p>
+</div>
+<div class="flex items-center justify-between mt-auto pt-stack-sm border-t border-outline-variant border-dashed">
+<div class="flex items-center gap-1 font-body-sm text-[12px] text-slate-gray">
+<span class="material-symbols-outlined text-[14px]">description</span>
+                                    Ops_Leader_v4.pdf
+                                </div>
+<div class="flex items-center gap-1 bg-ats-emerald/10 text-ats-emerald font-label-mono text-[11px] px-1.5 py-0.5 rounded border border-ats-emerald/20">
+<span class="material-symbols-outlined text-[12px] font-bold">bolt</span>
+                                    98%
+                                </div>
+</div>
+</div>
+</div>
+</div>
+<!-- Column: Offers -->
+<div class="flex flex-col flex-shrink-0 w-[320px] bg-surface-container-low rounded-xl p-stack-sm border border-outline-variant h-full max-h-full overflow-hidden opacity-80 hover:opacity-100 transition-opacity">
+<div class="flex items-center justify-between px-2 py-3 mb-2">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-ats-emerald"></span>
+<h3 class="font-headline-md text-body-lg font-semibold text-primary">Offers</h3>
+</div>
+<span class="bg-surface-container-high text-primary font-label-mono text-label-mono px-2 py-0.5 rounded-full border border-outline-variant">0</span>
+</div>
+<div class="flex flex-col items-center justify-center h-48 border-2 border-dashed border-outline-variant rounded-lg bg-surface/50 m-1">
+<span class="material-symbols-outlined text-[32px] text-outline mb-2">workspace_premium</span>
+<p class="font-body-sm text-slate-gray text-center px-4">Move applications here when you receive an offer.</p>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>

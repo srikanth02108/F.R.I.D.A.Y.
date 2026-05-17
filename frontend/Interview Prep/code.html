@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AI Interview Prep Suite | TYR</title>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-family: 'Material Symbols Outlined';
+            font-weight: normal;
+            font-style: normal;
+            font-size: 24px;
+            line-height: 1;
+            letter-spacing: normal;
+            text-transform: none;
+            display: inline-block;
+            white-space: nowrap;
+            word-wrap: normal;
+            direction: ltr;
+            -webkit-font-feature-settings: 'liga';
+            -webkit-font-smoothing: antialiased;
+        }
+    </style>
+<!-- Tailwind Config -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-fixed": "#e2e2eb",
+                        "azure-vibrant": "#2055FD",
+                        "on-tertiary-fixed-variant": "#005233",
+                        "latex-paper": "#FFFFFF",
+                        "tertiary-fixed-dim": "#4fdf9d",
+                        "tertiary-fixed": "#6ffcb7",
+                        "on-background": "#1b1c1c",
+                        "on-tertiary-container": "#009763",
+                        "error": "#ba1a1a",
+                        "deep-obsidian": "#0A0A0A",
+                        "tertiary": "#000000",
+                        "on-surface": "#1b1c1c",
+                        "on-secondary": "#ffffff",
+                        "inverse-surface": "#303031",
+                        "surface-container-high": "#e9e8e7",
+                        "outline": "#77777c",
+                        "ats-emerald": "#0EB87A",
+                        "primary-container": "#191b22",
+                        "background": "#fbf9f8",
+                        "surface-container": "#efeded",
+                        "on-secondary-container": "#eaebff",
+                        "tertiary-container": "#002112",
+                        "primary": "#000000",
+                        "surface-container-highest": "#e4e2e2",
+                        "secondary-container": "#2558ff",
+                        "inverse-on-surface": "#f2f0f0",
+                        "on-tertiary": "#ffffff",
+                        "surface-container-low": "#f5f3f3",
+                        "on-error": "#ffffff",
+                        "on-primary-fixed-variant": "#45464e",
+                        "on-primary-fixed": "#191b22",
+                        "secondary": "#003fd8",
+                        "secondary-fixed": "#dde1ff",
+                        "inverse-primary": "#c5c6ce",
+                        "on-tertiary-fixed": "#002112",
+                        "on-surface-variant": "#46464b",
+                        "surface": "#fbf9f8",
+                        "on-secondary-fixed-variant": "#0036bc",
+                        "surface-variant": "#e4e2e2",
+                        "primary-fixed-dim": "#c5c6ce",
+                        "surface-bright": "#fbf9f8",
+                        "outline-variant": "#c7c6cb",
+                        "on-secondary-fixed": "#001355",
+                        "on-primary-container": "#82838b",
+                        "surface-tint": "#5d5e65",
+                        "error-container": "#ffdad6",
+                        "secondary-fixed-dim": "#b8c4ff",
+                        "on-error-container": "#93000a",
+                        "surface-dim": "#dbdad9",
+                        "surface-container-lowest": "#ffffff",
+                        "slate-gray": "#6B6B6B",
+                        "on-primary": "#ffffff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-md": "16px",
+                        "container-max": "1280px",
+                        "gutter": "24px",
+                        "margin-mobile": "16px",
+                        "margin-desktop": "40px",
+                        "base": "4px",
+                        "stack-sm": "8px",
+                        "stack-lg": "32px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Plus Jakarta Sans"],
+                        "body-lg": ["Plus Jakarta Sans"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "body-sm": ["Plus Jakarta Sans"],
+                        "headline-lg-mobile": ["Plus Jakarta Sans"],
+                        "display-lg": ["Plus Jakarta Sans"],
+                        "button-text": ["Plus Jakarta Sans"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "label-mono": ["JetBrains Mono"]
+                    },
+                    "fontSize": {
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                        "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                        "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+                        "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                        "button-text": ["15px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                        "label-mono": ["13px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-background text-on-background min-h-screen flex selection:bg-azure-vibrant selection:text-white">
+<!-- Shared Component: SideNavBar -->
+<nav class="hidden md:flex flex-col fixed left-0 top-0 h-full w-80 p-stack-md bg-surface-container-lowest dark:bg-deep-obsidian border-r border-surface-container-high dark:border-primary-container z-40">
+<!-- Header -->
+<div class="flex items-center gap-stack-sm mb-stack-lg px-stack-sm">
+<div class="w-10 h-10 rounded-lg bg-primary-fixed flex items-center justify-center text-azure-vibrant overflow-hidden border border-surface-container-high">
+<img alt="User Profile" class="w-full h-full object-cover" data-alt="A professional headshot of a confident corporate executive in a modern, well-lit office environment. High key lighting, sharp focus, capturing a sense of ambition and readiness. The color palette features deep blacks, crisp whites, and subtle cool tones to align with a corporate modern aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD2Vl6AxMyvbhnsLdSiHT2j4pmFwjCMWcdl3Y6s4N0tQYoBSz2B8808bP91L8lpYs4EZBq-lxCaGtYru7b6OlSM9MnDb1WCnNNinTqJUL5EtpS6ThTJ1b23wFpSbRHb7RRWrwzxavngdzP68-VvPkfuGoLwa4Tx38bMz5Axhe-AboEoIt6Au37JF2fSI376KcVjPWsPhiyPR-l0JRzHhBpEihcQLCGCNU3uEVPm_amGzITGGoy5FyM1ZTGEEDhgHHIvo1qXNaDLBro"/>
+</div>
+<div>
+<h1 class="font-headline-md text-headline-md text-primary">TYR</h1>
+<p class="font-label-mono text-label-mono text-slate-gray">Professional Dashboard <span class="text-azure-vibrant">• AI-Ready</span></p>
+</div>
+</div>
+<!-- Navigation Links -->
+<div class="flex flex-col gap-base flex-1">
+<a class="flex items-center gap-stack-sm px-stack-md py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-high transition-all font-body-sm text-body-sm" href="#">
+<span class="material-symbols-outlined" data-icon="description">description</span>
+<span>Resumes</span>
+</a>
+<a class="flex items-center gap-stack-sm px-stack-md py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-high transition-all font-body-sm text-body-sm" href="#">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+<span>ATS Score</span>
+</a>
+<!-- Active State -->
+<a class="flex items-center gap-stack-sm px-stack-md py-3 bg-secondary-container text-on-secondary-container rounded-lg font-semibold font-body-sm text-body-sm hover:bg-surface-container-high transition-all translate-x-1" href="#">
+<span class="material-symbols-outlined" data-icon="record_voice_over" data-weight="fill" style="font-variation-settings: 'FILL' 1;">record_voice_over</span>
+<span>Interview Prep</span>
+</a>
+<a class="flex items-center gap-stack-sm px-stack-md py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-high transition-all font-body-sm text-body-sm mt-auto" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span>Settings</span>
+</a>
+</div>
+<!-- CTA -->
+<div class="mt-stack-md">
+<button class="w-full py-3 bg-deep-obsidian text-white rounded-lg font-button-text text-button-text flex items-center justify-center gap-stack-sm hover:shadow-lg transition-all hover:bg-primary-container">
+<span class="material-symbols-outlined text-[18px]" data-icon="add">add</span>
+                New Resume
+            </button>
+</div>
+</nav>
+<!-- Main Content Area -->
+<main class="w-full md:ml-80 p-margin-mobile md:p-margin-desktop flex flex-col min-h-screen">
+<!-- Page Header -->
+<header class="mb-stack-lg">
+<h2 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-primary mb-base">AI Interview Coaching Studio</h2>
+<p class="font-body-md text-body-md text-slate-gray">Simulated environment structured around the <strong class="text-primary font-semibold">STAR Method</strong>.</p>
+</header>
+<!-- Content Grid (Sidebar-Main Split Strategy within main canvas) -->
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-gutter flex-1">
+<!-- Left Column: Mock Interview Interface (Span 8) -->
+<div class="xl:col-span-8 flex flex-col bg-surface-container-lowest rounded-xl border border-surface-container-high shadow-[0px_4px_20px_rgba(15,17,23,0.04)] overflow-hidden h-[800px]">
+<!-- Chat Header -->
+<div class="px-stack-md py-stack-sm border-b border-surface-container-high bg-surface flex justify-between items-center">
+<div class="flex items-center gap-stack-sm">
+<div class="w-8 h-8 rounded-full bg-azure-vibrant/10 flex items-center justify-center text-azure-vibrant">
+<span class="material-symbols-outlined text-[18px]">smart_toy</span>
+</div>
+<div>
+<h3 class="font-headline-md text-[16px] leading-[20px] text-primary">Role: Senior Product Manager</h3>
+<p class="font-label-mono text-label-mono text-slate-gray text-[11px]">Session ID: TYR-INT-994</p>
+</div>
+</div>
+<div class="flex gap-stack-sm">
+<button class="text-slate-gray hover:text-azure-vibrant transition-colors flex items-center gap-1 font-button-text text-[13px]">
+<span class="material-symbols-outlined text-[18px]">history</span> History
+                        </button>
+<button class="text-slate-gray hover:text-error transition-colors flex items-center gap-1 font-button-text text-[13px]">
+<span class="material-symbols-outlined text-[18px]">stop_circle</span> End Session
+                        </button>
+</div>
+</div>
+<!-- Chat Canvas -->
+<div class="flex-1 overflow-y-auto p-stack-md flex flex-col gap-stack-lg bg-surface-bright relative">
+<!-- Date/Time Anchor -->
+<div class="text-center">
+<span class="font-label-mono text-[10px] text-slate-gray bg-surface px-3 py-1 rounded-full border border-surface-container-high">TODAY 14:02 PM</span>
+</div>
+<!-- AI Initial Prompt -->
+<div class="flex gap-stack-sm max-w-[85%]">
+<div class="w-8 h-8 shrink-0 rounded-full bg-azure-vibrant flex items-center justify-center text-white mt-1 shadow-sm">
+<span class="material-symbols-outlined text-[18px]">smart_toy</span>
+</div>
+<div class="bg-surface rounded-2xl rounded-tl-sm p-stack-md border border-surface-container-high shadow-sm text-on-surface">
+<p class="font-body-md text-body-md mb-stack-sm">Welcome to your mock interview for the Senior Product Manager position. We will focus on behavioral questions using the STAR framework.</p>
+<div class="bg-surface-container px-3 py-2 rounded border-l-2 border-azure-vibrant mb-stack-sm">
+<p class="font-label-mono text-label-mono text-primary">QUESTION 1 / 5</p>
+<p class="font-body-md text-body-md font-medium mt-1">Tell me about a time you had to launch a product feature with significant technical constraints and a tight deadline.</p>
+</div>
+<p class="font-body-sm text-body-sm text-slate-gray mt-2 flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">lightbulb</span> Focus on detailing your specific <strong>Actions</strong>.</p>
+</div>
+</div>
+<!-- User Response -->
+<div class="flex gap-stack-sm max-w-[85%] self-end flex-row-reverse">
+<div class="w-8 h-8 shrink-0 rounded-full bg-deep-obsidian flex items-center justify-center text-white mt-1 shadow-sm">
+<span class="material-symbols-outlined text-[18px]">person</span>
+</div>
+<div class="bg-deep-obsidian rounded-2xl rounded-tr-sm p-stack-md shadow-sm text-white">
+<p class="font-body-md text-body-md">In my last role at FinTechX, we had to launch the new instant-transfer feature before Q3 close. The engineering team was constrained by legacy API rate limits. As the PM, I scoped down the initial launch to a beta group of 10% of users. I worked directly with the backend lead to implement a queuing system. We launched on time and processed 50k transactions in week one with zero downtime.</p>
+</div>
+</div>
+<!-- AI Feedback (Structured) -->
+<div class="flex gap-stack-sm max-w-[85%]">
+<div class="w-8 h-8 shrink-0 rounded-full bg-azure-vibrant flex items-center justify-center text-white mt-1 shadow-sm">
+<span class="material-symbols-outlined text-[18px]">smart_toy</span>
+</div>
+<div class="bg-surface rounded-2xl rounded-tl-sm p-stack-md border border-surface-container-high shadow-sm text-on-surface w-full">
+<div class="flex justify-between items-center mb-stack-sm border-b border-surface-container pb-2">
+<p class="font-label-mono text-label-mono text-primary font-bold">ANALYSIS: STAR COMPLETENESS</p>
+<span class="px-2 py-1 bg-surface-container-highest text-primary font-label-mono text-[10px] rounded">SCORE: 78/100</span>
+</div>
+<div class="grid grid-cols-2 gap-stack-sm mb-stack-md">
+<div class="p-2 bg-ats-emerald/10 border border-ats-emerald/20 rounded">
+<p class="font-label-mono text-[11px] text-ats-emerald font-bold">S - SITUATION</p>
+<p class="font-body-sm text-[13px] mt-1">Clear context (FinTechX, Q3 deadline).</p>
+</div>
+<div class="p-2 bg-ats-emerald/10 border border-ats-emerald/20 rounded">
+<p class="font-label-mono text-[11px] text-ats-emerald font-bold">T - TASK</p>
+<p class="font-body-sm text-[13px] mt-1">Identified constraint (API limits).</p>
+</div>
+<div class="p-2 bg-surface-container border border-surface-container-high rounded">
+<p class="font-label-mono text-[11px] text-primary font-bold">A - ACTION</p>
+<p class="font-body-sm text-[13px] mt-1">Good scoping, but needs more detail on *how* you influenced the engineering lead.</p>
+</div>
+<div class="p-2 bg-ats-emerald/10 border border-ats-emerald/20 rounded">
+<p class="font-label-mono text-[11px] text-ats-emerald font-bold">R - RESULT</p>
+<p class="font-body-sm text-[13px] mt-1">Strong quantifiable metric (50k transactions).</p>
+</div>
+</div>
+<p class="font-body-md text-body-md text-primary">Would you like to try rephrasing the <strong>Action</strong> part to make it stronger?</p>
+</div>
+</div>
+</div>
+<!-- Input Area -->
+<div class="p-stack-md bg-surface border-t border-surface-container-high">
+<div class="flex gap-stack-sm items-end">
+<button class="w-10 h-10 shrink-0 rounded-lg border border-surface-container-high bg-surface-bright flex items-center justify-center text-slate-gray hover:text-primary transition-colors focus:outline-none focus:ring-2 focus:ring-azure-vibrant/20">
+<span class="material-symbols-outlined">mic</span>
+</button>
+<div class="flex-1 relative">
+<textarea class="w-full bg-surface-bright border border-surface-container-high rounded-lg py-2 px-3 font-body-md text-body-md text-on-surface focus:border-azure-vibrant focus:ring-4 focus:ring-azure-vibrant/10 transition-all resize-none font-label-mono placeholder:font-body-md" placeholder="Type your response or use the microphone..." rows="2"></textarea>
+</div>
+<button class="px-6 h-10 bg-azure-vibrant text-white rounded-lg font-button-text text-button-text flex items-center justify-center hover:bg-secondary transition-colors shadow-sm focus:outline-none focus:ring-4 focus:ring-azure-vibrant/20">
+                            Send <span class="material-symbols-outlined ml-1 text-[18px]">send</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Right Column: Metrics & Guides (Span 4) -->
+<div class="xl:col-span-4 flex flex-col gap-gutter">
+<!-- Telemetry Dashboard -->
+<div class="bg-surface-container-lowest rounded-xl border border-surface-container-high shadow-[0px_4px_20px_rgba(15,17,23,0.04)] p-stack-md">
+<h3 class="font-label-mono text-label-mono text-primary mb-stack-md flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-azure-vibrant">vital_signs</span>
+                        REAL-TIME TELEMETRY
+                    </h3>
+<div class="flex flex-col gap-stack-md">
+<!-- Clarity Score -->
+<div>
+<div class="flex justify-between items-end mb-1">
+<span class="font-body-sm text-[13px] font-medium text-slate-gray">Clarity Score</span>
+<span class="font-label-mono text-label-mono text-azure-vibrant font-bold">88%</span>
+</div>
+<div class="w-full h-2 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-azure-vibrant rounded-full" style="width: 88%;"></div>
+</div>
+</div>
+<!-- Confidence Level -->
+<div>
+<div class="flex justify-between items-end mb-1">
+<span class="font-body-sm text-[13px] font-medium text-slate-gray">Pacing &amp; Confidence</span>
+<span class="font-label-mono text-label-mono text-ats-emerald font-bold">Optimal</span>
+</div>
+<div class="w-full h-2 bg-surface-container-highest rounded-full overflow-hidden flex">
+<div class="h-full bg-surface-container-highest w-1/4"></div>
+<div class="h-full bg-ats-emerald w-2/4 rounded-full"></div>
+<div class="h-full bg-surface-container-highest w-1/4"></div>
+</div>
+</div>
+<!-- Keyword Coverage -->
+<div>
+<div class="flex justify-between items-end mb-1">
+<span class="font-body-sm text-[13px] font-medium text-slate-gray">JD Keyword Coverage</span>
+<span class="font-label-mono text-label-mono text-primary font-bold">12/15</span>
+</div>
+<div class="flex gap-1">
+<!-- Simulated discrete blocks for keywords -->
+<div class="h-2 flex-1 bg-deep-obsidian rounded-sm"></div>
+<div class="h-2 flex-1 bg-deep-obsidian rounded-sm"></div>
+<div class="h-2 flex-1 bg-deep-obsidian rounded-sm"></div>
+<div class="h-2 flex-1 bg-deep-obsidian rounded-sm"></div>
+<div class="h-2 flex-1 bg-surface-container-highest rounded-sm"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Custom Question Bank & STAR Guide -->
+<div class="bg-surface-container-lowest rounded-xl border border-surface-container-high shadow-[0px_4px_20px_rgba(15,17,23,0.04)] flex-1 flex flex-col overflow-hidden">
+<!-- Tabs -->
+<div class="flex border-b border-surface-container-high bg-surface">
+<button class="flex-1 py-3 text-center border-b-2 border-azure-vibrant font-button-text text-[13px] text-azure-vibrant bg-surface-bright">
+                            Question Bank
+                        </button>
+<button class="flex-1 py-3 text-center border-b-2 border-transparent font-button-text text-[13px] text-slate-gray hover:bg-surface-container-low hover:text-primary transition-colors">
+                            STAR Format
+                        </button>
+</div>
+<!-- Tab Content: Question Bank -->
+<div class="p-stack-md flex-1 overflow-y-auto">
+<p class="font-label-mono text-[11px] text-slate-gray mb-stack-sm uppercase tracking-wider">Generated from JD</p>
+<div class="flex flex-col gap-stack-sm">
+<button class="text-left p-3 rounded border border-azure-vibrant bg-azure-vibrant/5 hover:bg-azure-vibrant/10 transition-colors group">
+<p class="font-body-sm text-[13px] font-medium text-primary line-clamp-2">Tell me about a time you had to launch a product feature with significant technical constraints and a tight deadline.</p>
+<span class="font-label-mono text-[10px] text-azure-vibrant mt-2 inline-block">ACTIVE</span>
+</button>
+<button class="text-left p-3 rounded border border-surface-container-highest bg-surface hover:border-outline-variant hover:bg-surface-container-low transition-colors group">
+<p class="font-body-sm text-[13px] text-slate-gray group-hover:text-primary line-clamp-2 transition-colors">Describe a situation where you had to align conflicting stakeholders on a product roadmap priority.</p>
+<span class="font-label-mono text-[10px] text-slate-gray mt-2 inline-block">QUEUED</span>
+</button>
+<button class="text-left p-3 rounded border border-surface-container-highest bg-surface hover:border-outline-variant hover:bg-surface-container-low transition-colors group">
+<p class="font-body-sm text-[13px] text-slate-gray group-hover:text-primary line-clamp-2 transition-colors">How do you balance data-driven decision making with intuition when user data is ambiguous?</p>
+<span class="font-label-mono text-[10px] text-slate-gray mt-2 inline-block">QUEUED</span>
+</button>
+<button class="text-left p-3 rounded border border-surface-container-highest bg-surface hover:border-outline-variant hover:bg-surface-container-low transition-colors group">
+<p class="font-body-sm text-[13px] text-slate-gray group-hover:text-primary line-clamp-2 transition-colors">Give an example of a product failure you managed. What was the post-mortem process?</p>
+<span class="font-label-mono text-[10px] text-slate-gray mt-2 inline-block">QUEUED</span>
+</button>
+</div>
+</div>
+<!-- Mini STAR Reference (Always visible at bottom of sidebar for quick check) -->
+<div class="p-stack-md bg-surface border-t border-surface-container-high">
+<p class="font-label-mono text-[11px] text-primary mb-2 font-bold">STAR QUICK REFERENCE</p>
+<div class="grid grid-cols-4 gap-1 text-center">
+<div class="bg-surface-container p-1 rounded"><span class="font-headline-md text-[14px] font-bold text-primary">S</span><div class="text-[9px] font-label-mono text-slate-gray">Set Scene</div></div>
+<div class="bg-surface-container p-1 rounded"><span class="font-headline-md text-[14px] font-bold text-primary">T</span><div class="text-[9px] font-label-mono text-slate-gray">Goal</div></div>
+<div class="bg-azure-vibrant/10 border border-azure-vibrant/20 p-1 rounded"><span class="font-headline-md text-[14px] font-bold text-azure-vibrant">A</span><div class="text-[9px] font-label-mono text-azure-vibrant">What YOU did</div></div>
+<div class="bg-surface-container p-1 rounded"><span class="font-headline-md text-[14px] font-bold text-primary">R</span><div class="text-[9px] font-label-mono text-slate-gray">Metrics</div></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>

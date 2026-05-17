@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import { ArrowRight } from "lucide-react";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
 function ScoreCard({
@@ -20,44 +19,40 @@ function ScoreCard({
   const isAfter = variant === "after";
 
   return (
-    <Card
+    <div
       className={cn(
-        "border-2 transition-all duration-700",
+        "flex h-48 w-full flex-col justify-center rounded-2xl border-2 p-8 transition-all duration-700 md:w-2/5",
         isAfter
           ? active
-            ? "border-emerald-400 bg-emerald-50 shadow-lg shadow-emerald-100"
-            : "border-slate-200 bg-white"
+            ? "scale-100 border-[#38A169] bg-[#F0FFF4] shadow-lg md:hover:scale-105"
+            : "border-[#e9e8e7] bg-white shadow-sm"
           : active
-            ? "border-amber-300 bg-amber-50"
-            : "border-slate-200 bg-white",
+            ? "border-[#DD6B20] bg-white shadow-sm"
+            : "border-[#e9e8e7] bg-white shadow-sm",
       )}
     >
-      <CardHeader className="pb-2">
-        <CardTitle
-          className={cn(
-            "text-sm font-semibold uppercase tracking-wide",
-            isAfter ? "text-emerald-800" : "text-amber-800",
-          )}
-        >
-          {label}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <p
-          className={cn(
-            "text-5xl font-bold tabular-nums",
-            isAfter ? "text-emerald-600" : "text-amber-600",
-          )}
-        >
-          {score}
-        </p>
-        <p className="mt-2 text-sm text-slate-600">
-          {isAfter
-            ? "ATS-optimized keywords, metrics, and structure"
-            : "Generic phrasing · missing role keywords"}
-        </p>
-      </CardContent>
-    </Card>
+      <span
+        className={cn(
+          "mb-4 font-mono text-sm font-bold tracking-widest uppercase",
+          isAfter ? "text-[#276749]" : "text-[#C05621]",
+        )}
+      >
+        {label}
+      </span>
+      <p
+        className={cn(
+          "mb-4 text-6xl font-extrabold tabular-nums tracking-tight",
+          isAfter ? "text-[#38A169]" : "text-[#DD6B20]",
+        )}
+      >
+        {score}
+      </p>
+      <p className="text-sm text-[#6B6B6B]">
+        {isAfter
+          ? "ATS-optimized keywords, metrics, and structure"
+          : "Generic phrasing · missing role keywords"}
+      </p>
+    </div>
   );
 }
 
@@ -109,39 +104,45 @@ export function AtsScoreDemo() {
   }, [hasAnimated]);
 
   return (
-    <div ref={sectionRef} className="mx-auto max-w-4xl">
-      <div className="mb-8 text-center">
-        <h2 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
-          Watch your ATS score climb
-        </h2>
-        <p className="mx-auto mt-3 max-w-2xl text-slate-600">
-          Tailor once — see measurable lift in keyword match and parser-friendly
-          structure before you hit apply.
-        </p>
-      </div>
-
-      <div className="grid items-center gap-6 md:grid-cols-[1fr_auto_1fr]">
-        <ScoreCard
-          label="Before tailoring"
-          score={58}
-          variant="before"
-          active={!hasAnimated || displayScore < 75}
-        />
-
-        <div className="flex flex-col items-center gap-2 text-violet-600">
-          <ArrowRight className="hidden size-8 md:block" />
-          <span className="rounded-full bg-violet-100 px-3 py-1 text-xs font-semibold text-violet-800">
-            AI Tailor
-          </span>
+    <section
+      ref={sectionRef}
+      id="ats-score"
+      className="scroll-mt-28 border-b border-[#e9e8e7] bg-[#fbf9f8] px-4 py-20 sm:px-6 md:px-10"
+    >
+      <div className="mx-auto max-w-[1280px]">
+        <div className="mb-16 text-center">
+          <h2 className="text-3xl font-bold tracking-tight text-[#0A0A0A] md:text-5xl">
+            Watch your ATS score climb
+          </h2>
+          <p className="mx-auto mt-4 max-w-2xl text-lg text-[#6B6B6B]">
+            Tailor once — see measurable lift in keyword match and parser-friendly
+            structure before you hit apply.
+          </p>
         </div>
 
-        <ScoreCard
-          label="After tailoring"
-          score={hasAnimated ? displayScore : 58}
-          variant="after"
-          active={hasAnimated && displayScore >= 75}
-        />
+        <div className="mx-auto flex max-w-5xl flex-col items-center justify-center gap-8 md:flex-row md:gap-12">
+          <ScoreCard
+            label="Before Tailoring"
+            score={58}
+            variant="before"
+            active={!hasAnimated || displayScore < 75}
+          />
+
+          <div className="flex shrink-0 flex-col items-center justify-center gap-3">
+            <ArrowRight className="size-10 font-bold text-[#805AD5] md:size-8" />
+            <span className="rounded-full border border-[#E9D8FD] bg-[#FAF5FF] px-4 py-1.5 font-mono text-xs font-bold tracking-wide text-[#6B46C1]">
+              AI Tailor
+            </span>
+          </div>
+
+          <ScoreCard
+            label="After Tailoring"
+            score={hasAnimated ? displayScore : 58}
+            variant="after"
+            active={hasAnimated && displayScore >= 75}
+          />
+        </div>
       </div>
-    </div>
+    </section>
   );
 }

@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>TYR - User Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary-fixed": "#e2e2eb",
+                    "azure-vibrant": "#2055FD",
+                    "on-tertiary-fixed-variant": "#005233",
+                    "latex-paper": "#FFFFFF",
+                    "tertiary-fixed-dim": "#4fdf9d",
+                    "tertiary-fixed": "#6ffcb7",
+                    "on-background": "#1b1c1c",
+                    "on-tertiary-container": "#009763",
+                    "error": "#ba1a1a",
+                    "deep-obsidian": "#0A0A0A",
+                    "tertiary": "#000000",
+                    "on-surface": "#1b1c1c",
+                    "on-secondary": "#ffffff",
+                    "inverse-surface": "#303031",
+                    "surface-container-high": "#e9e8e7",
+                    "outline": "#77777c",
+                    "ats-emerald": "#0EB87A",
+                    "primary-container": "#191b22",
+                    "background": "#fbf9f8",
+                    "surface-container": "#efeded",
+                    "on-secondary-container": "#eaebff",
+                    "tertiary-container": "#002112",
+                    "primary": "#000000",
+                    "surface-container-highest": "#e4e2e2",
+                    "secondary-container": "#2558ff",
+                    "inverse-on-surface": "#f2f0f0",
+                    "on-tertiary": "#ffffff",
+                    "surface-container-low": "#f5f3f3",
+                    "on-error": "#ffffff",
+                    "on-primary-fixed-variant": "#45464e",
+                    "on-primary-fixed": "#191b22",
+                    "secondary": "#003fd8",
+                    "secondary-fixed": "#dde1ff",
+                    "inverse-primary": "#c5c6ce",
+                    "on-tertiary-fixed": "#002112",
+                    "on-surface-variant": "#46464b",
+                    "surface": "#fbf9f8",
+                    "on-secondary-fixed-variant": "#0036bc",
+                    "surface-variant": "#e4e2e2",
+                    "primary-fixed-dim": "#c5c6ce",
+                    "surface-bright": "#fbf9f8",
+                    "outline-variant": "#c7c6cb",
+                    "on-secondary-fixed": "#001355",
+                    "on-primary-container": "#82838b",
+                    "surface-tint": "#5d5e65",
+                    "error-container": "#ffdad6",
+                    "secondary-fixed-dim": "#b8c4ff",
+                    "on-error-container": "#93000a",
+                    "surface-dim": "#dbdad9",
+                    "surface-container-lowest": "#ffffff",
+                    "slate-gray": "#6B6B6B",
+                    "on-primary": "#ffffff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "stack-md": "16px",
+                    "container-max": "1280px",
+                    "gutter": "24px",
+                    "margin-mobile": "16px",
+                    "margin-desktop": "40px",
+                    "base": "4px",
+                    "stack-sm": "8px",
+                    "stack-lg": "32px"
+            },
+            "fontFamily": {
+                    "body-md": [
+                            "Plus Jakarta Sans"
+                    ],
+                    "body-lg": [
+                            "Plus Jakarta Sans"
+                    ],
+                    "headline-lg": [
+                            "Plus Jakarta Sans"
+                    ],
+                    "body-sm": [
+                            "Plus Jakarta Sans"
+                    ],
+                    "headline-lg-mobile": [
+                            "Plus Jakarta Sans"
+                    ],
+                    "display-lg": [
+                            "Plus Jakarta Sans"
+                    ],
+                    "button-text": [
+                            "Plus Jakarta Sans"
+                    ],
+                    "headline-md": [
+                            "Plus Jakarta Sans"
+                    ],
+                    "label-mono": [
+                            "JetBrains Mono"
+                    ]
+            },
+            "fontSize": {
+                    "body-md": [
+                            "16px",
+                            {
+                                    "lineHeight": "24px",
+                                    "fontWeight": "400"
+                            }
+                    ],
+                    "body-lg": [
+                            "18px",
+                            {
+                                    "lineHeight": "28px",
+                                    "fontWeight": "400"
+                            }
+                    ],
+                    "headline-lg": [
+                            "32px",
+                            {
+                                    "lineHeight": "40px",
+                                    "letterSpacing": "-0.01em",
+                                    "fontWeight": "700"
+                            }
+                    ],
+                    "body-sm": [
+                            "14px",
+                            {
+                                    "lineHeight": "20px",
+                                    "fontWeight": "400"
+                            }
+                    ],
+                    "headline-lg-mobile": [
+                            "28px",
+                            {
+                                    "lineHeight": "36px",
+                                    "fontWeight": "700"
+                            }
+                    ],
+                    "display-lg": [
+                            "48px",
+                            {
+                                    "lineHeight": "56px",
+                                    "letterSpacing": "-0.02em",
+                                    "fontWeight": "800"
+                            }
+                    ],
+                    "button-text": [
+                            "15px",
+                            {
+                                    "lineHeight": "20px",
+                                    "letterSpacing": "0.01em",
+                                    "fontWeight": "600"
+                            }
+                    ],
+                    "headline-md": [
+                            "24px",
+                            {
+                                    "lineHeight": "32px",
+                                    "fontWeight": "600"
+                            }
+                    ],
+                    "label-mono": [
+                            "13px",
+                            {
+                                    "lineHeight": "16px",
+                                    "letterSpacing": "0.05em",
+                                    "fontWeight": "500"
+                            }
+                    ]
+            }
+    },
+        },
+      }
+    </script>
+<style>
+        .CodeMirror { height: 100%; font-family: 'JetBrains Mono', monospace; font-size: 13px; line-height: 1.6; }
+        .cm-s-obsidian.CodeMirror { background: #0A0A0A; color: #e2e2eb; }
+        .cm-s-obsidian .CodeMirror-gutters { background: #0A0A0A; border-right: 1px solid #191b22; }
+        .cm-s-obsidian .CodeMirror-linenumber { color: #82838b; }
+        .cm-s-obsidian .cm-keyword { color: #2055FD; }
+        .cm-s-obsidian .cm-string { color: #0EB87A; }
+        .cm-s-obsidian .cm-variable { color: #ffffff; }
+        .cm-s-obsidian .cm-def { color: #6ffcb7; }
+        .cm-s-obsidian .cm-comment { color: #6B6B6B; font-style: italic; }
+        
+        /* Custom scrollbar for editor */
+        .editor-container::-webkit-scrollbar { width: 8px; }
+        .editor-container::-webkit-scrollbar-track { background: #0A0A0A; }
+        .editor-container::-webkit-scrollbar-thumb { background: #191b22; border-radius: 4px; }
+        .editor-container::-webkit-scrollbar-thumb:hover { background: #303031; }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md min-h-screen overflow-hidden flex">
+<!-- SideNavBar (Shared Component) -->
+<nav class="hidden md:flex flex-col fixed left-0 top-0 h-full w-80 p-stack-md bg-surface-container-lowest dark:bg-deep-obsidian border-r border-surface-container-high dark:border-primary-container z-40">
+<!-- Header -->
+<div class="flex items-center gap-stack-md mb-stack-lg px-stack-sm pt-stack-sm">
+<div class="w-10 h-10 rounded-full bg-primary-fixed overflow-hidden border border-outline-variant flex items-center justify-center shrink-0">
+<img alt="User Profile" class="w-full h-full object-cover" data-alt="A close-up portrait of a professional young man with a slight smile, wearing a dark blazer over a light shirt. The background is a soft, out-of-focus modern office space with bright, natural lighting. The overall mood is confident, approachable, and corporate. The image uses a clean, high-key lighting style typical of professional corporate headshots." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD0BYJcWj05WJdgq_1td4mTnSICgi97DLZmqrduywri1-qDA7ZUremmCzuS104qQ-vNWFj9kz1yvW8J6jUghWL1HmE9IGR8KCC_ZBVNyzUs3hR_6m7p7jw9ujc3dm_qW70vaPONFePOZUgBI-YR23ZO3kMfyjXNq1ilwrmgoEjIuMmpGkIkdgY2wV6r7TMCZu4wh_kSeFZCNqxZ15N5i3LAM-wgHd6mzv-TbKeKhIbs1zjkV6HzIvp0dyXJmBeZ0ye83nmcTsAT2u8"/>
+</div>
+<div>
+<h2 class="font-headline-md text-headline-md text-primary truncate leading-tight">Professional Dashboard</h2>
+<p class="font-label-mono text-label-mono text-azure-vibrant mt-1">AI-Ready</p>
+</div>
+</div>
+<!-- Navigation Links -->
+<ul class="flex-1 space-y-2">
+<li>
+<a class="flex items-center gap-3 px-4 py-3 bg-secondary-container dark:bg-secondary text-on-secondary-container dark:text-white rounded-lg font-semibold font-body-md text-body-md w-full transition-all" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">description</span>
+<span>Resumes</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant dark:text-on-primary-container hover:bg-surface-container-low hover:bg-surface-container-high dark:hover:bg-primary-container rounded-lg font-body-md text-body-md w-full transition-all" href="#">
+<span class="material-symbols-outlined">analytics</span>
+<span>ATS Score</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant dark:text-on-primary-container hover:bg-surface-container-low hover:bg-surface-container-high dark:hover:bg-primary-container rounded-lg font-body-md text-body-md w-full transition-all" href="#">
+<span class="material-symbols-outlined">record_voice_over</span>
+<span>Interview Prep</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant dark:text-on-primary-container hover:bg-surface-container-low hover:bg-surface-container-high dark:hover:bg-primary-container rounded-lg font-body-md text-body-md w-full transition-all" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span>Settings</span>
+</a>
+</li>
+</ul>
+<!-- CTA -->
+<div class="mt-auto pt-stack-md">
+<button class="w-full bg-deep-obsidian hover:bg-primary-container text-white font-button-text text-button-text py-3 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors shadow-sm">
+<span class="material-symbols-outlined text-[18px]">add</span>
+                New Resume
+            </button>
+</div>
+</nav>
+<!-- Main Canvas (Editor Split View) -->
+<main class="ml-0 md:ml-80 flex-1 flex flex-col h-screen overflow-hidden bg-surface-container-low relative">
+<!-- Top Action Bar for Editor -->
+<header class="h-16 bg-surface-container-lowest border-b border-surface-container-high flex items-center justify-between px-gutter shrink-0 z-10 shadow-sm">
+<div class="flex items-center gap-4">
+<h1 class="font-headline-md text-body-lg font-bold text-primary flex items-center gap-2">
+<span class="material-symbols-outlined text-slate-gray">description</span>
+                    Software_Engineer_Senior_v2.tex
+                </h1>
+<span class="px-2 py-1 bg-surface-container text-on-surface-variant font-label-mono text-[11px] rounded uppercase tracking-wider">Saved</span>
+</div>
+<div class="flex items-center gap-3">
+<button class="text-secondary font-button-text text-button-text px-4 py-2 rounded-lg hover:bg-secondary-fixed transition-colors border border-transparent hover:border-secondary-fixed-dim">
+                    Share Link
+                </button>
+<button class="bg-azure-vibrant hover:bg-secondary text-white font-button-text text-button-text px-4 py-2 rounded-lg transition-colors shadow-sm flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">download</span>
+                    Download PDF
+                </button>
+<button class="bg-deep-obsidian hover:bg-primary-container text-white font-button-text text-button-text px-4 py-2 rounded-lg transition-colors shadow-sm flex items-center gap-2 ml-2">
+<span class="material-symbols-outlined text-[18px]">auto_fix_high</span>
+                    Tailor for New Job
+                </button>
+</div>
+</header>
+<!-- Split Editor Workspace -->
+<div class="flex-1 flex overflow-hidden">
+<!-- Left Panel: LaTeX Code Editor -->
+<div class="w-1/2 h-full bg-deep-obsidian flex flex-col border-r border-surface-container-high">
+<div class="h-10 bg-[#151515] flex items-center px-4 border-b border-primary-container shrink-0">
+<span class="font-label-mono text-[12px] text-on-primary-container">monaco-editor (LaTeX)</span>
+</div>
+<div class="flex-1 overflow-auto editor-container p-4 font-label-mono text-[13px] leading-relaxed text-latex-paper whitespace-pre font-mono">
+<span class="text-slate-gray italic">% Preamble</span>
+<span class="text-azure-vibrant">\documentclass</span>[11pt,a4paper]{<span class="text-ats-emerald">article</span>}
+<span class="text-azure-vibrant">\usepackage</span>[utf8]{<span class="text-ats-emerald">inputenc</span>}
+<span class="text-azure-vibrant">\usepackage</span>{<span class="text-ats-emerald">hyperref</span>}
+<span class="text-azure-vibrant">\usepackage</span>{<span class="text-ats-emerald">geometry</span>}
+<span class="text-azure-vibrant">\geometry</span>{margin=1in}
+
+<span class="text-azure-vibrant">\begin</span>{<span class="text-ats-emerald">document</span>}
+
+<span class="text-azure-vibrant">\begin</span>{<span class="text-ats-emerald">center</span>}
+    <span class="text-azure-vibrant">\Huge</span> <span class="text-azure-vibrant">\textbf</span>{<span class="text-white">Alex Rivera</span>} \\
+    <span class="text-azure-vibrant">\vspace</span>{2mm}
+    <span class="text-azure-vibrant">\small</span> Senior Software Engineer | alex.rivera@email.com | (555) 123-4567 \\
+    <span class="text-azure-vibrant">\href</span>{<span class="text-ats-emerald">https://linkedin.com/in/arivera</span>}{<span class="text-white">linkedin.com/in/arivera</span>} | <span class="text-azure-vibrant">\href</span>{<span class="text-ats-emerald">https://github.com/arivera</span>}{<span class="text-white">github.com/arivera</span>}
+<span class="text-azure-vibrant">\end</span>{<span class="text-ats-emerald">center</span>}
+
+<span class="text-azure-vibrant">\section*</span>{<span class="text-white">Professional Summary</span>}
+Innovative Senior Software Engineer with 8+ years of experience in designing, developing, and deploying scalable web applications and distributed systems. Proven expertise in cloud architecture (AWS), microservices, and leading high-performance engineering teams to deliver robust software solutions.
+
+<span class="text-azure-vibrant">\section*</span>{<span class="text-white">Experience</span>}
+<span class="text-azure-vibrant">\textbf</span>{<span class="text-white">TechFlow Solutions</span>} <span class="text-azure-vibrant">\hfill</span> San Francisco, CA \\
+<span class="text-azure-vibrant">\textit</span>{<span class="text-white">Senior Software Engineer</span>} <span class="text-azure-vibrant">\hfill</span> Jan 2020 -- Present
+<span class="text-azure-vibrant">\begin</span>{<span class="text-ats-emerald">itemize</span>}
+    <span class="text-azure-vibrant">\item</span> Spearheaded the migration of a legacy monolithic application to a microservices architecture using Node.js and Docker, improving system scalability by 40\%.
+    <span class="text-azure-vibrant">\item</span> Engineered and maintained RESTful APIs serving over 1M daily active users with 99.99\% uptime.
+    <span class="text-azure-vibrant">\item</span> Mentored 5 junior developers, improving code review turnaround time by 30\%.
+<span class="text-azure-vibrant">\end</span>{<span class="text-ats-emerald">itemize</span>}
+
+<span class="text-azure-vibrant">\textbf</span>{<span class="text-white">DataSphere Inc.</span>} <span class="text-azure-vibrant">\hfill</span> Austin, TX \\
+<span class="text-azure-vibrant">\textit</span>{<span class="text-white">Software Engineer</span>} <span class="text-azure-vibrant">\hfill</span> Jun 2016 -- Dec 2019
+<span class="text-azure-vibrant">\begin</span>{<span class="text-ats-emerald">itemize</span>}
+    <span class="text-azure-vibrant">\item</span> Developed real-time data processing pipelines using Python and Apache Kafka, reducing data latency by 25\%.
+    <span class="text-azure-vibrant">\item</span> Implemented CI/CD pipelines using Jenkins and GitLab, accelerating deployment cycles by 50\%.
+<span class="text-azure-vibrant">\end</span>{<span class="text-ats-emerald">itemize</span>}
+
+<span class="text-azure-vibrant">\section*</span>{<span class="text-white">Education</span>}
+<span class="text-azure-vibrant">\textbf</span>{<span class="text-white">University of Texas at Austin</span>} <span class="text-azure-vibrant">\hfill</span> Austin, TX \\
+Bachelor of Science in Computer Science <span class="text-azure-vibrant">\hfill</span> May 2016
+
+<span class="text-azure-vibrant">\section*</span>{<span class="text-white">Skills</span>}
+<span class="text-azure-vibrant">\textbf</span>{<span class="text-white">Languages:</span>} JavaScript (Node.js, React), Python, Java, SQL \\
+<span class="text-azure-vibrant">\textbf</span>{<span class="text-white">Technologies:</span>} AWS, Docker, Kubernetes, Apache Kafka, Git, CI/CD
+
+<span class="text-azure-vibrant">\end</span>{<span class="text-ats-emerald">document</span>}
+                </div>
+</div>
+<!-- Right Panel: Live PDF Preview -->
+<div class="w-1/2 h-full bg-surface-container relative flex flex-col items-center overflow-y-auto p-gutter relative">
+<!-- Floating ATS Score Widget -->
+<div class="absolute top-6 right-6 w-72 bg-white/90 backdrop-blur-xl border border-surface-container-high shadow-[0px_4px_20px_rgba(15,17,23,0.08)] rounded-xl p-4 z-20">
+<div class="flex items-center justify-between mb-3">
+<span class="font-label-mono text-label-mono text-slate-gray uppercase">ATS Match</span>
+<div class="flex items-center gap-1 text-ats-emerald">
+<span class="material-symbols-outlined text-[16px]">verified</span>
+<span class="font-bold text-body-md">92%</span>
+</div>
+</div>
+<!-- Progress Bar -->
+<div class="w-full bg-surface-container rounded-full h-1.5 mb-4">
+<div class="bg-ats-emerald h-1.5 rounded-full" style="width: 92%"></div>
+</div>
+<div class="space-y-2">
+<div class="flex items-start gap-2">
+<span class="material-symbols-outlined text-[16px] text-ats-emerald mt-0.5">check_circle</span>
+<div>
+<p class="font-body-sm text-[13px] font-semibold text-primary">Strong Keyword Density</p>
+<p class="font-body-sm text-[12px] text-slate-gray">"Microservices", "AWS", "Node.js" match JD.</p>
+</div>
+</div>
+<div class="flex items-start gap-2">
+<span class="material-symbols-outlined text-[16px] text-azure-vibrant mt-0.5">trending_up</span>
+<div>
+<p class="font-body-sm text-[13px] font-semibold text-primary">Action Verbs Optimized</p>
+<p class="font-body-sm text-[12px] text-slate-gray">Good use of "Spearheaded", "Engineered".</p>
+</div>
+</div>
+</div>
+</div>
+<!-- PDF Canvas Mockup -->
+<div class="bg-latex-paper w-[600px] min-h-[800px] shadow-[0px_10px_30px_rgba(0,0,0,0.1)] border border-surface-container-high rounded p-10 flex-shrink-0 mt-2 mb-10 transition-transform origin-top scale-[0.9]">
+<!-- Rendered Resume Content (Simplified Visual Mockup) -->
+<div class="text-center border-b border-surface-container-high pb-4 mb-4">
+<h1 class="font-display-lg text-[32px] font-bold text-primary mb-1 tracking-tight">Alex Rivera</h1>
+<p class="font-body-md text-slate-gray text-[13px]">Senior Software Engineer | alex.rivera@email.com | (555) 123-4567</p>
+<p class="font-body-md text-azure-vibrant text-[13px] mt-1 hover:underline cursor-pointer">linkedin.com/in/arivera | github.com/arivera</p>
+</div>
+<div class="mb-4">
+<h2 class="font-headline-md text-[16px] font-bold text-primary uppercase tracking-wider mb-2 border-b border-outline-variant pb-1">Professional Summary</h2>
+<p class="font-body-md text-[13px] text-on-surface leading-relaxed">
+                            Innovative Senior Software Engineer with 8+ years of experience in designing, developing, and deploying scalable web applications and distributed systems. Proven expertise in cloud architecture (AWS), microservices, and leading high-performance engineering teams to deliver robust software solutions.
+                        </p>
+</div>
+<div class="mb-4">
+<h2 class="font-headline-md text-[16px] font-bold text-primary uppercase tracking-wider mb-2 border-b border-outline-variant pb-1">Experience</h2>
+<div class="mb-3">
+<div class="flex justify-between items-baseline mb-1">
+<h3 class="font-headline-md text-[14px] font-bold text-primary">TechFlow Solutions</h3>
+<span class="font-body-sm text-[13px] text-slate-gray">San Francisco, CA</span>
+</div>
+<div class="flex justify-between items-baseline mb-2">
+<span class="font-body-md text-[13px] italic text-primary">Senior Software Engineer</span>
+<span class="font-body-sm text-[13px] text-slate-gray">Jan 2020 – Present</span>
+</div>
+<ul class="list-disc list-outside ml-4 font-body-md text-[13px] text-on-surface leading-relaxed space-y-1">
+<li>Spearheaded the migration of a legacy monolithic application to a microservices architecture using Node.js and Docker, improving system scalability by 40%.</li>
+<li>Engineered and maintained RESTful APIs serving over 1M daily active users with 99.99% uptime.</li>
+<li>Mentored 5 junior developers, improving code review turnaround time by 30%.</li>
+</ul>
+</div>
+<div class="mb-3">
+<div class="flex justify-between items-baseline mb-1">
+<h3 class="font-headline-md text-[14px] font-bold text-primary">DataSphere Inc.</h3>
+<span class="font-body-sm text-[13px] text-slate-gray">Austin, TX</span>
+</div>
+<div class="flex justify-between items-baseline mb-2">
+<span class="font-body-md text-[13px] italic text-primary">Software Engineer</span>
+<span class="font-body-sm text-[13px] text-slate-gray">Jun 2016 – Dec 2019</span>
+</div>
+<ul class="list-disc list-outside ml-4 font-body-md text-[13px] text-on-surface leading-relaxed space-y-1">
+<li>Developed real-time data processing pipelines using Python and Apache Kafka, reducing data latency by 25%.</li>
+<li>Implemented CI/CD pipelines using Jenkins and GitLab, accelerating deployment cycles by 50%.</li>
+</ul>
+</div>
+</div>
+<div class="mb-4">
+<h2 class="font-headline-md text-[16px] font-bold text-primary uppercase tracking-wider mb-2 border-b border-outline-variant pb-1">Education</h2>
+<div class="flex justify-between items-baseline mb-1">
+<h3 class="font-headline-md text-[14px] font-bold text-primary">University of Texas at Austin</h3>
+<span class="font-body-sm text-[13px] text-slate-gray">Austin, TX</span>
+</div>
+<div class="flex justify-between items-baseline">
+<span class="font-body-md text-[13px] text-primary">Bachelor of Science in Computer Science</span>
+<span class="font-body-sm text-[13px] text-slate-gray">May 2016</span>
+</div>
+</div>
+<div class="mb-4">
+<h2 class="font-headline-md text-[16px] font-bold text-primary uppercase tracking-wider mb-2 border-b border-outline-variant pb-1">Skills</h2>
+<p class="font-body-md text-[13px] text-on-surface leading-relaxed">
+<strong class="font-bold">Languages:</strong> JavaScript (Node.js, React), Python, Java, SQL<br/>
+<strong class="font-bold">Technologies:</strong> AWS, Docker, Kubernetes, Apache Kafka, Git, CI/CD
+                        </p>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>

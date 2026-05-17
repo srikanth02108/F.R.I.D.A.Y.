@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ATS Score Analysis - TYR</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "secondary-fixed-dim": "#b8c4ff",
+                      "surface": "#fbf9f8",
+                      "latex-paper": "#FFFFFF",
+                      "secondary-container": "#2558ff",
+                      "on-secondary-fixed": "#001355",
+                      "tertiary-fixed-dim": "#4fdf9d",
+                      "primary": "#000000",
+                      "ats-emerald": "#0EB87A",
+                      "on-secondary": "#ffffff",
+                      "surface-container-lowest": "#ffffff",
+                      "primary-fixed-dim": "#c5c6ce",
+                      "inverse-on-surface": "#f2f0f0",
+                      "on-primary-container": "#82838b",
+                      "surface-bright": "#fbf9f8",
+                      "secondary": "#003fd8",
+                      "inverse-surface": "#303031",
+                      "slate-gray": "#6B6B6B",
+                      "surface-container-high": "#e9e8e7",
+                      "outline-variant": "#c7c6cb",
+                      "on-error-container": "#93000a",
+                      "surface-container-low": "#f5f3f3",
+                      "on-error": "#ffffff",
+                      "error-container": "#ffdad6",
+                      "surface-container": "#efeded",
+                      "tertiary": "#000000",
+                      "on-surface-variant": "#46464b",
+                      "on-background": "#1b1c1c",
+                      "on-tertiary-fixed-variant": "#005233",
+                      "on-secondary-container": "#eaebff",
+                      "outline": "#77777c",
+                      "tertiary-container": "#002112",
+                      "on-tertiary-container": "#009763",
+                      "primary-fixed": "#e2e2eb",
+                      "on-secondary-fixed-variant": "#0036bc",
+                      "error": "#ba1a1a",
+                      "inverse-primary": "#c5c6ce",
+                      "tertiary-fixed": "#6ffcb7",
+                      "secondary-fixed": "#dde1ff",
+                      "background": "#fbf9f8",
+                      "surface-container-highest": "#e4e2e2",
+                      "surface-variant": "#e4e2e2",
+                      "deep-obsidian": "#0A0A0A",
+                      "primary-container": "#191b22",
+                      "surface-tint": "#5d5e65",
+                      "on-primary-fixed-variant": "#45464e",
+                      "on-surface": "#1b1c1c",
+                      "surface-dim": "#dbdad9",
+                      "azure-vibrant": "#2055FD",
+                      "on-tertiary-fixed": "#002112",
+                      "on-tertiary": "#ffffff",
+                      "on-primary": "#ffffff",
+                      "on-primary-fixed": "#191b22"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "stack-sm": "8px",
+                      "container-max": "1280px",
+                      "stack-lg": "32px",
+                      "base": "4px",
+                      "gutter": "24px",
+                      "stack-md": "16px",
+                      "margin-desktop": "40px",
+                      "margin-mobile": "16px"
+              },
+              "fontFamily": {
+                      "headline-lg": ["Plus Jakarta Sans"],
+                      "body-md": ["Plus Jakarta Sans"],
+                      "body-sm": ["Plus Jakarta Sans"],
+                      "headline-lg-mobile": ["Plus Jakarta Sans"],
+                      "label-mono": ["JetBrains Mono"],
+                      "body-lg": ["Plus Jakarta Sans"],
+                      "display-lg": ["Plus Jakarta Sans"],
+                      "headline-md": ["Plus Jakarta Sans"],
+                      "button-text": ["Plus Jakarta Sans"]
+              },
+              "fontSize": {
+                      "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+                      "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                      "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                      "headline-lg-mobile": ["28px", { "lineHeight": "36px", "fontWeight": "700" }],
+                      "label-mono": ["13px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500" }],
+                      "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                      "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+                      "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                      "button-text": ["15px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600" }]
+              }
+            }
+          }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        /* Level 1 Elevation for Cards */
+        .elevation-1 {
+            box-shadow: 0px 4px 20px rgba(15, 17, 23, 0.04);
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface flex h-screen overflow-hidden">
+<!-- SideNavBar (Desktop) -->
+<nav class="fixed left-0 top-0 h-screen w-[320px] hidden md:flex flex-col bg-white border-r border-outline-variant shadow-md py-stack-lg px-gutter z-50">
+<div class="flex flex-col gap-stack-lg">
+<!-- Brand -->
+<div class="flex items-center gap-stack-sm px-4">
+<span class="font-headline-md text-headline-md font-bold text-primary tracking-tighter">TYR</span>
+<span class="font-label-mono text-label-mono text-slate-gray px-2 py-1 bg-surface-container-low rounded-DEFAULT">Platform</span>
+</div>
+<!-- CTA -->
+<button class="w-full bg-deep-obsidian text-on-primary font-button-text text-button-text py-3 rounded-lg flex items-center justify-center gap-2 hover:bg-primary/90 transition-colors">
+<span class="material-symbols-outlined" data-weight="fill" style="font-variation-settings: 'FILL' 1;">add_circle</span>
+                Build New Resume
+            </button>
+<!-- Navigation Links -->
+<div class="flex flex-col gap-stack-sm">
+<!-- Inactive Tab -->
+<a class="flex items-center gap-stack-md text-slate-gray hover:text-primary px-4 py-3 rounded-lg hover:bg-surface-container-low transition-all" href="#">
+<span class="material-symbols-outlined">description</span>
+<span class="font-body-md text-body-md">My Resumes</span>
+</a>
+<!-- Active Tab: ATS Analytics -->
+<a class="flex items-center gap-stack-md bg-secondary-container/10 text-azure-vibrant font-semibold rounded-lg px-4 py-3 border-r-4 border-azure-vibrant translate-x-1 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined" data-weight="fill" style="font-variation-settings: 'FILL' 1;">analytics</span>
+<span class="font-body-md text-body-md">ATS Analytics</span>
+</a>
+<!-- Inactive Tabs -->
+<a class="flex items-center gap-stack-md text-slate-gray hover:text-primary px-4 py-3 rounded-lg hover:bg-surface-container-low transition-all" href="#">
+<span class="material-symbols-outlined">psychology</span>
+<span class="font-body-md text-body-md">Interview Prep</span>
+</a>
+<a class="flex items-center gap-stack-md text-slate-gray hover:text-primary px-4 py-3 rounded-lg hover:bg-surface-container-low transition-all" href="#">
+<span class="material-symbols-outlined">assignment_turned_in</span>
+<span class="font-body-md text-body-md">Job Tracker</span>
+</a>
+<a class="flex items-center gap-stack-md text-slate-gray hover:text-primary px-4 py-3 rounded-lg hover:bg-surface-container-low transition-all" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-body-md text-body-md">Settings</span>
+</a>
+</div>
+</div>
+<div class="mt-auto flex flex-col gap-stack-sm">
+<a class="flex items-center gap-stack-md text-slate-gray hover:text-primary px-4 py-3 rounded-lg hover:bg-surface-container-low transition-all" href="#">
+<span class="material-symbols-outlined">help</span>
+<span class="font-body-md text-body-md">Help Center</span>
+</a>
+<a class="flex items-center gap-stack-md text-slate-gray hover:text-primary px-4 py-3 rounded-lg hover:bg-surface-container-low transition-all" href="#">
+<span class="material-symbols-outlined">logout</span>
+<span class="font-body-md text-body-md">Logout</span>
+</a>
+<div class="mt-stack-md pt-stack-md border-t border-outline-variant flex items-center gap-stack-md px-4">
+<div class="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center overflow-hidden">
+<span class="material-symbols-outlined text-slate-gray">person</span>
+</div>
+<div>
+<p class="font-label-mono text-label-mono text-primary font-bold">Executive User</p>
+<p class="font-label-mono text-label-mono text-slate-gray text-[11px]">Premium Tier</p>
+</div>
+</div>
+</div>
+</nav>
+<!-- Main Content Canvas -->
+<div class="flex-1 flex flex-col md:ml-[320px] w-full relative">
+<!-- TopAppBar (Mobile visible, Desktop auxiliary) -->
+<header class="bg-surface/80 backdrop-blur-md flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop h-16 sticky top-0 border-b border-outline-variant shadow-sm z-40">
+<div class="flex items-center gap-stack-sm md:hidden">
+<span class="font-headline-md text-headline-md font-black tracking-tighter text-primary">TYR</span>
+</div>
+<div class="hidden md:flex items-center gap-stack-sm">
+<span class="font-headline-md text-headline-md text-primary">Analytics Dashboard</span>
+</div>
+<div class="flex items-center gap-stack-md">
+<div class="hidden md:flex items-center bg-surface-container-low rounded-lg px-3 py-1 border border-outline-variant/50 focus-within:border-azure-vibrant transition-colors">
+<span class="material-symbols-outlined text-slate-gray text-sm">search</span>
+<input class="bg-transparent border-none focus:ring-0 font-body-sm text-body-sm text-primary w-48 outline-none pl-2" placeholder="Search analytics..." type="text"/>
+</div>
+<button class="text-slate-gray hover:text-primary transition-colors hover:bg-surface-container-low p-2 rounded-full duration-200">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="text-slate-gray hover:text-primary transition-colors hover:bg-surface-container-low p-2 rounded-full duration-200">
+<span class="material-symbols-outlined">help_outline</span>
+</button>
+<div class="flex gap-stack-sm ml-stack-sm">
+<button class="hidden md:flex items-center gap-2 font-button-text text-button-text text-azure-vibrant border border-azure-vibrant/30 px-4 py-2 rounded-lg hover:bg-azure-vibrant/5 transition-colors">
+<span class="material-symbols-outlined text-sm">download</span>
+                        Download PDF
+                    </button>
+<button class="bg-azure-vibrant text-on-secondary font-button-text text-button-text px-4 py-2 rounded-lg hover:bg-secondary transition-colors shadow-sm">
+                        Tailor Now
+                    </button>
+</div>
+</div>
+</header>
+<!-- Scrollable Dashboard Content -->
+<main class="flex-1 overflow-y-auto p-margin-mobile md:p-margin-desktop bg-surface">
+<div class="max-w-container-max mx-auto flex flex-col gap-stack-lg pb-stack-lg">
+<!-- Page Header -->
+<div>
+<h1 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-primary">ATS Score Analysis</h1>
+<p class="font-body-lg text-body-lg text-slate-gray mt-1">Deep-dive structural and semantic breakdown of your current resume iteration.</p>
+</div>
+<!-- Hero Gauge Card -->
+<section class="bg-latex-paper rounded-xl border border-outline-variant/40 elevation-1 p-gutter md:p-stack-lg flex flex-col md:flex-row items-center gap-stack-lg relative overflow-hidden">
+<!-- Glassmorphic Accent Graphic -->
+<div class="absolute -right-20 -top-20 w-64 h-64 bg-ats-emerald/5 rounded-full blur-3xl pointer-events-none"></div>
+<!-- Gauge Container -->
+<div class="relative w-48 h-48 flex-shrink-0 flex items-center justify-center">
+<svg class="w-full h-full transform -rotate-90" viewbox="0 0 100 100">
+<!-- Background track -->
+<circle class="stroke-surface-container-high" cx="50" cy="50" fill="none" r="45" stroke-dasharray="282.7" stroke-dashoffset="0" stroke-width="8"></circle>
+<!-- Score track (e.g., 85%) -->
+<circle class="stroke-ats-emerald transition-all duration-1000 ease-out" cx="50" cy="50" fill="none" r="45" stroke-dasharray="282.7" stroke-dashoffset="42.4" stroke-linecap="round" stroke-width="8"></circle>
+</svg>
+<div class="absolute flex flex-col items-center justify-center">
+<div class="flex items-baseline">
+<span class="font-display-lg text-display-lg text-primary">85</span>
+</div>
+<span class="font-label-mono text-label-mono text-slate-gray tracking-widest mt-1">/ 100</span>
+</div>
+</div>
+<!-- Summary Info -->
+<div class="flex flex-col gap-stack-sm flex-1">
+<div class="inline-flex items-center gap-2 px-3 py-1 bg-ats-emerald/10 text-on-tertiary-container rounded-full w-fit">
+<span class="material-symbols-outlined text-[16px]" data-weight="fill" style="font-variation-settings: 'FILL' 1;">verified</span>
+<span class="font-label-mono text-label-mono font-bold">Top 15% Match</span>
+</div>
+<h2 class="font-headline-md text-headline-md text-primary mt-2">Executive Precision Achieved</h2>
+<p class="font-body-md text-body-md text-slate-gray leading-relaxed">
+                            Your resume demonstrates strong technical alignment with target roles. Core competencies are well-structured, but critical formatting issues in the Work Experience section are triggering mild parsing warnings.
+                        </p>
+</div>
+</section>
+<!-- Bento Grid Breakdown -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-stack-md md:gap-stack-lg">
+<!-- Card 1: Keyword Match (Success) -->
+<article class="bg-latex-paper rounded-xl border border-outline-variant/40 elevation-1 p-gutter flex flex-col h-full">
+<header class="flex items-start justify-between mb-stack-md pb-stack-md border-b border-outline-variant/30">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-ats-emerald/10 flex items-center justify-center text-ats-emerald">
+<span class="material-symbols-outlined">key</span>
+</div>
+<div>
+<h3 class="font-headline-md text-[20px] leading-tight text-primary">Keyword Match</h3>
+<span class="font-label-mono text-label-mono text-slate-gray">Semantic Relevance</span>
+</div>
+</div>
+<div class="flex flex-col items-end">
+<span class="font-headline-md text-[24px] text-ats-emerald font-bold">92%</span>
+<span class="font-label-mono text-[11px] text-slate-gray">Optimal</span>
+</div>
+</header>
+<div class="flex-1">
+<p class="font-body-sm text-body-sm text-slate-gray mb-4">Core industry terminologies successfully mapped against target job description syntax.</p>
+<h4 class="font-label-mono text-label-mono text-primary mb-3">ACTIONABLE FIXES</h4>
+<ul class="flex flex-col gap-3 relative before:absolute before:left-[7px] before:top-2 before:bottom-2 before:w-[2px] before:bg-surface-container-highest">
+<li class="flex items-start gap-3 relative">
+<div class="w-4 h-4 rounded-full bg-latex-paper border-2 border-ats-emerald mt-0.5 relative z-10"></div>
+<span class="font-body-sm text-body-sm text-on-surface">Include <span class="font-label-mono bg-surface-container-low px-1 rounded text-primary">Kubernetes</span> in Technical Skills matrix.</span>
+</li>
+<li class="flex items-start gap-3 relative">
+<div class="w-4 h-4 rounded-full bg-latex-paper border-2 border-outline mt-0.5 relative z-10"></div>
+<span class="font-body-sm text-body-sm text-slate-gray">Expand on <span class="font-label-mono bg-surface-container-low px-1 rounded text-primary">Cross-functional Leadership</span> instances.</span>
+</li>
+</ul>
+</div>
+</article>
+<!-- Card 2: Structural Integrity (Warning/Neutral) -->
+<article class="bg-latex-paper rounded-xl border border-outline-variant/40 elevation-1 p-gutter flex flex-col h-full">
+<header class="flex items-start justify-between mb-stack-md pb-stack-md border-b border-outline-variant/30">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-surface-container-highest flex items-center justify-center text-slate-gray">
+<span class="material-symbols-outlined">account_tree</span>
+</div>
+<div>
+<h3 class="font-headline-md text-[20px] leading-tight text-primary">Structural Integrity</h3>
+<span class="font-label-mono text-label-mono text-slate-gray">Section Hierarchy</span>
+</div>
+</div>
+<div class="flex flex-col items-end">
+<span class="font-headline-md text-[24px] text-on-surface-variant font-bold">78%</span>
+<span class="font-label-mono text-[11px] text-slate-gray">Acceptable</span>
+</div>
+</header>
+<div class="flex-1">
+<p class="font-body-sm text-body-sm text-slate-gray mb-4">LaTeX parsing detected nested list depth exceeding standard ATS thresholds.</p>
+<h4 class="font-label-mono text-label-mono text-primary mb-3">ACTIONABLE FIXES</h4>
+<ul class="flex flex-col gap-3 relative before:absolute before:left-[7px] before:top-2 before:bottom-2 before:w-[2px] before:bg-surface-container-highest">
+<li class="flex items-start gap-3 relative">
+<div class="w-4 h-4 rounded-full bg-latex-paper border-2 border-on-surface-variant mt-0.5 relative z-10"></div>
+<span class="font-body-sm text-body-sm text-on-surface">Flatten nested bullet points under <span class="font-label-mono bg-surface-container-low px-1 rounded text-primary">Experience &gt; Project Alpha</span>. Limit to one level.</span>
+</li>
+<li class="flex items-start gap-3 relative">
+<div class="w-4 h-4 rounded-full bg-latex-paper border-2 border-on-surface-variant mt-0.5 relative z-10"></div>
+<span class="font-body-sm text-body-sm text-on-surface">Ensure 'Education' section predates 'Certifications' block for linear parsing.</span>
+</li>
+</ul>
+</div>
+</article>
+<!-- Card 3: Formatting Quality (Critical/Error) -->
+<article class="bg-latex-paper rounded-xl border border-error/30 elevation-1 p-gutter flex flex-col h-full relative overflow-hidden">
+<div class="absolute top-0 right-0 w-32 h-32 bg-error/5 rounded-bl-full pointer-events-none"></div>
+<header class="flex items-start justify-between mb-stack-md pb-stack-md border-b border-outline-variant/30 relative z-10">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-error-container flex items-center justify-center text-error">
+<span class="material-symbols-outlined">format_align_left</span>
+</div>
+<div>
+<h3 class="font-headline-md text-[20px] leading-tight text-primary">Formatting Quality</h3>
+<span class="font-label-mono text-label-mono text-slate-gray">Document Legibility</span>
+</div>
+</div>
+<div class="flex flex-col items-end">
+<span class="font-headline-md text-[24px] text-error font-bold">54%</span>
+<span class="font-label-mono text-[11px] text-error">Critical Issues</span>
+</div>
+</header>
+<div class="flex-1 relative z-10">
+<p class="font-body-sm text-body-sm text-slate-gray mb-4">Non-standard characters and layout tables detected. High risk of ATS rejection.</p>
+<h4 class="font-label-mono text-label-mono text-primary mb-3">ACTIONABLE FIXES</h4>
+<ul class="flex flex-col gap-3 relative before:absolute before:left-[7px] before:top-2 before:bottom-2 before:w-[2px] before:bg-error/20">
+<li class="flex items-start gap-3 relative">
+<div class="w-4 h-4 rounded-full bg-latex-paper border-2 border-error mt-0.5 relative z-10"></div>
+<span class="font-body-sm text-body-sm text-on-surface">Remove multi-column layout in the <span class="font-label-mono bg-error-container px-1 rounded text-error">Skills Section</span>. Use single-column comma separation.</span>
+</li>
+<li class="flex items-start gap-3 relative">
+<div class="w-4 h-4 rounded-full bg-latex-paper border-2 border-error mt-0.5 relative z-10"></div>
+<span class="font-body-sm text-body-sm text-on-surface">Convert custom bullet icons to standard circular glyphs or hyphens.</span>
+</li>
+</ul>
+</div>
+</article>
+<!-- Card 4: Contact Info Check (Success) -->
+<article class="bg-latex-paper rounded-xl border border-outline-variant/40 elevation-1 p-gutter flex flex-col h-full">
+<header class="flex items-start justify-between mb-stack-md pb-stack-md border-b border-outline-variant/30">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-ats-emerald/10 flex items-center justify-center text-ats-emerald">
+<span class="material-symbols-outlined">contact_mail</span>
+</div>
+<div>
+<h3 class="font-headline-md text-[20px] leading-tight text-primary">Contact Info Check</h3>
+<span class="font-label-mono text-label-mono text-slate-gray">Data Extraction</span>
+</div>
+</div>
+<div class="flex flex-col items-end">
+<span class="font-headline-md text-[24px] text-ats-emerald font-bold">100%</span>
+<span class="font-label-mono text-[11px] text-slate-gray">Verified</span>
+</div>
+</header>
+<div class="flex-1">
+<p class="font-body-sm text-body-sm text-slate-gray mb-4">All essential contact vectors successfully identified and categorized.</p>
+<div class="grid grid-cols-2 gap-4 mt-4">
+<div class="flex flex-col border border-outline-variant/30 rounded p-3 bg-surface-container-low/50">
+<span class="font-label-mono text-[11px] text-slate-gray mb-1">EMAIL</span>
+<span class="font-body-sm text-body-sm text-primary truncate">executive@domain.com</span>
+</div>
+<div class="flex flex-col border border-outline-variant/30 rounded p-3 bg-surface-container-low/50">
+<span class="font-label-mono text-[11px] text-slate-gray mb-1">LINKEDIN</span>
+<span class="font-body-sm text-body-sm text-primary truncate">linkedin.com/in/exec</span>
+</div>
+</div>
+</div>
+</article>
+</div>
+</div>
+</main>
+</div>
+</body></html>

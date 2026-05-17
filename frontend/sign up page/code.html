@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Sign Up - Tailor Your Resume (TYR)</title>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Config -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-bright": "#fbf9f8",
+                        "on-secondary-fixed": "#001355",
+                        "on-tertiary-container": "#009763",
+                        "surface-container-highest": "#e4e2e2",
+                        "primary-container": "#191b22",
+                        "on-error": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "tertiary-fixed": "#6ffcb7",
+                        "secondary-container": "#2558ff",
+                        "on-tertiary-fixed-variant": "#005233",
+                        "on-primary-container": "#82838b",
+                        "surface-container": "#efeded",
+                        "on-primary-fixed": "#191b22",
+                        "secondary": "#003fd8",
+                        "surface-dim": "#dbdad9",
+                        "tertiary": "#000000",
+                        "on-surface": "#1b1c1c",
+                        "on-surface-variant": "#46464b",
+                        "surface-variant": "#e4e2e2",
+                        "secondary-fixed": "#dde1ff",
+                        "ats-emerald": "#0EB87A",
+                        "on-tertiary": "#ffffff",
+                        "latex-paper": "#FFFFFF",
+                        "error-container": "#ffdad6",
+                        "surface-container-low": "#f5f3f3",
+                        "surface-container-high": "#e9e8e7",
+                        "on-primary": "#ffffff",
+                        "azure-vibrant": "#2055FD",
+                        "primary-fixed": "#e2e2eb",
+                        "on-secondary-fixed-variant": "#0036bc",
+                        "deep-obsidian": "#0A0A0A",
+                        "inverse-primary": "#c5c6ce",
+                        "surface-container-lowest": "#ffffff",
+                        "primary-fixed-dim": "#c5c6ce",
+                        "tertiary-fixed-dim": "#4fdf9d",
+                        "secondary-fixed-dim": "#b8c4ff",
+                        "on-tertiary-fixed": "#002112",
+                        "background": "#fbf9f8",
+                        "on-error-container": "#93000a",
+                        "surface-tint": "#5d5e65",
+                        "error": "#ba1a1a",
+                        "outline-variant": "#c7c6cb",
+                        "on-primary-fixed-variant": "#45464e",
+                        "on-background": "#1b1c1c",
+                        "on-secondary-container": "#eaebff",
+                        "slate-gray": "#6B6B6B",
+                        "primary": "#000000",
+                        "inverse-on-surface": "#f2f0f0",
+                        "surface": "#fbf9f8",
+                        "outline": "#77777c",
+                        "tertiary-container": "#002112",
+                        "inverse-surface": "#303031"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-md": "16px",
+                        "margin-mobile": "16px",
+                        "base": "4px",
+                        "stack-lg": "32px",
+                        "stack-sm": "8px",
+                        "margin-desktop": "40px",
+                        "gutter": "24px",
+                        "container-max": "1280px"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "body-lg": ["Plus Jakarta Sans"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "display-lg": ["Plus Jakarta Sans"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "button-text": ["Plus Jakarta Sans"],
+                        "body-sm": ["Plus Jakarta Sans"],
+                        "label-mono": ["JetBrains Mono"],
+                        "headline-lg-mobile": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                        "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "button-text": ["15px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600"}],
+                        "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "label-mono": ["13px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                        "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-surface-bright min-h-screen flex items-center justify-center font-body-md text-on-surface antialiased">
+<!-- Split Layout Container -->
+<div class="flex w-full h-screen overflow-hidden">
+<!-- Left Panel (Branding / Image) - Hidden on mobile -->
+<div class="hidden lg:flex lg:w-[45%] relative bg-deep-obsidian flex-col justify-between p-12">
+<!-- Background Image with Overlay -->
+<div class="absolute inset-0 z-0">
+<img alt="Abstract corporate background" class="w-full h-full object-cover opacity-30" data-alt="A sophisticated, high-contrast abstract architectural interior emphasizing depth, structure, and professional ambition. The scene features sleek geometric lines, glass surfaces reflecting deep obsidian and charcoal tones, punctuated by soft, cool ambient lighting. The aesthetic is extremely modern, authoritative, and perfectly aligns with a high-end corporate or executive engineering environment. Minimalist, premium, and focused." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAnp2NOF3ElJP7EEKmabUImLvspjBkuxrEUdBVVIC2LrgM9f6zfTp6mmrFN3C0DkKrzdQ_lcgnXlu9LKQGir8N_3qanjPXcFM5Im9-hL9zTts76GzFtC5PzcObYfSsuDIfjA1yk3y2Ar4mGlyfLxzrNFWmAhyT_JwRAKtugaWnSVVWv7_Dsns354KqW-9n-0dE1qsxRY4l2lzdSykBXyJIHXZ976CPKSNpLYdYHbnVemHlvBvPSib6697w344-FvspK6acnQ8Qzo8M"/>
+<div class="absolute inset-0 bg-gradient-to-t from-deep-obsidian via-deep-obsidian/80 to-transparent"></div>
+</div>
+<!-- Top Logo Area -->
+<div class="relative z-10 flex items-center gap-2">
+<div class="w-8 h-8 rounded-lg bg-latex-paper flex items-center justify-center text-deep-obsidian font-headline-md font-bold">
+                    T
+                </div>
+<span class="font-headline-md text-latex-paper tracking-tight">TYR</span>
+</div>
+<!-- Bottom Content -->
+<div class="relative z-10 max-w-lg">
+<h1 class="font-display-lg text-display-lg text-latex-paper mb-6">Precision Engineering For Your Career.</h1>
+<div class="space-y-6">
+<p class="font-body-lg text-body-lg text-surface-variant opacity-90">
+                        Join an elite network of professionals using AI-driven insights to construct ATS-proof resumes with mathematical precision.
+                    </p>
+<!-- Social Proof -->
+<div class="pt-6 border-t border-surface-container-high/20 flex items-center gap-4">
+<div class="flex -space-x-3">
+<img alt="User" class="w-10 h-10 rounded-full border-2 border-deep-obsidian object-cover" data-alt="A professional headshot of a young professional man in a sharp corporate setting, looking confident." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDjLxtyl6kRYuuvVX5nT6b_0qy9t1yBmR9ZeYlPwE2H1VRUNmCw9Q__4urE5Vv9Lb6dfYejHSWNnPGYH-SSCMIhdUMw7kDy8zKdEYOMsT0mXJQbuvdlbY_-UjefbnFhoGxk2w3EPCkOBa0BWKGAL2KgvhMO08SzWGga0OdLcoPoqp40zKdlHGuDiE1Lr9tucgBcZWQbTXPjKt6-y1FYlE01jNeB1lpPw_wvyla8SnT-_FyA7logiz6htetSkjw-7K_GouQFyo0k7-Y"/>
+<img alt="User" class="w-10 h-10 rounded-full border-2 border-deep-obsidian object-cover" data-alt="A professional headshot of an executive woman in a modern office environment, slightly smiling." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCKbhrqylNnUSvmN3HNBRrfSSThmlVNirdvtddIqVtNrys-FiGTNR6XDs-SMXD4RAVCZ5CBPaJdVSD6xziX_b6Mi8fMuWSb_NDhgHqKRJrt8Y6ugqYmhYyeckc6I7i_UgWPhZmVC6_b4Mcp8fpbFqYWdYjBtHec37qnNBFv11bnULbNjqIWQWzKGCmAohEeL5ilCxDrU2RukOZUTKH4hn7F80x1LIabhnw_zmgpokszcpQiddYK7D9v_fpbGlv_f3EiTc3XoEV0qpw"/>
+<img alt="User" class="w-10 h-10 rounded-full border-2 border-deep-obsidian object-cover" data-alt="A professional headshot of a serious corporate director with a dark suit and blurred office background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCFc03J7WUX7sY4YjgBJG4bF0H6fRGcYVWoMT8EVLXbYMg-b7NO7vqK0gcOJ-0ZmwSA1VDhRPaDSChpLZSIrehKtmBG5G_uGClOkesaKOHY2-C2d0_DDuq8GDpI-A5wQk0jvW8ul5dS9zamTCpHvcLaKh1FCn7ZLITkj2tNkAbhDXrrrtgBPywLjv5HZslOC2b-QbPeiFN_959wKIlXTbItHaIJ4uVb7xroEQJSad1pftSWNtIfh-EDftDFBFZRsQnaqieOTNodGp8"/>
+</div>
+<div class="font-body-sm text-body-sm text-surface-variant">
+                            Trusted by <span class="text-latex-paper font-semibold">10,000+</span> Indian job seekers
+                        </div>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Panel (Form) -->
+<div class="w-full lg:w-[55%] bg-surface-bright flex items-center justify-center p-8 sm:p-12 overflow-y-auto">
+<div class="w-full max-w-[440px] space-y-8">
+<!-- Mobile Logo (Visible only on small screens) -->
+<div class="lg:hidden flex items-center gap-2 mb-8">
+<div class="w-8 h-8 rounded-lg bg-deep-obsidian flex items-center justify-center text-latex-paper font-headline-md font-bold">
+                        T
+                    </div>
+<span class="font-headline-md text-on-surface tracking-tight">TYR</span>
+</div>
+<!-- Header -->
+<div class="space-y-2">
+<h2 class="font-headline-lg text-headline-lg text-on-surface">Create Account</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Join 10k+ professionals tailoring their path to success.</p>
+</div>
+<!-- Form -->
+<form class="space-y-5">
+<!-- Full Name -->
+<div class="space-y-1.5">
+<label class="block font-label-mono text-label-mono text-on-surface-variant" for="fullName">Full Name</label>
+<input class="w-full px-4 py-3 rounded-lg border border-outline-variant bg-surface-bright text-on-surface placeholder:text-on-primary-container focus:outline-none focus:ring-2 focus:ring-azure-vibrant/20 focus:border-azure-vibrant transition-all font-body-md text-body-md shadow-sm" id="fullName" name="fullName" placeholder="Rahul Sharma" type="text"/>
+</div>
+<!-- Email -->
+<div class="space-y-1.5">
+<label class="block font-label-mono text-label-mono text-on-surface-variant" for="email">Email Address</label>
+<input class="w-full px-4 py-3 rounded-lg border border-outline-variant bg-surface-bright text-on-surface placeholder:text-on-primary-container focus:outline-none focus:ring-2 focus:ring-azure-vibrant/20 focus:border-azure-vibrant transition-all font-body-md text-body-md shadow-sm" id="email" name="email" placeholder="rahul@example.com" type="email"/>
+</div>
+<!-- Password -->
+<div class="space-y-1.5">
+<label class="block font-label-mono text-label-mono text-on-surface-variant" for="password">Password</label>
+<input class="w-full px-4 py-3 rounded-lg border border-outline-variant bg-surface-bright text-on-surface placeholder:text-on-primary-container focus:outline-none focus:ring-2 focus:ring-azure-vibrant/20 focus:border-azure-vibrant transition-all font-body-md text-body-md shadow-sm" id="password" name="password" placeholder="••••••••" type="password"/>
+</div>
+<!-- Primary Action -->
+<button class="w-full mt-2 py-3.5 px-4 bg-deep-obsidian hover:bg-on-surface text-latex-paper rounded-lg font-button-text text-button-text shadow-[0_4px_20px_rgba(10,10,10,0.15)] transition-all flex items-center justify-center gap-2" type="button">
+                        Create Account
+                        <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+</button>
+</form>
+<!-- Divider -->
+<div class="relative flex items-center py-2">
+<div class="flex-grow border-t border-surface-container-high"></div>
+<span class="flex-shrink-0 mx-4 font-label-mono text-label-mono text-on-surface-variant">OR</span>
+<div class="flex-grow border-t border-surface-container-high"></div>
+</div>
+<!-- Secondary Action (Google) -->
+<button class="w-full py-3 px-4 bg-surface-bright hover:bg-surface-container-low border border-outline-variant text-on-surface rounded-lg font-button-text text-button-text transition-all flex items-center justify-center gap-3" type="button">
+<svg class="w-5 h-5" fill="none" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"></path>
+<path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"></path>
+<path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"></path>
+<path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"></path>
+</svg>
+                    Continue with Google
+                </button>
+<!-- Footer Link -->
+<div class="text-center pt-4">
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+                        Already have an account? 
+                        <a class="font-button-text text-azure-vibrant hover:text-secondary hover:underline transition-all" href="#">Sign In</a>
+</p>
+</div>
+<!-- Legal Terms Mini -->
+<div class="text-center mt-auto pt-8">
+<p class="font-body-sm text-body-sm text-on-primary-container text-[12px]">
+                        By creating an account, you agree to our <a class="underline hover:text-on-surface" href="#">Terms of Service</a> and <a class="underline hover:text-on-surface" href="#">Privacy Policy</a>.
+                    </p>
+</div>
+</div>
+</div>
+</div>
+</body></html>
