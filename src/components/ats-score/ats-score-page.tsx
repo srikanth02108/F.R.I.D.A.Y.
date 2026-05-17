@@ -22,6 +22,17 @@ import {
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  WorkspacePageHeader,
+  workspaceAzureButtonClass,
+  workspaceCardClass,
+  workspaceInputClass,
+  workspaceLabelClass,
+  workspaceOutlineButtonClass,
+  workspacePageClass,
+  workspacePrimaryButtonClass,
+  workspaceScrollClass,
+} from "@/components/workspace/workspace-styles";
 import { extractTextFromResumeFile } from "@/lib/extract-resume-text";
 import type { AtsScoreResult } from "@/types/ats-score";
 import { cn } from "@/lib/utils";
@@ -119,58 +130,69 @@ export function AtsScorePage() {
   };
 
   return (
-    <div className="h-full overflow-y-auto bg-slate-50">
-      <div className="mx-auto max-w-5xl space-y-8 px-6 py-8">
-        <header>
-          <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
-            ATS Score Analyzer
-          </h2>
-          <p className="mt-1 text-sm text-slate-500">
-            Audit your resume compliance against corporate filtering systems
-            instantly.
-          </p>
-        </header>
+    <div className={workspacePageClass}>
+      <div className={workspaceScrollClass}>
+        <WorkspacePageHeader
+          badge="Analytics"
+          title="ATS Score Analysis"
+          description="Deep-dive structural and semantic breakdown of your resume against corporate filtering systems."
+        />
 
         {isLoading ? (
           <AtsScoreLoading />
         ) : (
           <>
             {!scoreResult && (
-              <div className="space-y-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+              <div
+                className={cn(
+                  workspaceCardClass,
+                  "space-y-6 p-6 md:p-8",
+                )}
+              >
                 <Tabs
                   value={inputTab}
                   onValueChange={setInputTab}
                   className="w-full"
                 >
-                  <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="upload">Upload Resume</TabsTrigger>
-                    <TabsTrigger value="paste">Paste Text</TabsTrigger>
+                  <TabsList className="grid h-11 w-full grid-cols-2 rounded-lg border border-[#c7c6cb] bg-[#f5f3f3] p-1">
+                    <TabsTrigger
+                      value="upload"
+                      className="rounded-md data-[state=active]:bg-white data-[state=active]:text-[#0A0A0A] data-[state=active]:shadow-sm"
+                    >
+                      Upload Resume
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="paste"
+                      className="rounded-md data-[state=active]:bg-white data-[state=active]:text-[#0A0A0A] data-[state=active]:shadow-sm"
+                    >
+                      Paste Text
+                    </TabsTrigger>
                   </TabsList>
 
-                  <TabsContent value="upload" className="mt-4">
+                  <TabsContent value="upload" className="mt-6">
                     <div
                       {...getRootProps()}
                       className={cn(
                         "flex min-h-[220px] cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed p-8 text-center transition-colors",
                         isDragActive
-                          ? "border-violet-500 bg-violet-50"
-                          : "border-slate-300 bg-slate-50 hover:border-violet-400 hover:bg-violet-50/50",
+                          ? "border-[#2055FD] bg-[#2055FD]/5"
+                          : "border-[#c7c6cb] bg-[#fbf9f8] hover:border-[#2055FD]/50 hover:bg-[#2055FD]/5",
                       )}
                     >
                       <input {...getInputProps()} />
-                      <Upload className="mb-3 size-10 text-slate-400" />
-                      <p className="text-sm font-medium text-slate-700">
+                      <Upload className="mb-3 size-10 text-[#2055FD]" />
+                      <p className="text-sm font-semibold text-[#0A0A0A]">
                         Drag & drop your resume here
                       </p>
-                      <p className="mt-1 text-xs text-slate-500">
+                      <p className="mt-1 text-xs text-[#6B6B6B]">
                         Supports .pdf and .txt files
                       </p>
                     </div>
 
                     {uploadedFileName && (
-                      <div className="mt-4 flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50 px-4 py-3">
-                        <div className="flex items-center gap-2 text-sm text-slate-700">
-                          <FileText className="size-4 text-violet-600" />
+                      <div className="mt-4 flex items-center justify-between rounded-lg border border-[#c7c6cb] bg-[#f5f3f3] px-4 py-3">
+                        <div className="flex items-center gap-2 text-sm text-[#46464b]">
+                          <FileText className="size-4 text-[#2055FD]" />
                           <span className="font-medium">{uploadedFileName}</span>
                         </div>
                         <Button
@@ -179,6 +201,7 @@ export function AtsScorePage() {
                           size="icon-sm"
                           onClick={clearUpload}
                           aria-label="Remove file"
+                          className="text-[#6B6B6B] hover:text-[#0A0A0A]"
                         >
                           <X className="size-4" />
                         </Button>
@@ -186,9 +209,9 @@ export function AtsScorePage() {
                     )}
                   </TabsContent>
 
-                  <TabsContent value="paste" className="mt-4">
-                    <Label htmlFor="resume-paste" className="sr-only">
-                      Paste resume text
+                  <TabsContent value="paste" className="mt-6">
+                    <Label htmlFor="resume-paste" className={workspaceLabelClass}>
+                      Resume content
                     </Label>
                     <Textarea
                       id="resume-paste"
@@ -200,7 +223,10 @@ export function AtsScorePage() {
                         setUploadedFileName(null);
                         setScoreResult(null);
                       }}
-                      className="min-h-[280px] resize-y font-mono text-sm"
+                      className={cn(
+                        workspaceInputClass,
+                        "mt-2 min-h-[280px] resize-y font-mono text-sm",
+                      )}
                     />
                   </TabsContent>
                 </Tabs>
@@ -210,26 +236,26 @@ export function AtsScorePage() {
                     <Button
                       type="button"
                       variant="ghost"
-                      className="mt-4 flex w-full items-center justify-between px-0 hover:bg-transparent"
+                      className="flex w-full items-center justify-between rounded-lg border border-[#c7c6cb] bg-[#f5f3f3] px-4 py-3 hover:bg-[#efeded]"
                     >
-                      <span className="text-sm font-medium text-slate-800">
+                      <span className="text-sm font-semibold text-[#0A0A0A]">
                         Target Job Description (Optional)
                       </span>
                       <ChevronDown
                         className={cn(
-                          "size-4 transition-transform",
+                          "size-4 text-[#6B6B6B] transition-transform",
                           jdOpen && "rotate-180",
                         )}
                       />
                     </Button>
                   </CollapsibleTrigger>
-                  <CollapsibleContent className="mt-2">
+                  <CollapsibleContent className="mt-3">
                     <Textarea
                       rows={6}
                       placeholder="Paste the job description to enable keyword match scoring…"
                       value={jobDescription}
                       onChange={(e) => setJobDescription(e.target.value)}
-                      className="resize-y"
+                      className={cn(workspaceInputClass, "resize-y")}
                     />
                   </CollapsibleContent>
                 </Collapsible>
@@ -237,7 +263,7 @@ export function AtsScorePage() {
                 <Button
                   type="button"
                   size="lg"
-                  className="mt-6 w-full bg-violet-600 hover:bg-violet-700"
+                  className={cn(workspacePrimaryButtonClass, "mt-2 w-full")}
                   onClick={handleCheckScore}
                   disabled={!resumeText.trim()}
                 >
@@ -248,10 +274,11 @@ export function AtsScorePage() {
 
             {scoreResult && (
               <>
-                <div className="flex justify-end">
+                <div className="mb-6 flex justify-end">
                   <Button
                     variant="outline"
                     size="sm"
+                    className={workspaceOutlineButtonClass}
                     onClick={() => {
                       setScoreResult(null);
                     }}

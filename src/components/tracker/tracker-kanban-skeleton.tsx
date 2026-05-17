@@ -9,7 +9,7 @@ export function TrackerKanbanSkeleton() {
         {KANBAN_COLUMNS.map((column) => (
           <div
             key={column.status}
-            className={`flex min-h-[420px] flex-col rounded-xl border-2 ${column.borderClass}`}
+            className={`flex min-h-[420px] w-[300px] shrink-0 flex-col rounded-xl border md:w-auto ${column.borderClass}`}
           >
             <div className="flex items-center justify-between border-b border-inherit px-3 py-3">
               <Skeleton className="h-4 w-20" />
@@ -17,7 +17,7 @@ export function TrackerKanbanSkeleton() {
             </div>
             <div className="space-y-3 overflow-y-auto p-3">
               {[0, 1].map((i) => (
-                <Card key={i} className="border-slate-200 shadow-sm">
+                <Card key={i} className="border-[#c7c6cb] bg-white shadow-sm">
                   <CardHeader className="space-y-2 p-3 pb-2">
                     <div className="flex gap-2">
                       <Skeleton className="size-8 rounded-full" />

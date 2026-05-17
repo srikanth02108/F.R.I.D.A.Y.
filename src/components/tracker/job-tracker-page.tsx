@@ -60,6 +60,15 @@ type JobApplicationInsert =
   Database["public"]["Tables"]["job_applications"]["Insert"];
 type JobApplicationUpdate =
   Database["public"]["Tables"]["job_applications"]["Update"];
+import {
+  WorkspacePageHeader,
+  workspaceCardClass,
+  workspaceInputClass,
+  workspaceLabelClass,
+  workspacePrimaryButtonClass,
+  workspacePageClass,
+  workspaceScrollClass,
+} from "@/components/workspace/workspace-styles";
 import { cn } from "@/lib/utils";
 
 type ResumeOption = {
@@ -484,68 +493,60 @@ export function JobTrackerPage() {
   };
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto p-6">
+    <div className={cn(workspacePageClass, "overflow-hidden")}>
+      <div className={workspaceScrollClass}>
         <div className="mx-auto flex w-full max-w-[1600px] flex-1 flex-col space-y-6">
-          <header className="space-y-1">
-            <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
-              Job Application Tracker
-            </h1>
-            <p className="max-w-3xl text-sm text-slate-600">
-              Manage your pipeline, track application statuses, and link tailored
-              resume variations to active targets.
-            </p>
-          </header>
-
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="relative w-full max-w-md">
-              <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                placeholder="Search by company or job title…"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9"
-              />
-            </div>
-            <Button className="gap-2" onClick={() => openAddModal("saved")}>
+          <WorkspacePageHeader
+            badge="Pipeline"
+            title="Job Tracker"
+            description="Manage your active applications across structured stages. Link tailored resume variations to each target."
+          >
+            <Button
+              className={cn(workspacePrimaryButtonClass, "gap-2")}
+              onClick={() => openAddModal("saved")}
+            >
               <Plus className="size-4" />
-              Add New Application
+              New Application
             </Button>
+          </WorkspacePageHeader>
+
+          <div className="relative w-full max-w-md">
+            <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-[#77777c]" />
+            <Input
+              placeholder="Search roles, companies…"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className={cn(workspaceInputClass, "pl-9")}
+            />
           </div>
 
           <div className="grid gap-4 sm:grid-cols-3">
-            <Card>
+            <Card className={cn(workspaceCardClass, "border-0 shadow-none")}>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  Total Applied
-                </CardTitle>
+                <CardTitle className={workspaceLabelClass}>Total Applied</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-3xl font-semibold text-slate-900">
+                <p className="text-3xl font-bold text-[#0A0A0A]">
                   {metrics.totalApplied}
                 </p>
               </CardContent>
             </Card>
-            <Card>
+            <Card className={cn(workspaceCardClass, "border-0 shadow-none")}>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  In Progress
-                </CardTitle>
+                <CardTitle className={workspaceLabelClass}>In Progress</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-3xl font-semibold text-amber-700">
+                <p className="text-3xl font-bold text-[#2055FD]">
                   {metrics.inProgress}
                 </p>
               </CardContent>
             </Card>
-            <Card>
+            <Card className={cn(workspaceCardClass, "border-0 shadow-none")}>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  Success Rate
-                </CardTitle>
+                <CardTitle className={workspaceLabelClass}>Success Rate</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-3xl font-semibold text-emerald-700">
+                <p className="text-3xl font-bold text-[#0EB87A]">
                   {metrics.successRate}%
                 </p>
               </CardContent>
@@ -555,12 +556,8 @@ export function JobTrackerPage() {
           {isInitialLoading ? (
             <TrackerKanbanSkeleton />
           ) : (
-            <div className="min-h-0 flex-1 overflow-x-auto">
-              <div
-                className={cn(
-                  "grid h-[calc(100vh-220px)] min-w-[1080px] grid-cols-6 gap-4",
-                )}
-              >
+            <div className="min-h-0 flex-1 overflow-x-auto pb-4">
+              <div className="flex h-[calc(100vh-280px)] min-w-max gap-4 md:min-w-[1080px]">
                 {KANBAN_COLUMNS.map((column) => {
                   const columnJobs = jobsByStatus.get(column.status) ?? [];
 
@@ -568,7 +565,7 @@ export function JobTrackerPage() {
                     <div
                       key={column.status}
                       className={cn(
-                        "flex min-h-0 flex-col rounded-xl border-2",
+                        "flex min-h-0 w-[300px] shrink-0 flex-col rounded-xl border",
                         column.borderClass,
                       )}
                     >
@@ -605,7 +602,7 @@ export function JobTrackerPage() {
                           {columnJobs.map((job) => (
                             <Card
                               key={job.id}
-                              className="cursor-pointer border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md"
+                              className="cursor-pointer border-[#c7c6cb] bg-white shadow-sm transition-all hover:border-[#2055FD]/40 hover:shadow-md"
                               onClick={() => openDetailsModal(job)}
                             >
                               <CardHeader className="space-y-3 p-3 pb-2">
@@ -619,10 +616,10 @@ export function JobTrackerPage() {
                                     {job.company.charAt(0).toUpperCase() || "?"}
                                   </div>
                                   <div className="min-w-0 flex-1">
-                                    <p className="truncate text-sm font-semibold text-slate-900">
+                                    <p className="truncate text-sm font-semibold text-[#0A0A0A]">
                                       {job.role}
                                     </p>
-                                    <p className="truncate text-xs text-slate-600">
+                                    <p className="truncate font-mono text-[11px] tracking-wider text-[#6B6B6B] uppercase">
                                       {job.company}
                                     </p>
                                   </div>

@@ -63,7 +63,19 @@ import {
 import { createClient } from "@/lib/supabase/client";
 import { streamSsePost } from "@/lib/stream-sse";
 import type { Resume, ResumeContent } from "@/types/database";
+import { cn } from "@/lib/utils";
 import type { InterviewQuestion, InterviewQuestionType } from "@/types/interview";
+import {
+  WorkspacePageHeader,
+  workspaceAzureButtonClass,
+  workspaceCardClass,
+  workspaceInputClass,
+  workspaceLabelClass,
+  workspaceOutlineButtonClass,
+  workspacePageClass,
+  workspacePrimaryButtonClass,
+  workspaceScrollClass,
+} from "@/components/workspace/workspace-styles";
 
 type SavedResumeOption = {
   id: string;
@@ -528,33 +540,44 @@ export function InterviewPrepPage() {
         placeholder="Paste the job description for role-specific questions and coaching…"
         value={jobDescription}
         onChange={(e) => setJobDescription(e.target.value)}
-        className="min-h-[140px] resize-y"
+        className={cn(workspaceInputClass, "min-h-[140px] resize-y")}
       />
     </div>
   );
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
-      <div className="mx-auto w-full max-w-6xl space-y-6 p-6">
-        <header className="space-y-1">
-          <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
-            Interview Prep Suite
-          </h1>
-          <p className="max-w-3xl text-sm text-slate-600">
-            Train with role-specific AI mock interviews and fine-tune your
-            messaging using the STAR framework.
-          </p>
-        </header>
+    <div className={workspacePageClass}>
+      <div className={cn(workspaceScrollClass, "mx-auto max-w-6xl")}>
+        <WorkspacePageHeader
+          badge="Interview coaching"
+          title="AI Interview Coaching Studio"
+          description="Simulated environment structured around the STAR method. Train with role-specific mock interviews and fine-tune your messaging."
+        />
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full max-w-xl grid-cols-3">
-            <TabsTrigger value="question-bank">Question Bank</TabsTrigger>
-            <TabsTrigger value="mock-interview">Mock Interview</TabsTrigger>
-            <TabsTrigger value="star-coach">STAR Coach</TabsTrigger>
+          <TabsList className="grid h-11 w-full max-w-xl grid-cols-3 rounded-lg border border-[#c7c6cb] bg-[#f5f3f3] p-1">
+            <TabsTrigger
+              value="question-bank"
+              className="rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm"
+            >
+              Question Bank
+            </TabsTrigger>
+            <TabsTrigger
+              value="mock-interview"
+              className="rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm"
+            >
+              Mock Interview
+            </TabsTrigger>
+            <TabsTrigger
+              value="star-coach"
+              className="rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm"
+            >
+              STAR Coach
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="question-bank" className="space-y-6">
-            <Card>
+            <Card className={cn(workspaceCardClass, "border-0 shadow-none")}>
               <CardHeader>
                 <CardTitle className="text-lg">Setup</CardTitle>
                 <CardDescription>
@@ -594,7 +617,7 @@ export function InterviewPrepPage() {
                     {QUESTION_TYPE_OPTIONS.map((option) => (
                       <label
                         key={option.value}
-                        className="flex cursor-pointer items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm shadow-sm transition-colors hover:bg-slate-50"
+                        className="flex cursor-pointer items-center gap-2 rounded-lg border border-[#c7c6cb] bg-white px-3 py-2.5 text-sm shadow-sm transition-colors hover:border-[#2055FD]/30 hover:bg-[#f5f3f3]"
                       >
                         <Checkbox
                           checked={typeFilters.has(option.value)}
@@ -611,7 +634,7 @@ export function InterviewPrepPage() {
                 <Button
                   onClick={handleGenerateQuestions}
                   disabled={isGeneratingQuestions}
-                  className="gap-2"
+                  className={cn(workspacePrimaryButtonClass, "gap-2")}
                 >
                   {isGeneratingQuestions ? (
                     <>
@@ -636,10 +659,13 @@ export function InterviewPrepPage() {
               )}
 
               {filteredQuestions.map((item) => (
-                <Card key={item.id} className="overflow-hidden">
+                <Card
+                  key={item.id}
+                  className={cn(workspaceCardClass, "overflow-hidden border-0 shadow-none")}
+                >
                   <CardHeader className="space-y-3 pb-2">
                     <div className="flex flex-wrap items-start justify-between gap-3">
-                      <h3 className="text-lg font-semibold leading-snug text-slate-900">
+                      <h3 className="text-lg font-semibold leading-snug text-[#0A0A0A]">
                         {item.question}
                       </h3>
                       <div className="flex shrink-0 flex-wrap gap-2">
@@ -702,6 +728,7 @@ export function InterviewPrepPage() {
                     <Button
                       variant="outline"
                       size="sm"
+                      className={workspaceOutlineButtonClass}
                       onClick={() => openPractice(item)}
                     >
                       Practice This Question
@@ -720,7 +747,7 @@ export function InterviewPrepPage() {
 
           <TabsContent value="mock-interview" className="space-y-6">
             {!mockActive && !mockSummary && (
-              <Card>
+              <Card className={cn(workspaceCardClass, "border-0 shadow-none")}>
                 <CardHeader>
                   <CardTitle className="text-lg">Mock interview setup</CardTitle>
                   <CardDescription>
@@ -735,7 +762,7 @@ export function InterviewPrepPage() {
                   </div>
                   <Button
                     size="lg"
-                    className="w-full gap-2 sm:w-auto"
+                    className={cn(workspaceAzureButtonClass, "w-full gap-2 sm:w-auto")}
                     onClick={handleStartMockInterview}
                     disabled={isStartingMock}
                   >
@@ -757,7 +784,7 @@ export function InterviewPrepPage() {
 
             {mockActive && (
               <div className="space-y-4">
-                <div className="space-y-2 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+                <div className={cn(workspaceCardClass, "space-y-2 border-0 p-4 shadow-none")}>
                   <div className="flex items-center justify-between text-sm font-medium text-slate-700">
                     <span>
                       Question {Math.min(questionIndex + 1, mockQuestions.length)}{" "}
@@ -770,7 +797,7 @@ export function InterviewPrepPage() {
 
                 <div
                   ref={chatScrollRef}
-                  className="h-[500px] overflow-y-auto rounded-xl border border-slate-200 bg-slate-50/80 p-4 shadow-inner"
+                  className="h-[500px] overflow-y-auto rounded-xl border border-[#c7c6cb] bg-[#f5f3f3] p-4"
                 >
                   <div className="flex flex-col gap-4">
                     {chatMessages.map((message) => {
@@ -780,12 +807,12 @@ export function InterviewPrepPage() {
                             key={message.id}
                             className="flex max-w-[85%] items-end gap-2"
                           >
-                            <Avatar className="size-8 shrink-0 border border-slate-200 bg-slate-200">
-                              <AvatarFallback className="bg-slate-200 text-slate-700">
+                            <Avatar className="size-8 shrink-0 border border-[#c7c6cb] bg-[#2055FD]/10">
+                              <AvatarFallback className="bg-[#2055FD]/10 text-[#2055FD]">
                                 <Bot className="size-4" />
                               </AvatarFallback>
                             </Avatar>
-                            <div className="rounded-2xl rounded-bl-md bg-slate-200 px-4 py-3 text-sm text-slate-900 shadow-sm">
+                            <div className="rounded-2xl rounded-bl-md border border-[#c7c6cb] bg-white px-4 py-3 text-sm text-[#0A0A0A] shadow-sm">
                               {message.text}
                             </div>
                           </div>
@@ -798,12 +825,12 @@ export function InterviewPrepPage() {
                             key={message.id}
                             className="ml-auto flex max-w-[85%] flex-row-reverse items-end gap-2"
                           >
-                            <Avatar className="size-8 shrink-0 border border-violet-300 bg-violet-600">
-                              <AvatarFallback className="bg-violet-600 text-white">
+                            <Avatar className="size-8 shrink-0 border border-[#0A0A0A] bg-[#0A0A0A]">
+                              <AvatarFallback className="bg-[#0A0A0A] text-white">
                                 <User className="size-4" />
                               </AvatarFallback>
                             </Avatar>
-                            <div className="rounded-2xl rounded-br-md bg-violet-600 px-4 py-3 text-sm text-white shadow-sm">
+                            <div className="rounded-2xl rounded-br-md bg-[#0A0A0A] px-4 py-3 text-sm text-white shadow-sm">
                               {message.text}
                             </div>
                           </div>
@@ -832,7 +859,7 @@ export function InterviewPrepPage() {
                   </div>
                 </div>
 
-                <div className="space-y-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+                <div className={cn(workspaceCardClass, "space-y-3 border-0 p-4 shadow-none")}>
                   <Textarea
                     placeholder="Type your answer…"
                     value={mockAnswer}
@@ -848,7 +875,7 @@ export function InterviewPrepPage() {
                   />
                   <div className="flex flex-wrap gap-2">
                     <Button
-                      className="gap-2"
+                      className={cn(workspaceAzureButtonClass, "gap-2")}
                       onClick={() => void handleSendMockAnswer()}
                       disabled={
                         isMockSubmitting ||
@@ -876,7 +903,7 @@ export function InterviewPrepPage() {
             )}
 
             {mockSummary && !mockActive && (
-              <Card className="border-violet-200 bg-gradient-to-br from-violet-50 to-white">
+              <Card className="border-[#2055FD]/20 bg-gradient-to-br from-[#2055FD]/5 to-white shadow-[0px_4px_20px_rgba(15,17,23,0.04)]">
                 <CardHeader>
                   <CardTitle>Performance summary</CardTitle>
                   <CardDescription>
@@ -890,7 +917,7 @@ export function InterviewPrepPage() {
                       <p className="text-xs font-medium uppercase text-slate-500">
                         Overall score
                       </p>
-                      <p className="text-3xl font-semibold text-violet-700">
+                      <p className="text-3xl font-semibold text-[#2055FD]">
                         {mockSummary.averageRating > 0
                           ? `${mockSummary.averageRating} / 5`
                           : "—"}
@@ -939,7 +966,7 @@ export function InterviewPrepPage() {
 
           <TabsContent value="star-coach">
             <div className="grid gap-6 lg:grid-cols-2">
-              <Card>
+              <Card className={cn(workspaceCardClass, "border-0 shadow-none")}>
                 <CardHeader>
                   <CardTitle className="text-lg">Your draft</CardTitle>
                   <CardDescription>
@@ -968,7 +995,7 @@ export function InterviewPrepPage() {
                     />
                   </div>
                   <Button
-                    className="mx-auto flex w-full max-w-sm gap-2"
+                    className={cn(workspacePrimaryButtonClass, "mx-auto flex w-full max-w-sm gap-2")}
                     size="lg"
                     onClick={() => void handleImproveWithStar()}
                     disabled={isStarImproving}
@@ -988,7 +1015,7 @@ export function InterviewPrepPage() {
                 </CardContent>
               </Card>
 
-              <Card className="min-h-[420px]">
+              <Card className={cn(workspaceCardClass, "min-h-[420px] border-0 shadow-none")}>
                 <CardHeader className="flex flex-row items-start justify-between gap-2">
                   <div>
                     <CardTitle className="text-lg">STAR response</CardTitle>

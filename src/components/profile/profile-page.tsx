@@ -1,7 +1,21 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Info, Loader2, Plus, Save, Sparkles, Trash2 } from "lucide-react";
+import {
+  Briefcase,
+  CheckCircle2,
+  FolderOpen,
+  GraduationCap,
+  Info,
+  Link2,
+  Loader2,
+  Plus,
+  Save,
+  Sparkles,
+  Trash2,
+  User,
+  Wrench,
+} from "lucide-react";
 import toast from "react-hot-toast";
 
 import { Badge } from "@/components/ui/badge";
@@ -25,8 +39,20 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  WorkspacePageHeader,
+  workspaceAzureButtonClass,
+  workspaceCardClass,
+  workspaceInputClass,
+  workspaceLabelClass,
+  workspaceOutlineButtonClass,
+  workspacePageClass,
+  workspacePrimaryButtonClass,
+  workspaceScrollClass,
+} from "@/components/workspace/workspace-styles";
 import { createEmptyResumeContent } from "@/lib/resume-content";
 import { createClient } from "@/lib/supabase/client";
+import { cn } from "@/lib/utils";
 import type { ParsedLinkedInProfile } from "@/types/linkedin-import";
 import type {
   Education,
@@ -84,6 +110,28 @@ function mapParsedSkills(skillNames: string[]): Skill[] {
     level: "intermediate" as const,
     category: "General",
   }));
+}
+
+function ProfileSectionHeader({
+  icon: Icon,
+  title,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  title: string;
+}) {
+  return (
+    <div className="mb-6 flex items-center gap-2 border-b border-[#e9e8e7] pb-4">
+      <Icon className="size-5 text-[#2055FD]" />
+      <h3 className="text-lg font-semibold text-[#0A0A0A]">{title}</h3>
+    </div>
+  );
+}
+
+function getInitials(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return "?";
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return `${parts[0][0] ?? ""}${parts[parts.length - 1][0] ?? ""}`.toUpperCase();
 }
 
 export function ProfilePage() {
@@ -442,475 +490,684 @@ export function ProfilePage() {
       ? previewSkills.slice(0, 12).join(", ")
       : "None detected";
 
+  const vaultItemCount =
+    workExperience.length + education.length + skills.length + (summary.trim() ? 1 : 0);
+
   if (loading) {
     return (
-      <div className="flex flex-1 items-center justify-center">
-        <Loader2 className="size-8 animate-spin text-violet-600" />
+      <div className={cn(workspacePageClass, "items-center justify-center")}>
+        <Loader2 className="size-8 animate-spin text-[#2055FD]" />
       </div>
     );
   }
 
   return (
-    <div className="mx-auto h-full w-full max-w-4xl space-y-8 overflow-y-auto px-8 py-8">
-      <header className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
-            My Profile
-          </h2>
-          <p className="mt-1 text-sm text-slate-500">
-            Your professional vault powers AI resume generation and tailoring.
-          </p>
-        </div>
-
-        <Dialog
-          open={importOpen}
-          onOpenChange={(open) => {
-            setImportOpen(open);
-            if (!open) resetImportState();
-          }}
-        >
-          <DialogTrigger asChild>
-            <Button variant="secondary" className="shrink-0 gap-2">
-              <Sparkles className="size-4" />
-              Import from LinkedIn ✨
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
-            <DialogHeader>
-              <DialogTitle>Import from LinkedIn</DialogTitle>
-              <DialogDescription>
-                Paste exported profile text and let AI structure it for your
-                vault.
-              </DialogDescription>
-            </DialogHeader>
-
-            <div className="space-y-5">
-              <div className="space-y-2">
-                <Label htmlFor="linkedin-url">LinkedIn Profile URL</Label>
-                <Input
-                  id="linkedin-url"
-                  placeholder="https://www.linkedin.com/in/your-handle"
-                  value={importLinkedinUrl}
-                  onChange={(e) => setImportLinkedinUrl(e.target.value)}
-                  disabled={isParsing}
-                />
-              </div>
-
-              <div className="flex gap-3 rounded-lg border border-blue-200 bg-blue-50/80 p-3 text-sm text-blue-900">
-                <Info className="mt-0.5 size-4 shrink-0 text-blue-600" />
-                <p>
-                  <span className="font-medium">How to import:</span> Go to your
-                  LinkedIn profile page → click the &apos;More&apos; button in
-                  your top card → select &apos;Save to PDF&apos; or manually
-                  highlight and copy your &apos;About&apos; and &apos;Experience&apos;
-                  sections, then paste the text payload directly below.
-                </p>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="profile-text">Profile text</Label>
-                <Textarea
-                  id="profile-text"
-                  rows={10}
-                  placeholder="Paste your copied LinkedIn text data directly here..."
-                  value={importProfileText}
-                  onChange={(e) => setImportProfileText(e.target.value)}
-                  disabled={isParsing}
-                  className="min-h-[200px] resize-y"
-                />
-              </div>
-
-              {!parsedPreview && (
-                <Button
-                  type="button"
-                  className="w-full"
-                  onClick={() => void handleParseProfile()}
-                  disabled={isParsing}
-                >
-                  {isParsing ? (
-                    <>
-                      <Loader2 className="size-4 animate-spin" />
-                      Parsing Data...
-                    </>
-                  ) : (
-                    "Analyze & Parse Profile"
-                  )}
+    <div className={workspacePageClass}>
+      <div className={cn(workspaceScrollClass, "pb-28")}>
+        <div className="mx-auto max-w-6xl">
+          <WorkspacePageHeader
+            badge="Identity vault"
+            title="Profile Settings"
+            description="Manage your executive identity, professional links, and structured data that powers AI resume generation and tailoring."
+          >
+            <Dialog
+              open={importOpen}
+              onOpenChange={(open) => {
+                setImportOpen(open);
+                if (!open) resetImportState();
+              }}
+            >
+              <DialogTrigger asChild>
+                <Button className={cn(workspaceAzureButtonClass, "gap-2")}>
+                  <Sparkles className="size-4" />
+                  <span className="hidden sm:inline">Import from LinkedIn</span>
+                  <span className="sm:hidden">Import</span>
                 </Button>
-              )}
+              </DialogTrigger>
+              <DialogContent className="max-h-[90vh] overflow-y-auto border-[#c7c6cb] sm:max-w-lg">
+                <DialogHeader>
+                  <DialogTitle>Import from LinkedIn</DialogTitle>
+                  <DialogDescription>
+                    Paste exported profile text and let AI structure it for your
+                    vault.
+                  </DialogDescription>
+                </DialogHeader>
 
-              {parsedPreview && (
-                <div className="space-y-4 rounded-lg border bg-slate-50 p-4">
-                  <p className="text-sm font-medium text-slate-900">
-                    Review extracted data
-                  </p>
-                  <dl className="grid gap-3 text-sm">
-                    <div>
-                      <dt className="text-slate-500">Extracted Name</dt>
-                      <dd className="font-medium text-slate-900">
-                        {parsedPreview.fullName ?? "—"}
-                      </dd>
-                    </div>
-                    <div>
-                      <dt className="text-slate-500">
-                        Detected Experience Items Count
-                      </dt>
-                      <dd className="font-medium text-slate-900">
-                        {Array.isArray(parsedPreview.workExperience)
-                          ? parsedPreview.workExperience.length
-                          : 0}
-                      </dd>
-                    </div>
-                    <div>
-                      <dt className="text-slate-500">Identified Skills Matrix</dt>
-                      <dd className="mt-1 font-medium text-slate-900">
-                        {previewSkillLabels}
-                        {Array.isArray(parsedPreview.skills) &&
-                          parsedPreview.skills.length > 12 && (
-                            <span className="text-slate-500">
-                              {" "}
-                              +{parsedPreview.skills.length - 12} more
-                            </span>
-                          )}
-                      </dd>
-                    </div>
-                  </dl>
-                  <Button
-                    type="button"
-                    className="w-full bg-emerald-600 text-white hover:bg-emerald-700"
-                    onClick={handleConfirmImport}
-                  >
-                    Confirm & Save to Profile
-                  </Button>
-                </div>
-              )}
-            </div>
-          </DialogContent>
-        </Dialog>
-      </header>
+                <div className="space-y-5">
+                  <div className="space-y-2">
+                    <Label htmlFor="linkedin-url" className={workspaceLabelClass}>
+                      LinkedIn profile URL
+                    </Label>
+                    <Input
+                      id="linkedin-url"
+                      placeholder="https://www.linkedin.com/in/your-handle"
+                      value={importLinkedinUrl}
+                      onChange={(e) => setImportLinkedinUrl(e.target.value)}
+                      disabled={isParsing}
+                      className={workspaceInputClass}
+                    />
+                  </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Personal information</CardTitle>
-          <CardDescription>Basics shown across generated resumes</CardDescription>
-        </CardHeader>
-        <CardContent className="grid gap-4 sm:grid-cols-2">
-          <div className="space-y-2 sm:col-span-2">
-            <Label htmlFor="full-name">Full name</Label>
-            <Input
-              id="full-name"
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-            />
-          </div>
-          <div className="space-y-2 sm:col-span-2">
-            <Label htmlFor="headline">Headline</Label>
-            <Input
-              id="headline"
-              value={headline}
-              onChange={(e) => setHeadline(e.target.value)}
-              placeholder="Senior Software Engineer · Full Stack"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="location">Location</Label>
-            <Input
-              id="location"
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="phone">Phone</Label>
-            <Input
-              id="phone"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="linkedin">LinkedIn URL</Label>
-            <Input
-              id="linkedin"
-              value={linkedinUrl}
-              onChange={(e) => setLinkedinUrl(e.target.value)}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="github">GitHub URL</Label>
-            <Input
-              id="github"
-              value={githubUrl}
-              onChange={(e) => setGithubUrl(e.target.value)}
-            />
-          </div>
-          <div className="space-y-2 sm:col-span-2">
-            <Label htmlFor="website">Website</Label>
-            <Input
-              id="website"
-              value={websiteUrl}
-              onChange={(e) => setWebsiteUrl(e.target.value)}
-            />
-          </div>
-          <div className="space-y-2 sm:col-span-2">
-            <Label htmlFor="summary">Professional summary</Label>
-            <Textarea
-              id="summary"
-              rows={4}
-              value={summary}
-              onChange={(e) => setSummary(e.target.value)}
-              placeholder="A concise overview of your experience and strengths..."
-            />
-          </div>
-        </CardContent>
-      </Card>
+                  <div className="flex gap-3 rounded-lg border border-[#2055FD]/20 bg-[#2055FD]/5 p-3 text-sm text-[#1b1c1c]">
+                    <Info className="mt-0.5 size-4 shrink-0 text-[#2055FD]" />
+                    <p>
+                      <span className="font-semibold">How to import:</span> Go to
+                      your LinkedIn profile page → click the &apos;More&apos; button
+                      in your top card → select &apos;Save to PDF&apos; or manually
+                      highlight and copy your &apos;About&apos; and
+                      &apos;Experience&apos; sections, then paste the text payload
+                      directly below.
+                    </p>
+                  </div>
 
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0">
-          <div>
-            <CardTitle>Work experience</CardTitle>
-            <CardDescription>Roles, impact, and achievements</CardDescription>
-          </div>
-          <Button type="button" variant="outline" size="sm" onClick={addWorkExperience}>
-            <Plus className="size-4" />
-            Add role
-          </Button>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {workExperience.length === 0 ? (
-            <p className="text-sm text-slate-500">
-              No roles yet. Add manually or import from LinkedIn.
-            </p>
-          ) : (
-            workExperience.map((job, index) => (
-              <div key={job.id}>
-                {index > 0 && <Separator className="mb-6" />}
-                <div className="grid gap-3 sm:grid-cols-2">
                   <div className="space-y-2">
-                    <Label>Company</Label>
-                    <Input
-                      value={job.company}
-                      onChange={(e) =>
-                        updateWorkExperience(job.id, { company: e.target.value })
-                      }
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Title</Label>
-                    <Input
-                      value={job.title}
-                      onChange={(e) =>
-                        updateWorkExperience(job.id, { title: e.target.value })
-                      }
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Start date</Label>
-                    <Input
-                      value={job.startDate}
-                      onChange={(e) =>
-                        updateWorkExperience(job.id, {
-                          startDate: e.target.value,
-                        })
-                      }
-                      placeholder="2022-01"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>End date</Label>
-                    <Input
-                      value={job.endDate ?? ""}
-                      onChange={(e) =>
-                        updateWorkExperience(job.id, {
-                          endDate: e.target.value || null,
-                        })
-                      }
-                      placeholder="Present"
-                      disabled={job.current}
-                    />
-                  </div>
-                  <div className="flex items-center gap-2 sm:col-span-2">
-                    <input
-                      type="checkbox"
-                      id={`current-${job.id}`}
-                      checked={job.current}
-                      onChange={(e) =>
-                        updateWorkExperience(job.id, {
-                          current: e.target.checked,
-                          endDate: e.target.checked ? null : job.endDate,
-                        })
-                      }
-                      className="size-4 rounded border-slate-300"
-                    />
-                    <Label htmlFor={`current-${job.id}`}>Current role</Label>
-                  </div>
-                  <div className="space-y-2 sm:col-span-2">
-                    <Label>Description</Label>
+                    <Label htmlFor="profile-text" className={workspaceLabelClass}>
+                      Profile text
+                    </Label>
                     <Textarea
-                      rows={3}
-                      value={job.description}
-                      onChange={(e) =>
-                        updateWorkExperience(job.id, {
-                          description: e.target.value,
-                        })
-                      }
+                      id="profile-text"
+                      rows={10}
+                      placeholder="Paste your copied LinkedIn text data directly here..."
+                      value={importProfileText}
+                      onChange={(e) => setImportProfileText(e.target.value)}
+                      disabled={isParsing}
+                      className={cn(workspaceInputClass, "min-h-[200px] resize-y")}
                     />
                   </div>
-                </div>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="mt-3 text-destructive hover:text-destructive"
-                  onClick={() => removeWorkExperience(job.id)}
-                >
-                  <Trash2 className="size-4" />
-                  Remove
-                </Button>
-              </div>
-            ))
-          )}
-        </CardContent>
-      </Card>
 
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0">
-          <div>
-            <CardTitle>Education</CardTitle>
-            <CardDescription>Degrees and institutions</CardDescription>
-          </div>
-          <Button type="button" variant="outline" size="sm" onClick={addEducation}>
-            <Plus className="size-4" />
-            Add education
-          </Button>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {education.length === 0 ? (
-            <p className="text-sm text-slate-500">No education entries yet.</p>
-          ) : (
-            education.map((edu, index) => (
-              <div key={edu.id}>
-                {index > 0 && <Separator className="mb-6" />}
-                <div className="grid gap-3 sm:grid-cols-2">
+                  {!parsedPreview && (
+                    <Button
+                      type="button"
+                      className={cn(workspacePrimaryButtonClass, "w-full")}
+                      onClick={() => void handleParseProfile()}
+                      disabled={isParsing}
+                    >
+                      {isParsing ? (
+                        <>
+                          <Loader2 className="size-4 animate-spin" />
+                          Parsing Data...
+                        </>
+                      ) : (
+                        "Analyze & Parse Profile"
+                      )}
+                    </Button>
+                  )}
+
+                  {parsedPreview && (
+                    <div className="space-y-4 rounded-lg border border-[#c7c6cb] bg-[#f5f3f3] p-4">
+                      <p className="text-sm font-semibold text-[#0A0A0A]">
+                        Review extracted data
+                      </p>
+                      <dl className="grid gap-3 text-sm">
+                        <div>
+                          <dt className={workspaceLabelClass}>Extracted name</dt>
+                          <dd className="mt-1 font-medium text-[#0A0A0A]">
+                            {parsedPreview.fullName ?? "—"}
+                          </dd>
+                        </div>
+                        <div>
+                          <dt className={workspaceLabelClass}>
+                            Experience items
+                          </dt>
+                          <dd className="mt-1 font-medium text-[#0A0A0A]">
+                            {Array.isArray(parsedPreview.workExperience)
+                              ? parsedPreview.workExperience.length
+                              : 0}
+                          </dd>
+                        </div>
+                        <div>
+                          <dt className={workspaceLabelClass}>Skills matrix</dt>
+                          <dd className="mt-1 font-medium text-[#0A0A0A]">
+                            {previewSkillLabels}
+                            {Array.isArray(parsedPreview.skills) &&
+                              parsedPreview.skills.length > 12 && (
+                                <span className="text-[#6B6B6B]">
+                                  {" "}
+                                  +{parsedPreview.skills.length - 12} more
+                                </span>
+                              )}
+                          </dd>
+                        </div>
+                      </dl>
+                      <Button
+                        type="button"
+                        className={cn(
+                          "w-full bg-[#0EB87A] text-white hover:bg-[#0da06f]",
+                        )}
+                        onClick={handleConfirmImport}
+                      >
+                        Confirm & Save to Profile
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </DialogContent>
+            </Dialog>
+          </WorkspacePageHeader>
+
+          <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-12 lg:gap-8">
+            <div className="flex flex-col gap-6 lg:col-span-8">
+              <section className={cn(workspaceCardClass, "p-6 md:p-8")}>
+                <ProfileSectionHeader icon={User} title="Personal Information" />
+                <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2 sm:col-span-2">
-                    <Label>Institution</Label>
+                    <Label htmlFor="full-name" className={workspaceLabelClass}>
+                      Full name
+                    </Label>
                     <Input
-                      value={edu.institution}
-                      onChange={(e) =>
-                        updateEducation(edu.id, { institution: e.target.value })
-                      }
+                      id="full-name"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      className={workspaceInputClass}
+                    />
+                  </div>
+                  <div className="space-y-2 sm:col-span-2">
+                    <Label htmlFor="headline" className={workspaceLabelClass}>
+                      Headline
+                    </Label>
+                    <Input
+                      id="headline"
+                      value={headline}
+                      onChange={(e) => setHeadline(e.target.value)}
+                      placeholder="Senior Software Engineer · Full Stack"
+                      className={workspaceInputClass}
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Degree</Label>
+                    <Label htmlFor="location" className={workspaceLabelClass}>
+                      Current location
+                    </Label>
                     <Input
-                      value={edu.degree}
-                      onChange={(e) =>
-                        updateEducation(edu.id, { degree: e.target.value })
-                      }
+                      id="location"
+                      value={location}
+                      onChange={(e) => setLocation(e.target.value)}
+                      className={workspaceInputClass}
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Field of study</Label>
+                    <Label htmlFor="phone" className={workspaceLabelClass}>
+                      Phone number
+                    </Label>
                     <Input
-                      value={edu.field}
-                      onChange={(e) =>
-                        updateEducation(edu.id, { field: e.target.value })
-                      }
+                      id="phone"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      className={workspaceInputClass}
+                    />
+                  </div>
+                  <div className="space-y-2 sm:col-span-2">
+                    <Label htmlFor="summary" className={workspaceLabelClass}>
+                      Professional summary
+                    </Label>
+                    <Textarea
+                      id="summary"
+                      rows={4}
+                      value={summary}
+                      onChange={(e) => setSummary(e.target.value)}
+                      placeholder="A concise overview of your experience and strengths..."
+                      className={cn(workspaceInputClass, "resize-y")}
                     />
                   </div>
                 </div>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="mt-3 text-destructive hover:text-destructive"
-                  onClick={() => removeEducation(edu.id)}
-                >
-                  <Trash2 className="size-4" />
-                  Remove
-                </Button>
-              </div>
-            ))
-          )}
-        </CardContent>
-      </Card>
+              </section>
 
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0">
-          <div>
-            <CardTitle>Skills</CardTitle>
-            <CardDescription>Tools, languages, and competencies</CardDescription>
-          </div>
-          <Button type="button" variant="outline" size="sm" onClick={addSkill}>
-            <Plus className="size-4" />
-            Add skill
-          </Button>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {skills.length === 0 ? (
-            <p className="text-sm text-slate-500">No skills listed yet.</p>
-          ) : (
-            <div className="flex flex-wrap gap-2">
-              {skills.map((skill) => (
-                <div
-                  key={skill.id}
-                  className="flex items-center gap-1 rounded-lg border bg-white px-2 py-1"
-                >
-                  <Input
-                    value={skill.name}
-                    onChange={(e) => updateSkill(skill.id, e.target.value)}
-                    className="h-7 w-32 border-0 bg-transparent px-1 shadow-none focus-visible:ring-0"
-                    placeholder="Skill name"
-                  />
+              <section className={cn(workspaceCardClass, "p-6 md:p-8")}>
+                <ProfileSectionHeader icon={Link2} title="Professional Links" />
+                <div className="flex flex-col gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="linkedin" className={workspaceLabelClass}>
+                      LinkedIn URL
+                    </Label>
+                    <Input
+                      id="linkedin"
+                      value={linkedinUrl}
+                      onChange={(e) => setLinkedinUrl(e.target.value)}
+                      placeholder="linkedin.com/in/your-handle"
+                      className={workspaceInputClass}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="github" className={workspaceLabelClass}>
+                      GitHub / portfolio
+                    </Label>
+                    <Input
+                      id="github"
+                      value={githubUrl}
+                      onChange={(e) => setGithubUrl(e.target.value)}
+                      placeholder="github.com/your-handle"
+                      className={workspaceInputClass}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="website" className={workspaceLabelClass}>
+                      Website
+                    </Label>
+                    <Input
+                      id="website"
+                      value={websiteUrl}
+                      onChange={(e) => setWebsiteUrl(e.target.value)}
+                      placeholder="https://yoursite.com"
+                      className={workspaceInputClass}
+                    />
+                  </div>
+                </div>
+              </section>
+
+              <section className={cn(workspaceCardClass, "overflow-hidden")}>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 border-b border-[#e9e8e7] px-6 py-4">
+                  <div className="flex items-center gap-2">
+                    <Briefcase className="size-5 text-[#2055FD]" />
+                    <div>
+                      <CardTitle className="text-lg text-[#0A0A0A]">
+                        Work experience
+                      </CardTitle>
+                      <CardDescription className="text-[#6B6B6B]">
+                        Roles, impact, and achievements
+                      </CardDescription>
+                    </div>
+                  </div>
                   <Button
                     type="button"
-                    variant="ghost"
-                    size="icon-sm"
-                    className="text-slate-400 hover:text-destructive"
-                    onClick={() => removeSkill(skill.id)}
+                    variant="outline"
+                    size="sm"
+                    className={workspaceOutlineButtonClass}
+                    onClick={addWorkExperience}
                   >
-                    <Trash2 className="size-3.5" />
+                    <Plus className="size-4" />
+                    Add role
                   </Button>
-                </div>
-              ))}
-            </div>
-          )}
-          {skills.length > 0 && (
-            <div className="flex flex-wrap gap-1.5 pt-2">
-              {skills
-                .filter((s) => s.name.trim())
-                .map((skill) => (
-                  <Badge key={skill.id} variant="secondary">
-                    {skill.name}
-                  </Badge>
-                ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+                </CardHeader>
+                <CardContent className="space-y-6 p-6">
+                  {workExperience.length === 0 ? (
+                    <p className="text-sm text-[#6B6B6B]">
+                      No roles yet. Add manually or import from LinkedIn.
+                    </p>
+                  ) : (
+                    workExperience.map((job, index) => (
+                      <div key={job.id}>
+                        {index > 0 && <Separator className="mb-6 bg-[#e9e8e7]" />}
+                        <div className="grid gap-3 sm:grid-cols-2">
+                          <div className="space-y-2">
+                            <Label className={workspaceLabelClass}>Company</Label>
+                            <Input
+                              value={job.company}
+                              onChange={(e) =>
+                                updateWorkExperience(job.id, {
+                                  company: e.target.value,
+                                })
+                              }
+                              className={workspaceInputClass}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label className={workspaceLabelClass}>Title</Label>
+                            <Input
+                              value={job.title}
+                              onChange={(e) =>
+                                updateWorkExperience(job.id, {
+                                  title: e.target.value,
+                                })
+                              }
+                              className={workspaceInputClass}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label className={workspaceLabelClass}>Start date</Label>
+                            <Input
+                              value={job.startDate}
+                              onChange={(e) =>
+                                updateWorkExperience(job.id, {
+                                  startDate: e.target.value,
+                                })
+                              }
+                              placeholder="2022-01"
+                              className={workspaceInputClass}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label className={workspaceLabelClass}>End date</Label>
+                            <Input
+                              value={job.endDate ?? ""}
+                              onChange={(e) =>
+                                updateWorkExperience(job.id, {
+                                  endDate: e.target.value || null,
+                                })
+                              }
+                              placeholder="Present"
+                              disabled={job.current}
+                              className={workspaceInputClass}
+                            />
+                          </div>
+                          <div className="flex items-center gap-2 sm:col-span-2">
+                            <input
+                              type="checkbox"
+                              id={`current-${job.id}`}
+                              checked={job.current}
+                              onChange={(e) =>
+                                updateWorkExperience(job.id, {
+                                  current: e.target.checked,
+                                  endDate: e.target.checked ? null : job.endDate,
+                                })
+                              }
+                              className="size-4 rounded border-[#c7c6cb] accent-[#2055FD]"
+                            />
+                            <Label
+                              htmlFor={`current-${job.id}`}
+                              className="text-sm font-medium text-[#46464b]"
+                            >
+                              Current role
+                            </Label>
+                          </div>
+                          <div className="space-y-2 sm:col-span-2">
+                            <Label className={workspaceLabelClass}>Description</Label>
+                            <Textarea
+                              rows={3}
+                              value={job.description}
+                              onChange={(e) =>
+                                updateWorkExperience(job.id, {
+                                  description: e.target.value,
+                                })
+                              }
+                              className={cn(workspaceInputClass, "resize-y")}
+                            />
+                          </div>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="mt-3 text-red-600 hover:bg-red-50 hover:text-red-700"
+                          onClick={() => removeWorkExperience(job.id)}
+                        >
+                          <Trash2 className="size-4" />
+                          Remove
+                        </Button>
+                      </div>
+                    ))
+                  )}
+                </CardContent>
+              </section>
 
-      <div className="flex justify-end pb-8">
-        <Button
-          type="button"
-          size="lg"
-          onClick={() => void handleSave()}
-          disabled={saving}
-          className="gap-2"
-        >
-          {saving ? (
-            <>
-              <Loader2 className="size-4 animate-spin" />
-              Saving...
-            </>
-          ) : (
-            <>
-              <Save className="size-4" />
-              Save profile
-            </>
-          )}
-        </Button>
+              <section className={cn(workspaceCardClass, "overflow-hidden")}>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 border-b border-[#e9e8e7] px-6 py-4">
+                  <div className="flex items-center gap-2">
+                    <GraduationCap className="size-5 text-[#2055FD]" />
+                    <div>
+                      <CardTitle className="text-lg text-[#0A0A0A]">Education</CardTitle>
+                      <CardDescription className="text-[#6B6B6B]">
+                        Degrees and institutions
+                      </CardDescription>
+                    </div>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className={workspaceOutlineButtonClass}
+                    onClick={addEducation}
+                  >
+                    <Plus className="size-4" />
+                    Add education
+                  </Button>
+                </CardHeader>
+                <CardContent className="space-y-6 p-6">
+                  {education.length === 0 ? (
+                    <p className="text-sm text-[#6B6B6B]">No education entries yet.</p>
+                  ) : (
+                    education.map((edu, index) => (
+                      <div key={edu.id}>
+                        {index > 0 && <Separator className="mb-6 bg-[#e9e8e7]" />}
+                        <div className="grid gap-3 sm:grid-cols-2">
+                          <div className="space-y-2 sm:col-span-2">
+                            <Label className={workspaceLabelClass}>Institution</Label>
+                            <Input
+                              value={edu.institution}
+                              onChange={(e) =>
+                                updateEducation(edu.id, {
+                                  institution: e.target.value,
+                                })
+                              }
+                              className={workspaceInputClass}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label className={workspaceLabelClass}>Degree</Label>
+                            <Input
+                              value={edu.degree}
+                              onChange={(e) =>
+                                updateEducation(edu.id, { degree: e.target.value })
+                              }
+                              className={workspaceInputClass}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label className={workspaceLabelClass}>
+                              Field of study
+                            </Label>
+                            <Input
+                              value={edu.field}
+                              onChange={(e) =>
+                                updateEducation(edu.id, { field: e.target.value })
+                              }
+                              className={workspaceInputClass}
+                            />
+                          </div>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="mt-3 text-red-600 hover:bg-red-50 hover:text-red-700"
+                          onClick={() => removeEducation(edu.id)}
+                        >
+                          <Trash2 className="size-4" />
+                          Remove
+                        </Button>
+                      </div>
+                    ))
+                  )}
+                </CardContent>
+              </section>
+
+              <section className={cn(workspaceCardClass, "overflow-hidden")}>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 border-b border-[#e9e8e7] px-6 py-4">
+                  <div className="flex items-center gap-2">
+                    <Wrench className="size-5 text-[#2055FD]" />
+                    <div>
+                      <CardTitle className="text-lg text-[#0A0A0A]">Skills</CardTitle>
+                      <CardDescription className="text-[#6B6B6B]">
+                        Tools, languages, and competencies
+                      </CardDescription>
+                    </div>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className={workspaceOutlineButtonClass}
+                    onClick={addSkill}
+                  >
+                    <Plus className="size-4" />
+                    Add skill
+                  </Button>
+                </CardHeader>
+                <CardContent className="space-y-4 p-6">
+                  {skills.length === 0 ? (
+                    <p className="text-sm text-[#6B6B6B]">No skills listed yet.</p>
+                  ) : (
+                    <>
+                      <div className="flex flex-wrap gap-2">
+                        {skills.map((skill) => (
+                          <div
+                            key={skill.id}
+                            className="flex items-center gap-1 rounded-lg border border-[#c7c6cb] bg-[#fbf9f8] px-2 py-1"
+                          >
+                            <Input
+                              value={skill.name}
+                              onChange={(e) => updateSkill(skill.id, e.target.value)}
+                              className="h-7 w-32 border-0 bg-transparent px-1 shadow-none focus-visible:ring-0"
+                              placeholder="Skill name"
+                            />
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon-sm"
+                              className="text-[#77777c] hover:text-red-600"
+                              onClick={() => removeSkill(skill.id)}
+                            >
+                              <Trash2 className="size-3.5" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="flex flex-wrap gap-1.5 border-t border-[#e9e8e7] pt-4">
+                        {skills
+                          .filter((s) => s.name.trim())
+                          .map((skill) => (
+                            <Badge
+                              key={skill.id}
+                              className="border border-[#2055FD]/20 bg-[#2055FD]/10 text-[#2055FD]"
+                            >
+                              {skill.name}
+                            </Badge>
+                          ))}
+                      </div>
+                    </>
+                  )}
+                </CardContent>
+              </section>
+            </div>
+
+            <aside className="flex flex-col gap-6 lg:col-span-4">
+              <section
+                className={cn(
+                  workspaceCardClass,
+                  "relative overflow-hidden p-6",
+                )}
+              >
+                <div className="pointer-events-none absolute -top-10 -right-10 size-32 rounded-full bg-[#2055FD]/10 blur-2xl" />
+                <div className="relative z-10 flex flex-col items-center text-center">
+                  <div className="relative mb-4">
+                    <div className="flex size-24 items-center justify-center rounded-full border-4 border-white bg-[#efeded] text-2xl font-bold text-[#0A0A0A] shadow-sm">
+                      {getInitials(fullName || "Profile")}
+                    </div>
+                    {fullName.trim() ? (
+                      <span
+                        className="absolute right-0 bottom-0 flex size-7 items-center justify-center rounded-full border-2 border-white bg-[#0EB87A] text-white"
+                        title="Profile active"
+                      >
+                        <CheckCircle2 className="size-4" />
+                      </span>
+                    ) : null}
+                  </div>
+                  <h3 className="text-xl font-semibold text-[#0A0A0A]">
+                    {fullName.trim() || "Your name"}
+                  </h3>
+                  <p className="mt-1 text-sm text-[#6B6B6B]">
+                    {headline.trim() || "Add a professional headline"}
+                  </p>
+                  {location.trim() ? (
+                    <p className="mt-1 font-mono text-[12px] tracking-wide text-[#77777c] uppercase">
+                      {location}
+                    </p>
+                  ) : null}
+                  <div className="mt-6 w-full rounded-lg border border-[#c7c6cb]/50 bg-[#f5f3f3] p-3">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="text-left">
+                        <span className={workspaceLabelClass}>Vault status</span>
+                        <p className="text-sm font-semibold text-[#0A0A0A]">
+                          {vaultResumeId ? "Synced" : "Not saved yet"}
+                        </p>
+                      </div>
+                      <span
+                        className={cn(
+                          "rounded-full px-3 py-1 font-mono text-[11px] font-bold tracking-wider uppercase",
+                          vaultResumeId
+                            ? "border border-[#0EB87A]/30 bg-[#0EB87A]/10 text-[#005233]"
+                            : "border border-[#c7c6cb] bg-[#efeded] text-[#6B6B6B]",
+                        )}
+                      >
+                        {vaultResumeId ? "Active" : "Draft"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <section className={cn(workspaceCardClass, "flex flex-col p-6")}>
+                <div className="mb-4 flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <FolderOpen className="size-5 text-[#2055FD]" />
+                    <h3 className="text-lg font-semibold text-[#0A0A0A]">
+                      Resume Vault
+                    </h3>
+                  </div>
+                </div>
+                <p className="mb-4 text-sm text-[#6B6B6B]">
+                  Your verified master data store for AI generation and tailoring.
+                </p>
+                <div className="flex flex-col gap-3">
+                  <div className="group flex items-center justify-between rounded-lg border border-[#c7c6cb] bg-[#fbf9f8] p-3 transition-all hover:border-[#2055FD]/40 hover:shadow-sm">
+                    <div className="flex min-w-0 items-center gap-3">
+                      <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-[#0A0A0A] text-white">
+                        <FolderOpen className="size-4" />
+                      </div>
+                      <div className="min-w-0 text-left">
+                        <p className="truncate text-sm font-semibold text-[#0A0A0A]">
+                          {PROFILE_VAULT_TITLE}
+                        </p>
+                        <p className="font-mono text-[11px] text-[#6B6B6B]">
+                          Structured · {vaultItemCount} sections
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  {workExperience.length > 0 && (
+                    <div className="rounded-lg border border-dashed border-[#c7c6cb] bg-white p-3 text-left text-xs text-[#6B6B6B]">
+                      <span className="font-semibold text-[#0A0A0A]">
+                        {workExperience.length}
+                      </span>{" "}
+                      work {workExperience.length === 1 ? "entry" : "entries"} ·{" "}
+                      <span className="font-semibold text-[#0A0A0A]">
+                        {education.length}
+                      </span>{" "}
+                      education ·{" "}
+                      <span className="font-semibold text-[#0A0A0A]">
+                        {skills.filter((s) => s.name.trim()).length}
+                      </span>{" "}
+                      skills
+                    </div>
+                  )}
+                </div>
+              </section>
+            </aside>
+          </div>
+        </div>
+      </div>
+
+      <div className="fixed right-0 bottom-0 left-0 z-40 border-t border-[#c7c6cb] bg-white/90 px-4 py-4 backdrop-blur-md md:left-60">
+        <div className="mx-auto flex max-w-6xl justify-end">
+          <Button
+            type="button"
+            size="lg"
+            onClick={() => void handleSave()}
+            disabled={saving}
+            className={cn(workspacePrimaryButtonClass, "gap-2 px-8")}
+          >
+            {saving ? (
+              <>
+                <Loader2 className="size-4 animate-spin" />
+                Saving...
+              </>
+            ) : (
+              <>
+                <Save className="size-4" />
+                Save profile
+              </>
+            )}
+          </Button>
+        </div>
       </div>
     </div>
   );
 }
-

@@ -28,7 +28,7 @@ export function ScoreRing({
             cx="80"
             cy="80"
             r={radius}
-            className="stroke-slate-200"
+            className="stroke-[#e9e8e7]"
             strokeWidth="12"
             fill="none"
           />
@@ -53,7 +53,9 @@ export function ScoreRing({
           </span>
         </div>
       </div>
-      <p className="mt-4 text-center text-sm text-slate-500">{footerLabel}</p>
+      <p className="mt-4 text-center font-mono text-[13px] tracking-wide text-[#6B6B6B] uppercase">
+        {footerLabel}
+      </p>
     </div>
   );
 }
