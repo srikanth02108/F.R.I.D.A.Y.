@@ -16,7 +16,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
-import { BRAND_ACRONYM } from "@/lib/brand";
+import { FridayLogo } from "@/components/brand/friday-logo";
 import { navItems } from "@/lib/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
@@ -42,13 +42,12 @@ function getInitial(name: string, email: string): string {
 
 function SidebarBrand() {
   return (
-    <div className="flex h-16 shrink-0 items-center gap-3 border-b border-slate-800 px-5">
-      <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-violet-600 px-0.5 text-[9px] font-bold leading-none tracking-tight">
-        F
-      </div>
-      <span className="text-sm font-semibold leading-tight text-white">
-        {BRAND_ACRONYM}
-      </span>
+    <div className="flex h-16 shrink-0 items-center border-b border-slate-800 px-5">
+      <FridayLogo
+        size={36}
+        href="/app/dashboard"
+        wordmarkClassName="text-sm text-white"
+      />
     </div>
   );
 }
@@ -252,14 +251,11 @@ export function Sidebar() {
     <>
       {/* Mobile fixed header + sheet */}
       <header className="fixed top-0 right-0 left-0 z-50 flex h-14 items-center justify-between border-b border-slate-800 bg-slate-900 px-4 lg:hidden">
-        <div className="flex items-center gap-3">
-          <div className="flex size-8 items-center justify-center rounded-lg bg-violet-600 text-[10px] font-bold text-white">
-            F
-          </div>
-          <span className="text-sm font-semibold text-white">
-            {BRAND_ACRONYM}
-          </span>
-        </div>
+        <FridayLogo
+          size={32}
+          href="/app/dashboard"
+          wordmarkClassName="text-sm text-white"
+        />
         <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
           <SheetTrigger asChild>
             <Button

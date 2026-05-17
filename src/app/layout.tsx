@@ -18,9 +18,17 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: BRAND_FULL_NAME,
+  title: {
+    default: BRAND_FULL_NAME,
+    template: `%s | F.R.I.D.A.Y.`,
+  },
   description:
     "Flexible Resume & Interview Optimizer for a Dynamic Adaptation System — AI-powered ATS optimization and interview coaching.",
+  icons: {
+    icon: [{ url: "/friday-logo.png", type: "image/png" }],
+    apple: "/friday-logo.png",
+    shortcut: "/friday-logo.png",
+  },
 };
 
 export default function RootLayout({

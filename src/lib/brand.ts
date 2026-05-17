@@ -1,4 +1,5 @@
 export const BRAND_ACRONYM = "F.R.I.D.A.Y.";
+export const BRAND_LOGO_PATH = "/friday-logo.png";
 export const BRAND_FULL_NAME =
   "F.R.I.D.A.Y. - Flexible Resume & Interview Optimizer for a Dynamic Adaptation System";
 export const BRAND_SHORT = "Friday";

@@ -13,7 +13,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { BRAND_ACRONYM } from "@/lib/brand";
+import { FridayLogo } from "@/components/brand/friday-logo";
 import { cn } from "@/lib/utils";
 
 const NAV_LINKS = [
@@ -24,15 +24,12 @@ const NAV_LINKS = [
 
 function BrandMark({ className }: { className?: string }) {
   return (
-    <Link
+    <FridayLogo
+      size={40}
       href="/"
-      className={cn(
-        "text-lg font-extrabold tracking-tight text-[#0A0A0A] dark:text-white sm:text-xl",
-        className,
-      )}
-    >
-      {BRAND_ACRONYM}
-    </Link>
+      className={className}
+      wordmarkClassName="text-base font-extrabold text-[#0A0A0A] dark:text-white sm:text-lg"
+    />
   );
 }
 
