@@ -107,16 +107,16 @@ export function AtsScoreDemo() {
     <section
       ref={sectionRef}
       id="ats-score"
-      className="scroll-mt-28 border-b border-[#e9e8e7] bg-[#fbf9f8] px-4 py-20 sm:px-6 md:px-10"
+      className="scroll-mt-28 border-b border-[#e9e8e7] bg-[#fbf9f8] py-16 md:py-24 dark:border-slate-800 dark:bg-slate-950"
     >
-      <div className="mx-auto max-w-[1280px]">
-        <div className="mb-16 text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-[#0A0A0A] md:text-5xl">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6">
+        <div className="mb-12 text-center md:mb-14">
+          <h2 className="text-3xl font-bold tracking-tight text-[#0A0A0A] md:text-4xl dark:text-white">
             Watch your ATS score climb
           </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-lg text-[#6B6B6B]">
-            Tailor once — see measurable lift in keyword match and parser-friendly
-            structure before you hit apply.
+          <p className="mx-auto mt-4 max-w-2xl text-base text-[#6B6B6B] md:text-lg dark:text-slate-400">
+            Friday Tailoring once — see measurable lift in keyword match and
+            parser-friendly structure before you hit apply.
           </p>
         </div>
 
@@ -130,8 +130,8 @@ export function AtsScoreDemo() {
 
           <div className="flex shrink-0 flex-col items-center justify-center gap-3">
             <ArrowRight className="size-10 font-bold text-[#805AD5] md:size-8" />
-            <span className="rounded-full border border-[#E9D8FD] bg-[#FAF5FF] px-4 py-1.5 font-mono text-xs font-bold tracking-wide text-[#6B46C1]">
-              AI Tailor
+            <span className="rounded-full border border-[#E9D8FD] bg-[#FAF5FF] px-4 py-1.5 font-mono text-xs font-bold tracking-wide text-[#6B46C1] dark:border-violet-500/30 dark:bg-violet-500/10 dark:text-violet-300">
+              Friday Tailoring
             </span>
           </div>
 

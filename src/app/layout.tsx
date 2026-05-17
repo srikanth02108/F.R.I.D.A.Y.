@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "react-hot-toast";
 
+import { FridayThemeProvider } from "@/components/theme/friday-theme-provider";
+import { BRAND_FULL_NAME } from "@/lib/brand";
+
 import "./globals.css";
 
 const geistSans = Geist({
@@ -15,8 +18,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Tailor Your Resume",
-  description: "AI-powered resume builder that helps you land your next job",
+  title: BRAND_FULL_NAME,
+  description:
+    "Flexible Resume & Interview Optimizer for a Dynamic Adaptation System — AI-powered ATS optimization and interview coaching.",
 };
 
 export default function RootLayout({
@@ -27,20 +31,23 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} h-full scroll-smooth antialiased`}
+      suppressHydrationWarning
     >
-      <body className="flex min-h-full flex-col">
-        {children}
-        <Toaster
-          position="top-center"
-          toastOptions={{
-            duration: 4000,
-            style: {
-              background: "#0f172a",
-              color: "#f8fafc",
-            },
-          }}
-        />
+      <body className="flex min-h-full flex-col bg-background text-foreground">
+        <FridayThemeProvider>
+          {children}
+          <Toaster
+            position="top-center"
+            toastOptions={{
+              duration: 4000,
+              style: {
+                background: "#0f172a",
+                color: "#f8fafc",
+              },
+            }}
+          />
+        </FridayThemeProvider>
       </body>
     </html>
   );

@@ -13,7 +13,7 @@ export function LatexDiffView({ before, after, className }: LatexDiffViewProps) 
   return (
     <div
       className={cn(
-        "overflow-auto rounded-lg border border-slate-200 bg-slate-900 font-mono text-xs leading-relaxed",
+        "overflow-auto rounded-lg border border-zinc-200 bg-zinc-950 font-mono text-xs leading-relaxed dark:border-zinc-800",
         className,
       )}
     >

@@ -57,6 +57,7 @@ import {
   WorkspacePageHeader,
   workspaceAzureButtonClass,
   workspaceCardClass,
+  tailorResumePanelClass,
   workspaceInputClass,
   workspaceLabelClass,
   workspaceOutlineButtonClass,
@@ -767,9 +768,9 @@ export default function Page() {
           </div>
 
           {/* Panel 2 — Current resume */}
-          <div className={cn(workspaceCardClass, "col-span-12 flex min-h-[420px] flex-col lg:col-span-3")}>
-            <div className="border-b border-[#e9e8e7] px-4 py-3">
-              <Label className="text-sm font-semibold text-[#0A0A0A]">Your Current Resume</Label>
+          <div className={cn(tailorResumePanelClass, "col-span-12 flex min-h-[420px] flex-col lg:col-span-3")}>
+            <div className="border-b border-[#e9e8e7] px-4 py-3 dark:border-zinc-800">
+              <Label className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">Your Current Resume</Label>
               {selectedResume && !usePasteMode && (
                 <p className="mt-0.5 truncate text-xs text-[#2055FD]">
                   {selectedResume.title}
@@ -778,7 +779,7 @@ export default function Page() {
             </div>
             <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto p-4">
               <div className="flex items-center justify-between gap-2">
-                <Label htmlFor="paste-mode" className="text-xs text-slate-600">
+                <Label htmlFor="paste-mode" className="text-xs text-slate-600 dark:text-zinc-400">
                   Paste custom LaTeX
                 </Label>
                 <Switch
@@ -801,7 +802,7 @@ export default function Page() {
                     onValueChange={setSelectedResumeId}
                     disabled={isBusy || loadingResumes}
                   >
-                    <SelectTrigger className="w-full bg-white">
+                    <SelectTrigger className="w-full bg-white dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50">
                       <SelectValue
                         placeholder={
                           loadingResumes ? "Loading…" : "Select a resume"
@@ -866,18 +867,18 @@ export default function Page() {
             </div>
           </div>
 
-          {/* Panel 3 — Tailored result */}
-          <div className={cn(workspaceCardClass, "relative col-span-12 flex min-h-[420px] flex-col lg:col-span-5")}>
+          {/* Panel 3 — Tailored result (after tailoring) */}
+          <div className={cn(tailorResumePanelClass, "relative col-span-12 flex min-h-[420px] flex-col lg:col-span-5")}>
             {(isProcessing || isComplete) && (
-              <div className="absolute top-4 right-4 z-10 flex items-center gap-2 rounded-full border border-[#c7c6cb]/50 bg-white/80 px-4 py-1.5 shadow-sm backdrop-blur-md">
-                <span className="size-2 animate-pulse rounded-full bg-[#2055FD]" />
-                <span className={cn(workspaceLabelClass, "text-[#0A0A0A]")}>
+              <div className="absolute top-4 right-4 z-10 flex items-center gap-2 rounded-full border border-zinc-200/80 bg-white/90 px-4 py-1.5 shadow-sm backdrop-blur-md dark:border-zinc-700 dark:bg-zinc-900/90">
+                <span className="size-2 animate-pulse rounded-full bg-[#2055FD] dark:bg-violet-500" />
+                <span className={cn(workspaceLabelClass, "text-zinc-900 dark:text-zinc-50")}>
                   {isProcessing ? "Live: Tailoring" : "Tailored"}
                 </span>
               </div>
             )}
-            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#e9e8e7] px-4 py-3">
-              <Label className="text-sm font-semibold text-[#0A0A0A]">Tailored Resume</Label>
+            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#e9e8e7] px-4 py-3 dark:border-zinc-800">
+              <Label className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">Tailored Resume</Label>
               {isComplete && (
                 <Tabs
                   value={diffModeActive ? "diff" : "code"}

@@ -6,6 +6,7 @@ import { useState } from "react";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import toast from "react-hot-toast";
 
+import { AuthBackHomeLink } from "@/components/auth/auth-back-home-link";
 import { AuthBrandPanel } from "@/components/auth/auth-brand-panel";
 import { AuthGoogleButton } from "@/components/auth/auth-google-button";
 import {
@@ -17,6 +18,7 @@ import {
   AuthDesktopBrandMark,
   AuthMobileBrand,
 } from "@/components/auth/auth-mobile-brand";
+import { LandingThemeToggle } from "@/components/landing/landing-theme-toggle";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { createClient } from "@/lib/supabase/client";
@@ -27,6 +29,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [resettingPassword, setResettingPassword] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -51,20 +54,60 @@ export default function LoginPage() {
     router.refresh();
   }
 
+  async function handleForgotPassword() {
+    const trimmedEmail = email.trim();
+
+    if (!trimmedEmail) {
+      toast.error("Please enter your email address first, then try again.");
+      return;
+    }
+
+    setResettingPassword(true);
+
+    try {
+      const supabase = createClient();
+      const { error } = await supabase.auth.resetPasswordForEmail(trimmedEmail, {
+        redirectTo: `${window.location.origin}/auth/update-password`,
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      toast.success(
+        "Password reset email sent! Check your inbox for the secure reset link.",
+        { duration: 6000 },
+      );
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Could not send password reset email";
+      toast.error(message);
+    } finally {
+      setResettingPassword(false);
+    }
+  }
+
   return (
     <div className="flex min-h-screen w-full">
       <AuthBrandPanel variant="signin" />
 
-      <div className="flex w-full items-center justify-center overflow-y-auto bg-[#fbf9f8] p-4 sm:p-6 md:p-10 lg:w-1/2">
+      <div className="relative flex w-full items-center justify-center overflow-y-auto bg-[#fbf9f8] p-4 sm:p-6 md:p-10 lg:w-1/2 dark:bg-zinc-950">
+        <div className="absolute top-4 right-4 z-10 sm:top-6 sm:right-6">
+          <LandingThemeToggle />
+        </div>
+
         <div className="flex w-full max-w-md flex-col py-6">
+          <AuthBackHomeLink />
           <AuthMobileBrand />
           <AuthDesktopBrandMark />
 
           <div className="mb-8">
-            <h1 className="mb-2 text-[28px] font-bold leading-9 tracking-tight text-[#1b1c1c] md:text-[32px] md:leading-10">
+            <h1 className="mb-2 text-[28px] font-bold leading-9 tracking-tight text-[#1b1c1c] md:text-[32px] md:leading-10 dark:text-zinc-50">
               Sign In
             </h1>
-            <p className="text-base text-[#6B6B6B]">
+            <p className="text-base text-[#6B6B6B] dark:text-zinc-400">
               Enter your details to access your dashboard.
             </p>
           </div>
@@ -94,14 +137,11 @@ export default function LoginPage() {
                 </label>
                 <button
                   type="button"
-                  className="text-sm font-medium text-[#2055FD] transition-colors hover:text-[#0036bc]"
-                  onClick={() =>
-                    toast("Password reset is not configured yet.", {
-                      icon: "ℹ️",
-                    })
-                  }
+                  className="cursor-pointer text-sm font-medium text-purple-500 transition-colors hover:text-purple-600 hover:underline disabled:cursor-not-allowed disabled:opacity-60 dark:text-violet-400 dark:hover:text-violet-300"
+                  onClick={() => void handleForgotPassword()}
+                  disabled={loading || resettingPassword}
                 >
-                  Forgot password?
+                  {resettingPassword ? "Sending…" : "Forgot password?"}
                 </button>
               </div>
               <div className="relative">
@@ -118,7 +158,7 @@ export default function LoginPage() {
                 />
                 <button
                   type="button"
-                  className="absolute inset-y-0 right-0 flex items-center pr-3 text-[#77777c] transition-colors hover:text-[#1b1c1c]"
+                  className="absolute inset-y-0 right-0 flex items-center pr-3 text-[#77777c] transition-colors hover:text-[#1b1c1c] dark:text-zinc-500 dark:hover:text-zinc-200"
                   onClick={() => setShowPassword((prev) => !prev)}
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
@@ -151,10 +191,10 @@ export default function LoginPage() {
 
           <div className="relative my-8">
             <div className="absolute inset-0 flex items-center" aria-hidden>
-              <div className="w-full border-t border-[#e9e8e7]" />
+              <div className="w-full border-t border-[#e9e8e7] dark:border-zinc-800" />
             </div>
             <div className="relative flex justify-center">
-              <span className="bg-[#fbf9f8] px-4 font-mono text-[13px] font-medium tracking-[0.05em] text-[#6B6B6B]">
+              <span className="bg-[#fbf9f8] px-4 font-mono text-[13px] font-medium tracking-[0.05em] text-[#6B6B6B] dark:bg-zinc-950 dark:text-zinc-500">
                 OR
               </span>
             </div>
@@ -162,11 +202,11 @@ export default function LoginPage() {
 
           <AuthGoogleButton disabled />
 
-          <p className="mt-10 text-center text-base text-[#6B6B6B]">
+          <p className="mt-10 text-center text-base text-[#6B6B6B] dark:text-zinc-400">
             Don&apos;t have an account?{" "}
             <Link
               href="/auth/signup"
-              className="ml-1 text-[15px] font-semibold text-[#2055FD] transition-colors hover:text-[#2558ff]"
+              className="ml-1 text-[15px] font-semibold text-[#2055FD] transition-colors hover:text-[#2558ff] dark:text-violet-400"
             >
               Sign up
             </Link>

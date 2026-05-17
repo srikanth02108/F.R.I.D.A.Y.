@@ -2,12 +2,13 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
 import { LandingPage } from "@/components/landing/landing-page";
+import { BRAND_FULL_NAME } from "@/lib/brand";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
-  title: "Tailor Your Resume — AI-Powered ATS Optimization System",
+  title: `${BRAND_FULL_NAME} — AI-Powered ATS Optimization`,
   description:
-    "Dynamic resume customizer, real-time ATS keyword validator, and mock interview suite built for SummerSaaS Hackathon - 2026.",
+    "Flexible Resume & Interview Optimizer for a Dynamic Adaptation System — dynamic resume customizer, ATS keyword validator, and mock interview suite.",
 };
 
 export default async function Home() {
