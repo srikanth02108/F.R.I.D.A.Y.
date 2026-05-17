@@ -39,14 +39,14 @@ export function SkillsGapDashboard({ data }: SkillsGapDashboardProps) {
   return (
     <Card
       className={cn(
-        "border-2 shadow-sm",
+        "rounded-xl border shadow-[0px_4px_20px_rgba(15,17,23,0.04)]",
         strongAlignment
-          ? "border-emerald-300/80 bg-gradient-to-br from-emerald-50/40 to-white"
-          : "border-violet-300/80",
+          ? "border-[#0EB87A]/40 bg-gradient-to-br from-[#0EB87A]/5 to-white"
+          : "border-[#c7c6cb] bg-white",
       )}
     >
-      <CardHeader className="border-b border-slate-100 pb-4">
-        <CardTitle className="text-xl font-semibold text-slate-900">
+      <CardHeader className="border-b border-[#e9e8e7] pb-4">
+        <CardTitle className="text-xl font-semibold text-[#0A0A0A]">
           Skills Gap Analysis
         </CardTitle>
       </CardHeader>

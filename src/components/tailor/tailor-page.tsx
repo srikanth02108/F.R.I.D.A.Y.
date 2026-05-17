@@ -11,6 +11,7 @@ import {
   Loader2,
   Save,
   Sparkles,
+  TrendingUp,
 } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -52,6 +53,17 @@ import { streamSsePost } from "@/lib/stream-sse";
 import type { AtsScoreResult } from "@/types/ats-score";
 import type { SkillsGapResult } from "@/types/skills-gap";
 import type { Resume, UserProfile } from "@/types/database";
+import {
+  WorkspacePageHeader,
+  workspaceAzureButtonClass,
+  workspaceCardClass,
+  workspaceInputClass,
+  workspaceLabelClass,
+  workspaceOutlineButtonClass,
+  workspacePageClass,
+  workspacePrimaryButtonClass,
+  workspaceScrollClass,
+} from "@/components/workspace/workspace-styles";
 import { cn } from "@/lib/utils";
 
 const MonacoEditor = dynamic(() => import("@monaco-editor/react"), {
@@ -85,11 +97,11 @@ const COVER_LETTER_TONES = ["Professional", "Enthusiastic", "Casual"] as const;
 function jobLevelBadgeClass(level: JobLevel) {
   switch (level) {
     case "Junior":
-      return "bg-blue-100 text-blue-700";
+      return "bg-[#2055FD]/10 text-[#2055FD] border-[#2055FD]/20";
     case "Senior":
-      return "bg-amber-100 text-amber-800";
+      return "bg-amber-50 text-amber-800 border-amber-200";
     default:
-      return "bg-violet-100 text-violet-700";
+      return "bg-[#efeded] text-[#46464b] border-[#c7c6cb]";
   }
 }
 
@@ -672,25 +684,19 @@ export function TailorPage() {
   };
 
   return (
-    <div className="flex h-[calc(100vh-4rem)] flex-col overflow-hidden bg-slate-50">
+    <div className={cn(workspacePageClass, "h-[calc(100vh-4rem)]")}>
       {/* Top bar */}
-      <div className="shrink-0 border-b border-slate-200 bg-white px-6 py-4">
-        <h2 className="text-xl font-semibold tracking-tight text-slate-900">
-          Tailor Your Resume for a Job
-        </h2>
-        <p className="mt-1 text-sm text-slate-500">
-          Paste the job description and AI will rewrite your resume to maximize
-          ATS score.
-        </p>
-      </div>
-
-      {/* Main grid */}
-      <div className="min-h-0 flex-1 overflow-y-auto p-4 pb-24">
+      <div className={cn(workspaceScrollClass, "pb-28")}>
+        <WorkspacePageHeader
+          badge="Job alignment"
+          title="Tailor for Job"
+          description="Paste the job description and AI will rewrite your resume to maximize ATS match."
+        />
         <div className="grid grid-cols-12 gap-4">
           {/* Panel 1 — Job description */}
-          <div className="col-span-12 flex min-h-[420px] flex-col rounded-xl border border-slate-200 bg-white lg:col-span-4">
-            <div className="border-b border-slate-100 px-4 py-3">
-              <Label className="text-sm font-semibold">Paste Job Description</Label>
+          <div className={cn(workspaceCardClass, "col-span-12 flex min-h-[420px] flex-col lg:col-span-4")}>
+            <div className="border-b border-[#e9e8e7] px-4 py-3 md:px-6">
+              <Label className="text-sm font-semibold text-[#0A0A0A]">Target Job Description</Label>
             </div>
             <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto p-4">
               <Textarea
@@ -699,7 +705,7 @@ export function TailorPage() {
                 value={jobDescription}
                 onChange={(e) => setJobDescription(e.target.value)}
                 disabled={isBusy}
-                className="min-h-[200px] flex-1 resize-none"
+                className={cn(workspaceInputClass, "min-h-[200px] flex-1 resize-none")}
               />
 
               <Button
@@ -707,7 +713,7 @@ export function TailorPage() {
                 size="sm"
                 onClick={runJdAnalysis}
                 disabled={isBusy || !jobDescription.trim()}
-                className="w-fit"
+                className={cn(workspaceOutlineButtonClass, "w-fit")}
               >
                 {isAnalyzing ? (
                   <Loader2 className="size-3.5 animate-spin" />
@@ -718,16 +724,16 @@ export function TailorPage() {
               </Button>
 
               {showJdInsights && jdAnalysis && (
-                <div className="space-y-4 rounded-lg border border-slate-100 bg-slate-50 p-4">
+                <div className="space-y-4 rounded-lg border border-[#e9e8e7] bg-[#f5f3f3] p-4">
                   <div>
-                    <p className="mb-2 text-xs font-medium uppercase tracking-wide text-slate-500">
+                    <p className={cn(workspaceLabelClass, "mb-2")}>
                       Key Skills Required
                     </p>
                     <div className="flex flex-wrap gap-1.5">
                       {jdAnalysis.keySkills.map((skill) => (
                         <Badge
                           key={skill}
-                          className="border-0 bg-violet-100 text-violet-700"
+                          className="border border-[#2055FD]/20 bg-[#2055FD]/10 text-[#2055FD]"
                         >
                           {skill}
                         </Badge>
@@ -735,20 +741,20 @@ export function TailorPage() {
                     </div>
                   </div>
                   <div>
-                    <p className="mb-1 text-xs font-medium uppercase tracking-wide text-slate-500">
+                    <p className={cn(workspaceLabelClass, "mb-1")}>
                       Required Experience
                     </p>
-                    <p className="text-sm text-slate-700">
+                    <p className="text-sm text-[#46464b]">
                       {jdAnalysis.requiredExperience}
                     </p>
                   </div>
                   <div>
-                    <p className="mb-2 text-xs font-medium uppercase tracking-wide text-slate-500">
+                    <p className={cn(workspaceLabelClass, "mb-2")}>
                       Job Level
                     </p>
                     <Badge
                       className={cn(
-                        "border-0",
+                        "border",
                         jobLevelBadgeClass(jdAnalysis.jobLevel),
                       )}
                     >
@@ -761,11 +767,11 @@ export function TailorPage() {
           </div>
 
           {/* Panel 2 — Current resume */}
-          <div className="col-span-12 flex min-h-[420px] flex-col rounded-xl border border-slate-200 bg-white lg:col-span-3">
-            <div className="border-b border-slate-100 px-4 py-3">
-              <Label className="text-sm font-semibold">Your Current Resume</Label>
+          <div className={cn(workspaceCardClass, "col-span-12 flex min-h-[420px] flex-col lg:col-span-3")}>
+            <div className="border-b border-[#e9e8e7] px-4 py-3">
+              <Label className="text-sm font-semibold text-[#0A0A0A]">Your Current Resume</Label>
               {selectedResume && !usePasteMode && (
-                <p className="mt-0.5 truncate text-xs text-violet-600">
+                <p className="mt-0.5 truncate text-xs text-[#2055FD]">
                   {selectedResume.title}
                 </p>
               )}
@@ -822,7 +828,7 @@ export function TailorPage() {
                 />
               )}
 
-              <div className="min-h-[220px] flex-1 overflow-hidden rounded-lg border border-slate-200">
+              <div className="min-h-[220px] flex-1 overflow-hidden rounded-lg border border-[#c7c6cb] bg-[#0A0A0A]">
                 {!usePasteMode && (
                   <MonacoEditor
                     height="100%"
@@ -861,9 +867,17 @@ export function TailorPage() {
           </div>
 
           {/* Panel 3 — Tailored result */}
-          <div className="col-span-12 flex min-h-[420px] flex-col rounded-xl border border-slate-200 bg-white lg:col-span-5">
-            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 px-4 py-3">
-              <Label className="text-sm font-semibold">Tailored Resume</Label>
+          <div className={cn(workspaceCardClass, "relative col-span-12 flex min-h-[420px] flex-col lg:col-span-5")}>
+            {(isProcessing || isComplete) && (
+              <div className="absolute top-4 right-4 z-10 flex items-center gap-2 rounded-full border border-[#c7c6cb]/50 bg-white/80 px-4 py-1.5 shadow-sm backdrop-blur-md">
+                <span className="size-2 animate-pulse rounded-full bg-[#2055FD]" />
+                <span className={cn(workspaceLabelClass, "text-[#0A0A0A]")}>
+                  {isProcessing ? "Live: Tailoring" : "Tailored"}
+                </span>
+              </div>
+            )}
+            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#e9e8e7] px-4 py-3">
+              <Label className="text-sm font-semibold text-[#0A0A0A]">Tailored Resume</Label>
               {isComplete && (
                 <Tabs
                   value={diffModeActive ? "diff" : "code"}
@@ -883,11 +897,11 @@ export function TailorPage() {
 
             <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto p-4">
               {atsBeforeScore !== null && atsAfterScore !== null && isComplete && (
-                <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-center">
-                  <p className="text-sm font-semibold text-emerald-800">
+                <div className="rounded-lg border border-[#0EB87A]/30 bg-[#0EB87A]/10 px-4 py-3 text-center">
+                  <p className="text-sm font-semibold text-[#005233]">
                     ATS Match Score
                   </p>
-                  <p className="mt-1 flex items-center justify-center gap-2 text-lg font-bold text-emerald-700">
+                  <p className="mt-1 flex items-center justify-center gap-2 text-lg font-bold text-[#0EB87A]">
                     Before: {atsBeforeScore}%
                     <ArrowRight className="size-4" />
                     After: {atsAfterScore}%
@@ -905,8 +919,8 @@ export function TailorPage() {
                   </CardContent>
                 </Card>
               ) : isProcessing ? (
-                <div className="min-h-[280px] flex-1 rounded-lg border-2 border-violet-400 bg-slate-900 p-4 animate-pulse">
-                  <pre className="h-full overflow-auto font-mono text-xs leading-relaxed whitespace-pre-wrap text-slate-100">
+                <div className="min-h-[280px] flex-1 rounded-lg border-2 border-[#2055FD]/50 bg-[#0A0A0A] p-4 animate-pulse">
+                  <pre className="h-full overflow-auto font-mono text-xs leading-relaxed whitespace-pre-wrap text-[#f5f3f3]">
                     {tailoredResumeLatex || " "}
                   </pre>
                 </div>
@@ -917,7 +931,7 @@ export function TailorPage() {
                   className="min-h-[280px] flex-1"
                 />
               ) : (
-                <div className="min-h-[280px] flex-1 overflow-hidden rounded-lg border border-slate-200">
+                <div className="min-h-[280px] flex-1 overflow-hidden rounded-lg border border-[#c7c6cb] bg-[#0A0A0A]">
                   <MonacoEditor
                     height="100%"
                     language="latex"
@@ -939,7 +953,7 @@ export function TailorPage() {
                 <div className="space-y-2">
                   <div className="flex flex-wrap gap-2">
                     <Button
-                    className="bg-violet-600 hover:bg-violet-700"
+                    className={workspacePrimaryButtonClass}
                     size="sm"
                     onClick={handleOpenInEditor}
                     disabled={isBusy}
@@ -954,6 +968,7 @@ export function TailorPage() {
                   <Button
                     variant="outline"
                     size="sm"
+                    className={workspaceOutlineButtonClass}
                     onClick={handleExportPdf}
                     disabled={isBusy}
                   >
@@ -967,6 +982,7 @@ export function TailorPage() {
                   <Button
                     variant="outline"
                     size="sm"
+                    className={workspaceOutlineButtonClass}
                     onClick={handleSaveAsNewVersion}
                     disabled={isBusy}
                   >
@@ -1048,7 +1064,7 @@ export function TailorPage() {
               type="button"
               onClick={() => void handleGenerateCoverLetter()}
               disabled={isLetterStreaming}
-              className="w-full gap-2 bg-violet-600 hover:bg-violet-700"
+              className={cn(workspaceAzureButtonClass, "w-full gap-2")}
             >
               {isLetterStreaming ? (
                 <>
@@ -1086,7 +1102,7 @@ export function TailorPage() {
           </div>
 
           {hasCoverLetterText && !isLetterStreaming && (
-            <DialogFooter className="gap-2 border-t bg-slate-50/80 pt-4 sm:justify-between">
+            <DialogFooter className="gap-2 border-t border-[#e9e8e7] bg-[#f5f3f3]/80 pt-4 sm:justify-between">
               <Button
                 variant="outline"
                 onClick={() => setIsCoverLetterModalOpen(false)}
@@ -1106,14 +1122,13 @@ export function TailorPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Bottom bar */}
-      <div className="shrink-0 border-t border-slate-200 bg-white px-4 py-3">
+      <div className="fixed right-0 bottom-0 left-0 z-40 border-t border-[#c7c6cb] bg-white/90 px-4 py-4 backdrop-blur-md md:left-60">
         <Button
           type="button"
           size="lg"
           disabled={isBusy}
           onClick={handleTailor}
-          className="w-full bg-gradient-to-r from-violet-600 to-purple-600 py-6 text-base font-semibold text-white hover:from-violet-700 hover:to-purple-700"
+          className={cn(workspacePrimaryButtonClass, "w-full gap-2 py-6")}
         >
           {isProcessing ? (
             <>

@@ -1,10 +1,12 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { format } from "date-fns";
 import {
+  CheckCircle2,
   Copy,
   Download,
   FileText,
@@ -12,7 +14,9 @@ import {
   Loader2,
   Play,
   Save,
+  Share2,
   User,
+  Wand2,
 } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -34,16 +38,19 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
+  workspaceAzureButtonClass,
+  workspaceLabelClass,
+  workspaceOutlineButtonClass,
+  workspacePrimaryButtonClass,
+} from "@/components/workspace/workspace-styles";
+import {
   compileLatexToPdfBlob,
   downloadPdfBlob,
   sanitizeResumeFilename,
 } from "@/lib/compile-latex";
 import { createClient } from "@/lib/supabase/client";
 import { createEmptyResumeContent } from "@/lib/resume-content";
-import {
-  getTemplateLatex,
-  TEMPLATES,
-} from "@/lib/templates";
+import { getTemplateLatex, TEMPLATES } from "@/lib/templates";
 import type { Resume } from "@/types/database";
 import { cn } from "@/lib/utils";
 
@@ -331,33 +338,46 @@ export function ResumeEditor() {
 
   if (loadingResume) {
     return (
-      <div className="flex h-[calc(100vh-4rem)] items-center justify-center">
-        <Loader2 className="size-6 animate-spin text-violet-600" />
+      <div className="flex h-[calc(100vh-4rem)] items-center justify-center bg-[#f5f3f3]">
+        <Loader2 className="size-6 animate-spin text-[#2055FD]" />
       </div>
     );
   }
 
   return (
     <>
-      <div
-        ref={containerRef}
-        className={cn(
-          "flex h-[calc(100vh-4rem)] overflow-hidden bg-white",
-          isDragging && "cursor-col-resize select-none",
-        )}
-      >
-        {/* Left panel — editor */}
-        <div
-          className="flex min-w-0 flex-col border-r border-slate-200"
-          style={{ width: `${leftPanelPercent}%` }}
-        >
-          <div className="flex shrink-0 flex-wrap items-center gap-2 border-b border-slate-200 bg-slate-50 px-3 py-2">
+      <div className="flex h-[calc(100vh-4rem)] flex-col overflow-hidden bg-[#f5f3f3]">
+        <header className="z-10 flex h-16 shrink-0 flex-wrap items-center justify-between gap-3 border-b border-[#e9e8e7] bg-white px-4 shadow-sm md:px-6">
+          <div className="flex min-w-0 flex-1 items-center gap-3">
+            <FileText className="size-5 shrink-0 text-[#6B6B6B]" />
+            <Input
+              value={resumeName}
+              onChange={(e) => setResumeName(e.target.value)}
+              className="h-9 max-w-[min(100%,280px)] border-transparent bg-transparent px-0 text-base font-bold text-[#0A0A0A] shadow-none focus-visible:border-[#c7c6cb] focus-visible:ring-2 focus-visible:ring-[#2055FD]/10"
+              placeholder="Resume name"
+            />
+            <span
+              className={cn(
+                "shrink-0 rounded px-2 py-1 font-mono text-[11px] tracking-wider uppercase",
+                isDirty
+                  ? "bg-amber-50 text-amber-800"
+                  : "bg-[#efeded] text-[#46464b]",
+              )}
+            >
+              {isDirty ? "Unsaved" : "Saved"}
+            </span>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
             <Select
               value={selectedTemplate}
               onValueChange={handleTemplateChange}
               disabled={isBusy}
             >
-              <SelectTrigger className="w-[140px] bg-white" size="sm">
+              <SelectTrigger
+                className="h-9 w-[130px] border-[#c7c6cb] bg-white text-sm md:w-[150px]"
+                size="sm"
+              >
                 <SelectValue placeholder="Template" />
               </SelectTrigger>
               <SelectContent>
@@ -372,6 +392,7 @@ export function ResumeEditor() {
             <Button
               variant="outline"
               size="sm"
+              className={cn("hidden sm:inline-flex", workspaceOutlineButtonClass)}
               onClick={handleLoadMyInfo}
               disabled={isBusy}
             >
@@ -382,6 +403,7 @@ export function ResumeEditor() {
             <Button
               variant="outline"
               size="sm"
+              className={cn("hidden md:inline-flex", workspaceOutlineButtonClass)}
               onClick={handleCopyLatex}
               disabled={isBusy}
             >
@@ -395,7 +417,7 @@ export function ResumeEditor() {
 
             <Button
               size="sm"
-              className="bg-violet-600 hover:bg-violet-700"
+              className={cn(workspaceOutlineButtonClass)}
               onClick={handleSave}
               disabled={isBusy}
             >
@@ -407,69 +429,20 @@ export function ResumeEditor() {
               Save
             </Button>
 
-            <Input
-              value={resumeName}
-              onChange={(e) => setResumeName(e.target.value)}
-              className="ml-auto h-8 max-w-[180px] bg-white text-sm"
-              placeholder="Resume name"
-            />
-          </div>
-
-          <div className="min-h-0 flex-1">
-            <MonacoEditor
-              height="100%"
-              language="latex"
-              theme="vs-dark"
-              value={latexContent}
-              onChange={(value) => setLatexContent(value ?? "")}
-              options={{
-                wordWrap: "on",
-                fontSize: 13,
-                minimap: { enabled: false },
-                scrollBeyondLastLine: false,
-                automaticLayout: true,
-                padding: { top: 12 },
-              }}
-            />
-          </div>
-        </div>
-
-        {/* Draggable divider */}
-        <button
-          type="button"
-          aria-label="Resize panels"
-          onMouseDown={handleDividerMouseDown}
-          className={cn(
-            "flex w-1.5 shrink-0 cursor-col-resize items-center justify-center bg-slate-200 transition-colors hover:bg-violet-300",
-            isDragging && "bg-violet-400",
-          )}
-        >
-          <GripVertical className="size-3 text-slate-500" />
-        </button>
-
-        {/* Right panel — preview */}
-        <div
-          className="flex min-w-0 flex-1 flex-col"
-          style={{ width: `${100 - leftPanelPercent}%` }}
-        >
-          <div className="flex shrink-0 flex-wrap items-center gap-2 border-b border-slate-200 bg-slate-50 px-3 py-2">
-            <Button
-              size="sm"
-              className="bg-violet-600 hover:bg-violet-700"
-              onClick={handleCompile}
-              disabled={isBusy}
-            >
-              {compiling ? (
-                <Loader2 className="size-3.5 animate-spin" />
-              ) : (
-                <Play className="size-3.5" />
-              )}
-              Compile & Preview
-            </Button>
-
             <Button
               variant="outline"
               size="sm"
+              className={cn("hidden lg:inline-flex", workspaceOutlineButtonClass)}
+              disabled={isBusy}
+              onClick={() => toast("Share link coming soon", { icon: "ℹ️" })}
+            >
+              <Share2 className="size-3.5" />
+              Share
+            </Button>
+
+            <Button
+              size="sm"
+              className={cn(workspaceAzureButtonClass)}
               onClick={handleExportPdf}
               disabled={isBusy}
             >
@@ -478,37 +451,144 @@ export function ResumeEditor() {
               ) : (
                 <Download className="size-3.5" />
               )}
-              Export PDF
+              <span className="hidden sm:inline">Download PDF</span>
+              <span className="sm:hidden">PDF</span>
             </Button>
 
-            <span className="ml-auto text-xs text-slate-500">
-              {lastCompiled
-                ? `Last compiled ${format(lastCompiled, "h:mm a")}`
-                : "Not compiled yet"}
-            </span>
+            <Button size="sm" className={cn(workspacePrimaryButtonClass)} asChild>
+              <Link href="/app/tailor">
+                <Wand2 className="size-3.5" />
+                <span className="hidden sm:inline">Tailor for Job</span>
+                <span className="sm:hidden">Tailor</span>
+              </Link>
+            </Button>
+          </div>
+        </header>
+
+        <div
+          ref={containerRef}
+          className={cn(
+            "flex min-h-0 flex-1 overflow-hidden",
+            isDragging && "cursor-col-resize select-none",
+          )}
+        >
+          <div
+            className="flex min-w-0 flex-col border-r border-[#e9e8e7] bg-[#0A0A0A]"
+            style={{ width: `${leftPanelPercent}%` }}
+          >
+            <div className="flex h-10 shrink-0 items-center justify-between border-b border-[#191b22] bg-[#151515] px-4">
+              <span className={cn(workspaceLabelClass, "text-[12px] text-[#82838b]")}>
+                monaco-editor (LaTeX)
+              </span>
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-7 text-xs text-[#c5c6ce] hover:bg-[#191b22] hover:text-white"
+                onClick={handleCompile}
+                disabled={isBusy}
+              >
+                {compiling ? (
+                  <Loader2 className="size-3 animate-spin" />
+                ) : (
+                  <Play className="size-3" />
+                )}
+                Compile
+              </Button>
+            </div>
+
+            <div className="min-h-0 flex-1">
+              <MonacoEditor
+                height="100%"
+                language="latex"
+                theme="vs-dark"
+                value={latexContent}
+                onChange={(value) => setLatexContent(value ?? "")}
+                options={{
+                  wordWrap: "on",
+                  fontSize: 13,
+                  minimap: { enabled: false },
+                  scrollBeyondLastLine: false,
+                  automaticLayout: true,
+                  padding: { top: 12 },
+                }}
+              />
+            </div>
           </div>
 
-          <div className="min-h-0 flex-1 overflow-auto bg-slate-100 p-4">
-            {!pdfUrl ? (
-              <div className="flex h-full flex-col items-center justify-center rounded-lg border-2 border-dashed border-slate-300 bg-slate-50 text-center">
-                <FileText className="mb-3 size-10 text-slate-400" />
-                <p className="max-w-xs text-sm text-slate-500">
-                  Click &apos;Compile &amp; Preview&apos; to see your resume
+          <button
+            type="button"
+            aria-label="Resize panels"
+            onMouseDown={handleDividerMouseDown}
+            className={cn(
+              "flex w-1.5 shrink-0 cursor-col-resize items-center justify-center bg-[#e9e8e7] transition-colors hover:bg-[#2055FD]/40",
+              isDragging && "bg-[#2055FD]",
+            )}
+          >
+            <GripVertical className="size-3 text-[#77777c]" />
+          </button>
+
+          <div
+            className="relative flex min-w-0 flex-1 flex-col bg-[#efeded]"
+            style={{ width: `${100 - leftPanelPercent}%` }}
+          >
+            {pdfUrl ? (
+              <div className="absolute top-4 right-4 z-20 hidden w-72 rounded-xl border border-[#e9e8e7] bg-white/90 p-4 shadow-[0px_4px_20px_rgba(15,17,23,0.08)] backdrop-blur-xl sm:block">
+                <div className="mb-3 flex items-center justify-between">
+                  <span className={cn(workspaceLabelClass, "text-[#6B6B6B]")}>
+                    Preview Status
+                  </span>
+                  <div className="flex items-center gap-1 text-[#0EB87A]">
+                    <CheckCircle2 className="size-4" />
+                    <span className="text-sm font-bold">Ready</span>
+                  </div>
+                </div>
+                <div className="mb-3 h-1.5 w-full overflow-hidden rounded-full bg-[#efeded]">
+                  <div className="h-full w-full rounded-full bg-[#0EB87A]" />
+                </div>
+                <p className="text-xs text-[#6B6B6B]">
+                  {lastCompiled
+                    ? `Compiled ${format(lastCompiled, "h:mm a")}`
+                    : "PDF preview active"}
                 </p>
               </div>
-            ) : (
-              <iframe
-                title="Resume preview"
-                src={pdfUrl}
-                className="h-full min-h-[600px] w-full rounded-lg border border-slate-200 bg-white shadow-sm"
-              />
-            )}
+            ) : null}
+
+            <div className="min-h-0 flex-1 overflow-auto p-4 md:p-6">
+              {!pdfUrl ? (
+                <div className="flex h-full min-h-[320px] flex-col items-center justify-center rounded-xl border-2 border-dashed border-[#c7c6cb] bg-white text-center">
+                  <FileText className="mb-3 size-10 text-[#77777c]" />
+                  <p className="max-w-xs text-sm text-[#6B6B6B]">
+                    Click Compile to render your LaTeX resume as a live PDF
+                    preview.
+                  </p>
+                  <Button
+                    className={cn("mt-4", workspaceAzureButtonClass)}
+                    size="sm"
+                    onClick={handleCompile}
+                    disabled={isBusy}
+                  >
+                    {compiling ? (
+                      <Loader2 className="size-3.5 animate-spin" />
+                    ) : (
+                      <Play className="size-3.5" />
+                    )}
+                    Compile & Preview
+                  </Button>
+                </div>
+              ) : (
+                <iframe
+                  title="Resume preview"
+                  src={pdfUrl}
+                  className="mx-auto h-full min-h-[600px] w-full max-w-3xl rounded-sm border border-[#e9e8e7] bg-white shadow-[0px_10px_30px_rgba(0,0,0,0.1)]"
+                />
+              )}
+            </div>
           </div>
         </div>
       </div>
 
       <Dialog open={templateDialogOpen} onOpenChange={setTemplateDialogOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="border-[#c7c6cb] sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Switch template?</DialogTitle>
             <DialogDescription>
@@ -519,6 +599,7 @@ export function ResumeEditor() {
           <DialogFooter className="gap-2 sm:gap-0">
             <Button
               variant="outline"
+              className={workspaceOutlineButtonClass}
               onClick={() => {
                 setPendingTemplate(null);
                 setTemplateDialogOpen(false);
@@ -527,7 +608,7 @@ export function ResumeEditor() {
               Cancel
             </Button>
             <Button
-              className="bg-violet-600 hover:bg-violet-700"
+              className={workspacePrimaryButtonClass}
               onClick={confirmTemplateChange}
             >
               Switch template

@@ -4,32 +4,36 @@ import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import {
+  ArrowRight,
+  Check,
+  CloudUpload,
   FileText,
   Lightbulb,
   ListChecks,
   Loader2,
   Sparkles,
   Target,
+  Wand2,
 } from "lucide-react";
 import toast from "react-hot-toast";
 
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  WorkspacePageHeader,
+  WorkspaceSectionLabel,
+  workspaceAzureButtonClass,
+  workspaceCardClass,
+  workspaceInputClass,
+  workspaceLabelClass,
+  workspaceOutlineButtonClass,
+  workspacePageClass,
+  workspacePrimaryButtonClass,
+  workspaceScrollClass,
+} from "@/components/workspace/workspace-styles";
 import { compileLatexToPdfBlob } from "@/lib/compile-latex";
 import { createEmptyResumeContent } from "@/lib/resume-content";
 import { sanitizeGeneratedLatex } from "@/lib/sanitize-latex";
@@ -42,7 +46,7 @@ import { cn } from "@/lib/utils";
 const MonacoEditor = dynamic(() => import("@monaco-editor/react"), {
   ssr: false,
   loading: () => (
-    <div className="flex h-64 items-center justify-center bg-[#1e1e1e] text-sm text-slate-400">
+    <div className="flex h-64 items-center justify-center bg-[#1e1e1e] text-sm text-[#82838b]">
       Loading editor…
     </div>
   ),
@@ -52,19 +56,50 @@ const DEFAULT_TEMPLATE = "classic";
 const AI_RESUME_TITLE = "AI Generated Resume";
 
 const TIPS = [
-  {
-    icon: Target,
-    text: "Mention metrics and scale where possible",
-  },
-  {
-    icon: ListChecks,
-    text: "List your primary stack clearly",
-  },
-  {
-    icon: Lightbulb,
-    text: "Specify your target job role",
-  },
+  { icon: Target, text: "Mention metrics and scale where possible" },
+  { icon: ListChecks, text: "List your primary stack clearly" },
+  { icon: Lightbulb, text: "Specify your target job role" },
 ] as const;
+
+function ProgressStep({
+  step,
+  label,
+  active,
+  complete,
+}: {
+  step: number;
+  label: string;
+  active: boolean;
+  complete: boolean;
+}) {
+  return (
+    <div
+      className={cn(
+        "flex items-center gap-3",
+        !active && !complete && "opacity-60",
+      )}
+    >
+      <div
+        className={cn(
+          "flex size-8 items-center justify-center rounded-full font-mono text-[13px] font-bold",
+          complete || active
+            ? "bg-[#2055FD] text-white shadow-[0_0_15px_rgba(32,85,253,0.3)]"
+            : "bg-[#e9e8e7] text-[#6B6B6B]",
+        )}
+      >
+        {complete ? <Check className="size-4" /> : step}
+      </div>
+      <span
+        className={cn(
+          "text-lg font-semibold",
+          active || complete ? "text-[#0A0A0A]" : "text-[#6B6B6B]",
+        )}
+      >
+        {label}
+      </span>
+    </div>
+  );
+}
 
 export function GeneratePage() {
   const router = useRouter();
@@ -84,6 +119,9 @@ export function GeneratePage() {
 
   const isComplete = generatedLatex.length > 0 && !isGenerating;
   const isBusy = isGenerating || isCompiling || isSaving;
+  const stepInput = !isGenerating && !isComplete;
+  const stepProcessing = isGenerating;
+  const stepPreview = isComplete;
 
   useEffect(() => {
     return () => {
@@ -266,99 +304,95 @@ export function GeneratePage() {
   };
 
   return (
-    <div className="flex h-[calc(100vh-4rem)] overflow-hidden">
-      <div className="grid h-full w-full grid-cols-1 lg:grid-cols-[2fr_3fr]">
-        {/* Left column — inputs */}
-        <div className="flex min-h-0 flex-col overflow-y-auto border-r border-slate-200 bg-white p-6">
-          <div className="space-y-1">
-            <h2 className="text-xl font-semibold tracking-tight text-slate-900">
-              Generate Resume with AI
-            </h2>
-            <p className="text-sm text-slate-500">
-              Describe your experience and let Groq AI engineer your complete
-              resume.
-            </p>
-          </div>
+    <div className={cn(workspacePageClass, "relative")}>
+      <div className={cn(workspaceScrollClass, "pb-28")}>
+        <WorkspacePageHeader
+          badge="AI Hub Engine"
+          title="Resume Generation Hub"
+          description="Initialize your career vector. Describe your background and let Groq AI engineer your complete LaTeX resume."
+        />
 
-          <div className="mt-6 space-y-5">
-            <div className="space-y-2">
-              <Label htmlFor="description">Tell us about yourself...</Label>
-              <Textarea
-                id="description"
-                rows={8}
-                placeholder="E.g. I'm a 2024 Computer Science graduate from VIT. I did an internship at a startup where I built a REST API. I'm good at Python, React, and SQL. Looking for backend developer roles."
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                disabled={isBusy}
-                className="resize-none"
-              />
-            </div>
+        <div className="mb-8 flex flex-col gap-4 overflow-x-auto md:flex-row md:items-center">
+          <ProgressStep
+            step={1}
+            label="Input Source"
+            active={stepInput}
+            complete={stepProcessing || stepPreview}
+          />
+          <div className="hidden h-0.5 min-w-8 flex-1 bg-[#c7c6cb] md:block" />
+          <ProgressStep
+            step={2}
+            label="AI Processing"
+            active={stepProcessing}
+            complete={stepPreview}
+          />
+          <div className="hidden h-0.5 min-w-8 flex-1 bg-[#c7c6cb] md:block" />
+          <ProgressStep
+            step={3}
+            label="Preview & Refine"
+            active={stepPreview}
+            complete={false}
+          />
+        </div>
 
-            <div className="space-y-2">
-              <Label>Resume template</Label>
-              <Select
-                value={selectedTemplate}
-                onValueChange={setSelectedTemplate}
-                disabled={isBusy}
-              >
-                <SelectTrigger className="w-full bg-white">
-                  <SelectValue placeholder="Choose a template" />
-                </SelectTrigger>
-                <SelectContent>
-                  {TEMPLATES.map((template) => (
-                    <SelectItem key={template.id} value={template.id}>
-                      {template.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {selectedTemplateMeta && (
-                <p className="text-xs text-slate-500">
-                  {selectedTemplateMeta.description}
-                </p>
-              )}
-            </div>
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 lg:gap-6">
+          <div className="flex flex-col gap-6 lg:col-span-8">
+            <div className={cn(workspaceCardClass, "relative overflow-hidden p-6 md:p-8")}>
+              <CloudUpload className="absolute top-4 right-4 size-24 text-[#2055FD]/5" />
+              <h3 className="mb-2 text-xl font-semibold text-[#0A0A0A]">
+                Tell us about yourself
+              </h3>
+              <p className="mb-6 text-sm text-[#6B6B6B]">
+                Our semantic engine uses your narrative to build a high-signal
+                LaTeX resume via Groq AI.
+              </p>
 
-            <div className="flex items-center justify-between gap-4 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3">
-              <div className="space-y-0.5">
-                <Label htmlFor="load-profile" className="text-sm font-medium">
-                  Load from My Profile
+              <div className="space-y-2">
+                <Label htmlFor="description" className={workspaceLabelClass}>
+                  Background & experience
                 </Label>
-                <p className="text-xs text-slate-500">
-                  Include Supabase profile data in the Groq prompt
+                <Textarea
+                  id="description"
+                  rows={8}
+                  placeholder="E.g. I'm a 2024 Computer Science graduate from VIT. I did an internship at a startup where I built a REST API. I'm good at Python, React, and SQL. Looking for backend developer roles."
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  disabled={isBusy}
+                  className={cn(workspaceInputClass, "min-h-[200px] resize-none")}
+                />
+              </div>
+
+              <div className="mt-6 flex flex-col gap-4 rounded-lg border border-[#c7c6cb] bg-[#f5f3f3] px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <Label htmlFor="load-profile" className="text-sm font-semibold text-[#0A0A0A]">
+                    Load from My Profile
+                  </Label>
+                  <p className="text-xs text-[#6B6B6B]">
+                    Include Supabase profile data in the Groq prompt
+                  </p>
+                </div>
+                <Switch
+                  id="load-profile"
+                  checked={loadProfileToggle}
+                  onCheckedChange={setLoadProfileToggle}
+                  disabled={isBusy}
+                />
+              </div>
+
+              <div className="mt-4 rounded-lg border border-dashed border-[#c7c6cb] bg-[#fbf9f8] p-6 text-center">
+                <CloudUpload className="mx-auto mb-3 size-8 text-[#2055FD]" />
+                <p className="text-sm font-semibold text-[#0A0A0A]">
+                  Document upload coming soon
+                </p>
+                <p className="mt-1 text-xs text-[#6B6B6B]">
+                  PDF, DOCX, or LinkedIn archive — use manual entry for now
                 </p>
               </div>
-              <Switch
-                id="load-profile"
-                checked={loadProfileToggle}
-                onCheckedChange={setLoadProfileToggle}
-                disabled={isBusy}
-              />
             </div>
 
-            <Button
-              type="button"
-              size="lg"
-              disabled={isBusy || !description.trim()}
-              onClick={handleGenerate}
-              className="w-full bg-gradient-to-r from-violet-600 to-purple-600 text-white hover:from-violet-700 hover:to-purple-700"
-            >
-              {isGenerating ? (
-                <>
-                  <Loader2 className="size-4 animate-spin" />
-                  Generating...
-                </>
-              ) : (
-                <>
-                  <Sparkles className="size-4" />
-                  Generate Resume
-                </>
-              )}
-            </Button>
-
-            <Card className="shadow-sm">
+            <Card className={cn(workspaceCardClass, "border-0 shadow-none")}>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">
+                <CardTitle className="text-sm font-semibold text-[#0A0A0A]">
                   Pro-Tips for Better Generation
                 </CardTitle>
               </CardHeader>
@@ -368,9 +402,9 @@ export function GeneratePage() {
                   return (
                     <div
                       key={tip.text}
-                      className="flex items-start gap-2 text-sm text-slate-600"
+                      className="flex items-start gap-2 text-sm text-[#46464b]"
                     >
-                      <Icon className="mt-0.5 size-4 shrink-0 text-violet-600" />
+                      <Icon className="mt-0.5 size-4 shrink-0 text-[#2055FD]" />
                       <span>{tip.text}</span>
                     </div>
                   );
@@ -378,88 +412,173 @@ export function GeneratePage() {
               </CardContent>
             </Card>
           </div>
-        </div>
 
-        {/* Right column — output */}
-        <div className="flex min-h-0 flex-col overflow-y-auto bg-slate-50 p-6">
-          {!generatedLatex && !isGenerating ? (
-            <div className="flex h-full flex-col items-center justify-center text-center">
-              <div className="flex size-16 items-center justify-center rounded-2xl bg-violet-100">
-                <Sparkles className="size-8 text-violet-600" />
+          <div className="lg:col-span-4">
+            <div className={cn(workspaceCardClass, "flex h-full flex-col p-6")}>
+              <div className="mb-4 flex items-center justify-between">
+                <h3 className="text-lg font-semibold text-[#0A0A0A]">
+                  Output Architecture
+                </h3>
+                <Wand2 className="size-5 text-[#6B6B6B]" />
               </div>
-              <p className="mt-4 max-w-sm text-sm text-slate-500">
-                Your generated resume will appear here
+              <p className="mb-6 text-sm text-[#6B6B6B]">
+                Select the LaTeX template for compilation style and visual
+                hierarchy.
               </p>
-            </div>
-          ) : (
-            <div className="flex min-h-0 flex-1 flex-col gap-4">
-              {isGenerating ? (
-                <div
-                  className={cn(
-                    "min-h-[320px] flex-1 rounded-lg border-2 border-violet-400 bg-slate-900 p-4 animate-pulse",
-                  )}
-                >
-                  <pre className="h-full overflow-auto font-mono text-xs leading-relaxed whitespace-pre-wrap text-slate-100">
-                    {generatedLatex || " "}
-                  </pre>
-                </div>
-              ) : (
-                <div className="min-h-[320px] flex-1 overflow-hidden rounded-lg border border-slate-200 shadow-sm">
-                  <MonacoEditor
-                    height="100%"
-                    language="latex"
-                    theme="vs-dark"
-                    value={generatedLatex}
-                    options={{
-                      readOnly: true,
-                      wordWrap: "on",
-                      fontSize: 13,
-                      minimap: { enabled: false },
-                      scrollBeyondLastLine: false,
-                      automaticLayout: true,
-                      padding: { top: 12 },
-                    }}
-                  />
-                </div>
-              )}
 
-              {isComplete && (
-                <div className="flex flex-wrap gap-3">
-                  <Button
-                    className="bg-violet-600 hover:bg-violet-700"
-                    onClick={handleOpenInEditor}
-                    disabled={isBusy}
-                  >
-                    {isSaving ? (
-                      <Loader2 className="size-4 animate-spin" />
-                    ) : (
-                      <FileText className="size-4" />
-                    )}
-                    Open in Editor
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={handleCompilePreview}
-                    disabled={isBusy}
-                  >
-                    {isCompiling ? (
-                      <Loader2 className="size-4 animate-spin" />
-                    ) : null}
-                    Compile Preview
-                  </Button>
-                </div>
-              )}
-
-              {pdfBlobUrl && (
-                <iframe
-                  title="Compiled resume preview"
-                  src={pdfBlobUrl}
-                  className="h-[min(600px,50vh)] w-full rounded-lg border border-slate-200 bg-white shadow-sm"
-                />
-              )}
+              <div className="flex max-h-[420px] flex-col gap-3 overflow-y-auto pr-1">
+                {TEMPLATES.map((template) => {
+                  const isSelected = selectedTemplate === template.id;
+                  return (
+                    <button
+                      key={template.id}
+                      type="button"
+                      disabled={isBusy}
+                      onClick={() => setSelectedTemplate(template.id)}
+                      className={cn(
+                        "relative rounded-lg border p-3 text-left transition-all",
+                        isSelected
+                          ? "border-2 border-[#2055FD] bg-white shadow-[0_4px_15px_rgba(32,85,253,0.08)]"
+                          : "border-[#c7c6cb] bg-white hover:border-[#77777c]",
+                      )}
+                    >
+                      {isSelected ? (
+                        <span className="absolute top-3 right-3 flex size-5 items-center justify-center rounded-full bg-[#2055FD]">
+                          <Check className="size-3 text-white" />
+                        </span>
+                      ) : null}
+                      <div className="mb-3 h-20 overflow-hidden rounded border border-[#e9e8e7] bg-[#efeded]" />
+                      <h4 className="text-base font-semibold text-[#0A0A0A]">
+                        {template.name}
+                      </h4>
+                      {template.id === selectedTemplate &&
+                      selectedTemplateMeta ? (
+                        <p className="mt-1 text-xs text-[#6B6B6B]">
+                          {selectedTemplateMeta.description}
+                        </p>
+                      ) : null}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-          )}
+          </div>
         </div>
+
+        <div className="mt-8">
+          <WorkspaceSectionLabel>Generated output</WorkspaceSectionLabel>
+          <div
+            className={cn(
+              workspaceCardClass,
+              "min-h-[360px] overflow-hidden",
+              isGenerating && "border-2 border-[#2055FD]/40",
+            )}
+          >
+            {!generatedLatex && !isGenerating ? (
+              <div className="flex h-[360px] flex-col items-center justify-center p-8 text-center">
+                <div className="mb-4 flex size-16 items-center justify-center rounded-2xl bg-[#2055FD]/10">
+                  <Sparkles className="size-8 text-[#2055FD]" />
+                </div>
+                <p className="max-w-sm text-sm text-[#6B6B6B]">
+                  Your generated resume will stream here after you initialize
+                  the AI engine.
+                </p>
+              </div>
+            ) : isGenerating ? (
+              <pre className="h-[360px] overflow-auto bg-[#0A0A0A] p-4 font-mono text-xs leading-relaxed whitespace-pre-wrap text-[#f5f3f3]">
+                {generatedLatex || " "}
+              </pre>
+            ) : (
+              <div className="h-[360px]">
+                <MonacoEditor
+                  height="100%"
+                  language="latex"
+                  theme="vs-dark"
+                  value={generatedLatex}
+                  options={{
+                    readOnly: true,
+                    wordWrap: "on",
+                    fontSize: 13,
+                    minimap: { enabled: false },
+                    scrollBeyondLastLine: false,
+                    automaticLayout: true,
+                    padding: { top: 12 },
+                  }}
+                />
+              </div>
+            )}
+
+            {isComplete ? (
+              <div className="flex flex-wrap gap-3 border-t border-[#e9e8e7] bg-[#f5f3f3] p-4">
+                <Button
+                  className={workspacePrimaryButtonClass}
+                  onClick={handleOpenInEditor}
+                  disabled={isBusy}
+                >
+                  {isSaving ? (
+                    <Loader2 className="size-4 animate-spin" />
+                  ) : (
+                    <FileText className="size-4" />
+                  )}
+                  Open in Editor
+                </Button>
+                <Button
+                  variant="outline"
+                  className={workspaceOutlineButtonClass}
+                  onClick={handleCompilePreview}
+                  disabled={isBusy}
+                >
+                  {isCompiling ? (
+                    <Loader2 className="size-4 animate-spin" />
+                  ) : null}
+                  Compile Preview
+                </Button>
+              </div>
+            ) : null}
+          </div>
+
+          {pdfBlobUrl ? (
+            <iframe
+              title="Compiled resume preview"
+              src={pdfBlobUrl}
+              className="mt-4 h-[min(600px,50vh)] w-full rounded-xl border border-[#c7c6cb] bg-white shadow-sm"
+            />
+          ) : null}
+        </div>
+      </div>
+
+      <div className="fixed right-0 bottom-0 left-0 z-40 flex items-center justify-end gap-3 border-t border-[#c7c6cb] bg-white/90 px-4 py-4 backdrop-blur-md md:left-60">
+        <Button
+          variant="ghost"
+          className="text-[#6B6B6B] hover:text-[#0A0A0A]"
+          disabled={isBusy}
+          onClick={() => {
+            setDescription("");
+            setGeneratedLatex("");
+          }}
+        >
+          Clear session
+        </Button>
+        <Button
+          type="button"
+          size="lg"
+          disabled={isBusy || !description.trim()}
+          onClick={handleGenerate}
+          className={cn(workspacePrimaryButtonClass, "gap-2 px-8")}
+        >
+          {isGenerating ? (
+            <>
+              <Loader2 className="size-5 animate-spin" />
+              Initializing…
+            </>
+          ) : (
+            <>
+              <Sparkles className="size-5 text-[#2055FD]" />
+              Initialize AI Engine
+              <ArrowRight className="size-4" />
+            </>
+          )}
+        </Button>
       </div>
     </div>
   );

@@ -289,7 +289,7 @@ export function LandingPage() {
       <main className="flex-1 pt-16 lg:pt-20">
         <section className="mx-auto flex max-w-[1280px] flex-col items-center px-4 py-16 text-center sm:px-6 md:px-10 md:py-24">
           <span className="mb-6 inline-flex rounded-full border border-[#2055FD]/20 bg-[#2055FD]/10 px-3 py-1 font-mono text-[13px] font-medium tracking-[0.05em] text-[#2055FD]">
-            Built for Mumbai Hacks 2025
+            Built for SummerSaaS Hackathon 2026
           </span>
 
           <h1 className="mx-auto mb-6 max-w-4xl text-4xl font-extrabold tracking-[-0.02em] text-[#1b1c1c] sm:text-5xl md:text-[48px] md:leading-[56px]">
