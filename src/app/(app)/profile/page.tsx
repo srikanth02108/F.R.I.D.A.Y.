@@ -1,5 +1,13 @@
-import { PageStub } from "@/components/layout/PageStub";
+import type { Metadata } from "next";
 
-export default function ProfilePage() {
-  return <PageStub title="My Profile" />;
+import { ProfilePage } from "@/components/profile/profile-page";
+
+export const metadata: Metadata = {
+  title: "My Personal Info Vault | Tailor Your Resume",
+  description:
+    "Manage your professional profile, skills, and LinkedIn import vault.",
+};
+
+export default function Page() {
+  return <ProfilePage />;
 }

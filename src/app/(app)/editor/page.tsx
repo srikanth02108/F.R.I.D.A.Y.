@@ -1,7 +1,14 @@
+import type { Metadata } from "next";
 import { Suspense } from "react";
 import { Loader2 } from "lucide-react";
 
 import { ResumeEditor } from "@/components/editor/resume-editor";
+
+export const metadata: Metadata = {
+  title: "Advanced LaTeX Resume Editor | Tailor Your Resume",
+  description:
+    "Edit LaTeX resume source with live preview and Supabase persistence.",
+};
 
 function EditorLoading() {
   return (
