@@ -7,19 +7,25 @@ import {
   CheckCircle2,
   ChevronDown,
   ChevronUp,
+  Download,
   Key,
   LayoutTemplate,
+  Loader2,
   Sparkles,
   TrendingUp,
 } from "lucide-react";
+import toast from "react-hot-toast";
 
+import { FridayVerifiedBadge } from "@/components/ats-score/friday-verified-badge";
 import { ScoreRing } from "@/components/ats-score/score-ring";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
+  workspaceAzureButtonClass,
   workspaceCardClass,
   workspaceLabelClass,
+  workspaceOutlineButtonClass,
   workspacePrimaryButtonClass,
 } from "@/components/workspace/workspace-styles";
 import { getOverallScoreMeta, getSeverityStyles, SEVERITY_ORDER } from "@/lib/ats-score-ui";
@@ -29,6 +35,7 @@ import { cn } from "@/lib/utils";
 type AtsScoreResultsProps = {
   result: AtsScoreResult;
   hasJobDescription: boolean;
+  onRunAnother?: () => void;
 };
 
 function ScoreBar({
@@ -152,9 +159,47 @@ function IssueCard({ issue }: { issue: AtsIssue }) {
 export function AtsScoreResults({
   result,
   hasJobDescription,
+  onRunAnother,
 }: AtsScoreResultsProps) {
   const [showAllIssues, setShowAllIssues] = useState(false);
+  const [isExportingPdf, setIsExportingPdf] = useState(false);
   const meta = getOverallScoreMeta(result.overall_score);
+
+  const handleExportScorecard = async () => {
+    setIsExportingPdf(true);
+
+    try {
+      const response = await fetch("/api/ats-score/export-pdf", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ result, hasJobDescription }),
+      });
+
+      if (!response.ok) {
+        const payload = (await response.json().catch(() => null)) as {
+          error?: string;
+        } | null;
+        throw new Error(payload?.error ?? "PDF export failed");
+      }
+
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "friday-ats-scorecard.pdf";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      toast.success("ATS scorecard downloaded");
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Could not export PDF";
+      toast.error(message);
+    } finally {
+      setIsExportingPdf(false);
+    }
+  };
 
   const sortedIssues = useMemo(
     () =>
@@ -169,31 +214,76 @@ export function AtsScoreResults({
     : sortedIssues.slice(0, 3);
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6">
+    <div className="mx-auto max-w-6xl space-y-6">
+      <div className="flex flex-wrap items-center justify-end gap-3">
+        {onRunAnother ? (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className={workspaceOutlineButtonClass}
+            onClick={onRunAnother}
+          >
+            Run Another Check
+          </Button>
+        ) : null}
+        <Button
+          type="button"
+          size="sm"
+          className={cn(workspaceAzureButtonClass, "gap-2")}
+          onClick={() => void handleExportScorecard()}
+          disabled={isExportingPdf}
+        >
+          {isExportingPdf ? (
+            <Loader2 className="size-4 animate-spin" />
+          ) : (
+            <Download className="size-4" />
+          )}
+          Export ATS Scorecard as PDF
+        </Button>
+      </div>
+
       <section
         className={cn(
           workspaceCardClass,
-          "relative flex flex-col items-center gap-8 overflow-hidden p-6 md:flex-row md:p-10",
+          "relative overflow-hidden border-[#c7c6cb] bg-gradient-to-br from-white via-[#fbf9f8] to-[#2055FD]/5 p-6 md:p-10",
           meta.borderClass,
         )}
       >
         <div className="pointer-events-none absolute -top-20 -right-20 size-64 rounded-full bg-[#0EB87A]/5 blur-3xl" />
-        <ScoreRing score={result.overall_score} />
-        <div className="flex flex-1 flex-col gap-3 text-center md:text-left">
-          {result.overall_score >= 70 && (
-            <span className="mx-auto inline-flex w-fit items-center gap-2 rounded-full border border-[#0EB87A]/20 bg-[#0EB87A]/10 px-3 py-1 font-mono text-[13px] font-bold tracking-wider text-[#005233] uppercase md:mx-0">
-              <CheckCircle2 className="size-4" />
-              {result.overall_score >= 85 ? "Top tier match" : "Strong alignment"}
-            </span>
-          )}
-          <h2 className="text-2xl font-bold text-[#0A0A0A]">
-            {meta.label} ATS Performance
-          </h2>
-          <p className="text-base leading-relaxed text-[#6B6B6B]">
-            Your resume was analyzed for keyword density, structural integrity,
-            and parsing compatibility. Review the breakdown below to close
-            critical gaps before applying.
-          </p>
+        <div className="relative grid gap-8 lg:grid-cols-[auto_1fr] lg:items-center">
+          <div className="relative flex justify-center lg:justify-start">
+            <ScoreRing score={result.overall_score} />
+            <div className="absolute -top-1 right-0 lg:-top-2 lg:right-2">
+              <FridayVerifiedBadge />
+            </div>
+          </div>
+          <div className="space-y-4 text-center lg:text-left">
+            <p className={cn(workspaceLabelClass, "text-[#2055FD]")}>
+              Corporate ATS Analytics Dashboard
+            </p>
+            <h2 className="text-2xl font-bold tracking-tight text-[#0A0A0A] md:text-3xl">
+              {meta.label} Match — {result.overall_score}/100
+            </h2>
+            <p className="text-base leading-relaxed text-[#46464b]">
+              This analyzer applies standard deep-parsing token match matrices
+              mapped through the{" "}
+              <span className="font-semibold text-[#0A0A0A]">
+                Llama 3.3 70B
+              </span>{" "}
+              engine to emulate modern corporate applicant tracking screeners.
+              Scores reflect keyword alignment, structural compliance, and
+              quantification density relative to your target role.
+            </p>
+            {result.overall_score >= 70 && (
+              <span className="mx-auto inline-flex w-fit items-center gap-2 rounded-full border border-[#0EB87A]/20 bg-[#0EB87A]/10 px-3 py-1 font-mono text-[12px] font-bold tracking-wider text-[#005233] uppercase lg:mx-0">
+                <CheckCircle2 className="size-4" />
+                {result.overall_score >= 85
+                  ? "Top tier match"
+                  : "Strong alignment"}
+              </span>
+            )}
+          </div>
         </div>
       </section>
 

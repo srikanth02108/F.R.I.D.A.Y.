@@ -133,9 +133,9 @@ export default function Page() {
     <div className={workspacePageClass}>
       <div className={workspaceScrollClass}>
         <WorkspacePageHeader
-          badge="Analytics"
-          title="ATS Score Analysis"
-          description="Deep-dive structural and semantic breakdown of your resume against corporate filtering systems."
+          badge="Corporate analytics"
+          title="ATS Analytics Dashboard"
+          description="Authoritative deep-parsing analysis powered by Llama 3.3 70B — token match matrices, format compliance, and prioritized fixes mapped to modern ATS screeners."
         />
 
         {isLoading ? (
@@ -273,24 +273,11 @@ export default function Page() {
             )}
 
             {scoreResult && (
-              <>
-                <div className="mb-6 flex justify-end">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className={workspaceOutlineButtonClass}
-                    onClick={() => {
-                      setScoreResult(null);
-                    }}
-                  >
-                    Run Another Check
-                  </Button>
-                </div>
-                <AtsScoreResults
-                  result={scoreResult}
-                  hasJobDescription={hasJobDescription}
-                />
-              </>
+              <AtsScoreResults
+                result={scoreResult}
+                hasJobDescription={hasJobDescription}
+                onRunAnother={() => setScoreResult(null)}
+              />
             )}
           </>
         )}

@@ -46,9 +46,11 @@ import {
   sanitizeResumeFilename,
 } from "@/lib/compile-latex";
 import { resumeContentToPlainText } from "@/lib/interview-utils";
+import { PROFILE_VAULT_SLUG } from "@/lib/profile-vault";
 import { createEmptyResumeContent } from "@/lib/resume-content";
 import { sanitizeGeneratedLatex } from "@/lib/sanitize-latex";
 import { createClient } from "@/lib/supabase/client";
+import { fetchMasterResumeSource } from "@/lib/tailor-vault-source";
 import { streamSsePost } from "@/lib/stream-sse";
 import type { AtsScoreResult } from "@/types/ats-score";
 import type { SkillsGapResult } from "@/types/skills-gap";
@@ -92,6 +94,9 @@ type JdAnalysis = {
 };
 
 const TAILORED_RESUME_TITLE = "Tailored Resume";
+const TAILOR_PANEL_MAX_H = "max-h-[calc(100vh-250px)]";
+const TAILOR_PANEL_BODY =
+  "min-h-0 flex-1 overflow-y-auto overscroll-contain";
 
 const COVER_LETTER_TONES = ["Professional", "Enthusiastic", "Casual"] as const;
 
@@ -111,7 +116,9 @@ export default function Page() {
 
   const [jobDescription, setJobDescription] = useState("");
   const [selectedResumeId, setSelectedResumeId] = useState<string>("");
-  const [currentResumeLatex, setCurrentResumeLatex] = useState("");
+  const [useMasterResume, setUseMasterResume] = useState(true);
+  const [customResumeLatex, setCustomResumeLatex] = useState("");
+  const [sourceResumeLatex, setSourceResumeLatex] = useState("");
   const [tailoredResumeLatex, setTailoredResumeLatex] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -121,7 +128,6 @@ export default function Page() {
 
   const [savedResumes, setSavedResumes] = useState<SavedResumeOption[]>([]);
   const [loadingResumes, setLoadingResumes] = useState(true);
-  const [usePasteMode, setUsePasteMode] = useState(false);
   const [jdAnalysis, setJdAnalysis] = useState<JdAnalysis | null>(null);
 
   const [isExporting, setIsExporting] = useState(false);
@@ -171,7 +177,7 @@ export default function Page() {
 
     const { data, error } = await supabase
       .from("resumes")
-      .select("id, name, template, content")
+      .select("id, name, template, slug, content")
       .eq("user_id", user.id)
       .order("updated_at", { ascending: false });
 
@@ -182,24 +188,30 @@ export default function Page() {
       return;
     }
 
-    const options = (data ?? []).map((row) => {
-      const resume = row as Pick<Resume, "id" | "name" | "template" | "content">;
-      return {
-        id: resume.id,
-        name: resume.name,
-        template: resume.template,
-        latex: resume.content?.latexSource ?? "",
-      };
-    });
+    const options = (data ?? [])
+      .filter((row) => {
+        const resume = row as Pick<Resume, "slug">;
+        return resume.slug !== PROFILE_VAULT_SLUG;
+      })
+      .map((row) => {
+        const resume = row as Pick<
+          Resume,
+          "id" | "name" | "template" | "content"
+        >;
+        return {
+          id: resume.id,
+          name: resume.name,
+          template: resume.template,
+          latex: resume.content?.latexSource ?? "",
+        };
+      });
 
     setSavedResumes(options);
 
     if (options.length > 0) {
       setSelectedResumeId((current) => {
         const match = options.find((o) => o.id === current);
-        if (match) return current;
-        setCurrentResumeLatex(options[0].latex);
-        return options[0].id;
+        return match ? current : options[0].id;
       });
     }
   }, []);
@@ -207,14 +219,6 @@ export default function Page() {
   useEffect(() => {
     loadResumes();
   }, [loadResumes]);
-
-  useEffect(() => {
-    if (usePasteMode || !selectedResumeId) return;
-    const resume = savedResumes.find((r) => r.id === selectedResumeId);
-    if (resume) {
-      setCurrentResumeLatex(resume.latex);
-    }
-  }, [selectedResumeId, savedResumes, usePasteMode]);
 
   const fetchUserProfile = async (): Promise<Record<string, unknown>> => {
     const supabase = createClient();
@@ -370,8 +374,8 @@ export default function Page() {
       return;
     }
 
-    if (!currentResumeLatex.trim()) {
-      toast.error("Select or paste your current resume LaTeX");
+    if (!useMasterResume && !customResumeLatex.trim()) {
+      toast.error("Paste your LaTeX resume or enable Master Resume Source");
       return;
     }
 
@@ -380,10 +384,42 @@ export default function Page() {
     setAtsBeforeScore(null);
     setAtsAfterScore(null);
     setSkillsGapData(null);
-    const beforeLatex = sanitizeGeneratedLatex(currentResumeLatex);
 
     try {
-      const userProfile = await fetchUserProfile();
+      const supabase = createClient();
+      const {
+        data: { user },
+        error: authError,
+      } = await supabase.auth.getUser();
+
+      if (authError || !user) {
+        throw new Error("You must be signed in");
+      }
+
+      let beforeLatex: string;
+      let userProfile: Record<string, unknown> = {};
+      let profileVault: Record<string, unknown> = {};
+
+      if (useMasterResume) {
+        const source = await fetchMasterResumeSource(supabase, user.id);
+        beforeLatex = sanitizeGeneratedLatex(source.latex);
+        userProfile = (source.profile as Record<string, unknown> | null) ?? {
+          id: user.id,
+        };
+        profileVault = source.vault as Record<string, unknown>;
+
+        if (!beforeLatex.trim()) {
+          throw new Error(
+            "Profile vault is empty. Add experience in Profile first.",
+          );
+        }
+      } else {
+        beforeLatex = sanitizeGeneratedLatex(customResumeLatex);
+        userProfile = {};
+        profileVault = {};
+      }
+
+      setSourceResumeLatex(beforeLatex);
       let accumulated = "";
 
       await streamSsePost(
@@ -391,7 +427,9 @@ export default function Page() {
         {
           jobDescription: jobDescription.trim(),
           currentResume: beforeLatex,
+          useMasterResume,
           userProfile,
+          profileVault,
         },
         (chunk) => {
           accumulated += chunk;
@@ -685,44 +723,39 @@ export default function Page() {
   };
 
   return (
-    <div className={cn(workspacePageClass, "h-[calc(100vh-4rem)]")}>
-      {/* Top bar */}
-      <div className={cn(workspaceScrollClass, "pb-28")}>
+    <div className={cn(workspacePageClass, "flex h-[calc(100vh-4rem)] flex-col overflow-hidden")}>
+      <div className={cn(workspaceScrollClass, "shrink-0 pb-4")}>
         <WorkspacePageHeader
           badge="Job alignment"
           title="Tailor for Job"
           description="Paste the job description and AI will rewrite your resume to maximize ATS match."
         />
+      </div>
+
+      <div className={cn(workspaceScrollClass, "min-h-0 flex-1 overflow-y-auto pb-4")}>
         <div className="grid grid-cols-12 gap-4">
           {/* Panel 1 — Job description */}
-          <div className={cn(workspaceCardClass, "col-span-12 flex min-h-[420px] flex-col lg:col-span-4")}>
-            <div className="border-b border-[#e9e8e7] px-4 py-3 md:px-6">
-              <Label className="text-sm font-semibold text-[#0A0A0A]">Target Job Description</Label>
+          <div
+            className={cn(
+              workspaceCardClass,
+              "col-span-12 flex flex-col lg:col-span-4",
+              TAILOR_PANEL_MAX_H,
+            )}
+          >
+            <div className="shrink-0 border-b border-[#e9e8e7] px-4 py-3 md:px-6">
+              <Label className="text-sm font-semibold text-[#0A0A0A]">
+                Target Job Description
+              </Label>
             </div>
-            <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto p-4">
+            <div className={cn(TAILOR_PANEL_BODY, "flex flex-col gap-4 p-4")}>
               <Textarea
-                rows={12}
+                rows={8}
                 placeholder="Paste the full job posting here…"
                 value={jobDescription}
                 onChange={(e) => setJobDescription(e.target.value)}
                 disabled={isBusy}
-                className={cn(workspaceInputClass, "min-h-[200px] flex-1 resize-none")}
+                className={cn(workspaceInputClass, "min-h-[160px] resize-y")}
               />
-
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={runJdAnalysis}
-                disabled={isBusy || !jobDescription.trim()}
-                className={cn(workspaceOutlineButtonClass, "w-fit")}
-              >
-                {isAnalyzing ? (
-                  <Loader2 className="size-3.5 animate-spin" />
-                ) : (
-                  <Sparkles className="size-3.5" />
-                )}
-                Analyze JD
-              </Button>
 
               {showJdInsights && jdAnalysis && (
                 <div className="space-y-4 rounded-lg border border-[#e9e8e7] bg-[#f5f3f3] p-4">
@@ -765,110 +798,100 @@ export default function Page() {
                 </div>
               )}
             </div>
+            <div className="shrink-0 border-t border-[#e9e8e7] p-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={runJdAnalysis}
+                disabled={isBusy || !jobDescription.trim()}
+                className={cn(workspaceOutlineButtonClass, "w-full sm:w-auto")}
+              >
+                {isAnalyzing ? (
+                  <Loader2 className="size-3.5 animate-spin" />
+                ) : (
+                  <Sparkles className="size-3.5" />
+                )}
+                Analyze JD
+              </Button>
+            </div>
           </div>
 
-          {/* Panel 2 — Current resume */}
-          <div className={cn(tailorResumePanelClass, "col-span-12 flex min-h-[420px] flex-col lg:col-span-3")}>
-            <div className="border-b border-[#e9e8e7] px-4 py-3 dark:border-zinc-800">
-              <Label className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">Your Current Resume</Label>
-              {selectedResume && !usePasteMode && (
-                <p className="mt-0.5 truncate text-xs text-[#2055FD]">
-                  {selectedResume.name}
-                </p>
-              )}
+          {/* Panel 2 — Resume source */}
+          <div
+            className={cn(
+              tailorResumePanelClass,
+              "col-span-12 flex flex-col lg:col-span-3",
+              TAILOR_PANEL_MAX_H,
+            )}
+          >
+            <div className="shrink-0 border-b border-[#e9e8e7] px-4 py-3 dark:border-zinc-800">
+              <Label className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">
+                Resume Source
+              </Label>
+              <p className="mt-0.5 text-xs text-[#6B6B6B]">
+                Master vault or custom LaTeX input
+              </p>
             </div>
-            <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto p-4">
-              <div className="flex items-center justify-between gap-2">
-                <Label htmlFor="paste-mode" className="text-xs text-slate-600 dark:text-zinc-400">
-                  Paste custom LaTeX
-                </Label>
-                <Switch
-                  id="paste-mode"
-                  checked={usePasteMode}
-                  onCheckedChange={setUsePasteMode}
-                  disabled={isBusy}
-                />
-              </div>
-
-              {!usePasteMode ? (
-                savedResumes.length === 0 ? (
-                  <p className="text-sm text-slate-500">
-                    No saved resumes. Enable paste mode or create one in the
-                    editor.
-                  </p>
-                ) : (
-                  <Select
-                    value={selectedResumeId}
-                    onValueChange={setSelectedResumeId}
-                    disabled={isBusy || loadingResumes}
+            <div className={cn(TAILOR_PANEL_BODY, "flex flex-col gap-4 p-4")}>
+              <div className="flex items-center justify-between gap-3 rounded-lg border border-[#e9e8e7] bg-[#f5f3f3] px-3 py-3">
+                <div className="min-w-0">
+                  <Label
+                    htmlFor="master-resume-toggle"
+                    className="text-sm font-semibold text-[#0A0A0A]"
                   >
-                    <SelectTrigger className="w-full bg-white dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50">
-                      <SelectValue
-                        placeholder={
-                          loadingResumes ? "Loading…" : "Select a resume"
-                        }
-                      />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {savedResumes.map((resume) => (
-                        <SelectItem key={resume.id} value={resume.id}>
-                          {resume.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )
-              ) : (
-                <Textarea
-                  rows={6}
-                  placeholder="Paste your LaTeX resume here…"
-                  value={currentResumeLatex}
-                  onChange={(e) => setCurrentResumeLatex(e.target.value)}
+                    Use Master Resume Source
+                  </Label>
+                  <p className="mt-0.5 text-xs leading-relaxed text-[#6B6B6B]">
+                    Pull your full Profile Vault history for deep tailoring
+                  </p>
+                </div>
+                <Switch
+                  id="master-resume-toggle"
+                  checked={useMasterResume}
+                  onCheckedChange={setUseMasterResume}
                   disabled={isBusy}
-                  className="font-mono text-xs"
                 />
-              )}
-
-              <div className="min-h-[220px] flex-1 overflow-hidden rounded-lg border border-[#c7c6cb] bg-[#0A0A0A]">
-                {!usePasteMode && (
-                  <MonacoEditor
-                    height="100%"
-                    language="latex"
-                    theme="vs-dark"
-                    value={currentResumeLatex}
-                    options={{
-                      readOnly: true,
-                      wordWrap: "on",
-                      fontSize: 12,
-                      minimap: { enabled: false },
-                      scrollBeyondLastLine: false,
-                      automaticLayout: true,
-                    }}
-                  />
-                )}
-                {usePasteMode && (
-                  <MonacoEditor
-                    height="100%"
-                    language="latex"
-                    theme="vs-dark"
-                    value={currentResumeLatex}
-                    onChange={(v) => setCurrentResumeLatex(v ?? "")}
-                    options={{
-                      readOnly: false,
-                      wordWrap: "on",
-                      fontSize: 12,
-                      minimap: { enabled: false },
-                      scrollBeyondLastLine: false,
-                      automaticLayout: true,
-                    }}
-                  />
-                )}
               </div>
+              {useMasterResume ? (
+                <div className="rounded-lg border border-[#2055FD]/20 bg-gradient-to-br from-[#2055FD]/5 to-white p-4">
+                  <p className="text-sm font-medium text-[#0A0A0A]">
+                    Profile Vault active
+                  </p>
+                  <p className="mt-2 text-xs leading-relaxed text-[#6B6B6B]">
+                    All jobs, education, projects, skills, and certificates from
+                    your vault will be synthesized into a master LaTeX document
+                    tailored to this job. Local uploads are locked while this
+                    mode is on.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <Label htmlFor="custom-latex" className={workspaceLabelClass}>
+                    Paste LaTeX resume
+                  </Label>
+                  <Textarea
+                    id="custom-latex"
+                    rows={14}
+                    placeholder="\\documentclass{article}..."
+                    value={customResumeLatex}
+                    onChange={(e) => setCustomResumeLatex(e.target.value)}
+                    disabled={isBusy}
+                    className={cn(
+                      workspaceInputClass,
+                      "min-h-[240px] resize-y font-mono text-xs leading-relaxed",
+                    )}
+                  />
+                  <p className="text-xs text-[#6B6B6B]">
+                    Only this LaTeX string will be rewritten — no vault data is
+                    sent to the model.
+                  </p>
+                </div>
+              )}
             </div>
           </div>
 
           {/* Panel 3 — Tailored result (after tailoring) */}
-          <div className={cn(tailorResumePanelClass, "relative col-span-12 flex min-h-[420px] flex-col lg:col-span-5")}>
+          <div className={cn(tailorResumePanelClass, "relative col-span-12 flex flex-col lg:col-span-5", TAILOR_PANEL_MAX_H)}>
             {(isProcessing || isComplete) && (
               <div className="absolute top-4 right-4 z-10 flex items-center gap-2 rounded-full border border-zinc-200/80 bg-white/90 px-4 py-1.5 shadow-sm backdrop-blur-md dark:border-zinc-700 dark:bg-zinc-900/90">
                 <span className="size-2 animate-pulse rounded-full bg-[#2055FD] dark:bg-violet-500" />
@@ -896,7 +919,7 @@ export default function Page() {
               )}
             </div>
 
-            <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto p-4">
+            <div className={cn(TAILOR_PANEL_BODY, "flex flex-col gap-3 p-4")}>
               {atsBeforeScore !== null && atsAfterScore !== null && isComplete && (
                 <div className="rounded-lg border border-[#0EB87A]/30 bg-[#0EB87A]/10 px-4 py-3 text-center">
                   <p className="text-sm font-semibold text-[#005233]">
@@ -927,7 +950,7 @@ export default function Page() {
                 </div>
               ) : diffModeActive ? (
                 <LatexDiffView
-                  before={sanitizeGeneratedLatex(currentResumeLatex)}
+                  before={sourceResumeLatex}
                   after={tailoredResumeLatex}
                   className="min-h-[280px] flex-1"
                 />
@@ -1123,7 +1146,7 @@ export default function Page() {
         </DialogContent>
       </Dialog>
 
-      <div className="fixed right-0 bottom-0 left-0 z-40 border-t border-[#c7c6cb] bg-white/90 px-4 py-4 backdrop-blur-md md:left-60">
+      <div className="shrink-0 border-t border-[#c7c6cb] bg-white/95 px-4 py-4 backdrop-blur-md">
         <Button
           type="button"
           size="lg"
