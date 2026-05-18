@@ -8,11 +8,14 @@ import {
   MoreHorizontal,
   Pencil,
   Plus,
+  Radar,
   Search,
   Trash2,
+  X,
 } from "lucide-react";
 import toast from "react-hot-toast";
 
+import { MonitorAgentPanel } from "@/components/tracker/monitor-agent-panel";
 import { TrackerKanbanSkeleton } from "@/components/tracker/tracker-kanban-skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -69,6 +72,8 @@ import {
   workspacePageClass,
   workspaceScrollClass,
 } from "@/components/workspace/workspace-styles";
+import { PROFILE_VAULT_SLUG } from "@/lib/profile-vault";
+import type { MonitorAgentMatch } from "@/types/tracker-monitor";
 import { cn } from "@/lib/utils";
 
 type ResumeOption = {
@@ -143,6 +148,9 @@ export default function Page() {
   const [detailsJob, setDetailsJob] = useState<TrackerJob | null>(null);
   const [form, setForm] = useState<JobFormState>(EMPTY_FORM);
   const [statusPreset, setStatusPreset] = useState<JobApplicationStatus>("saved");
+  const [monitorAlert, setMonitorAlert] = useState<MonitorAgentMatch | null>(
+    null,
+  );
 
   const loadData = useCallback(async () => {
     setIsInitialLoading(true);
@@ -169,7 +177,7 @@ export default function Page() {
           .order("created_at", { ascending: false }),
         supabase
           .from("resumes")
-          .select("id, name, ats_score")
+          .select("id, name, ats_score, slug")
           .eq("user_id", user.id)
           .order("updated_at", { ascending: false }),
       ]);
@@ -184,7 +192,13 @@ export default function Page() {
 
       const resumeMap = new Map<string, ResumeOption>();
       for (const resume of resumesResult.data ?? []) {
-        resumeMap.set(resume.id, resume as ResumeOption);
+        const row = resume as ResumeOption & { slug?: string | null };
+        if (row.slug === PROFILE_VAULT_SLUG) continue;
+        resumeMap.set(resume.id, {
+          id: row.id,
+          name: row.name,
+          ats_score: row.ats_score,
+        });
       }
 
       setResumesList(Array.from(resumeMap.values()));
@@ -519,6 +533,49 @@ export default function Page() {
               className={cn(workspaceInputClass, "pl-9")}
             />
           </div>
+
+          <MonitorAgentPanel
+            resumes={resumesList.map((r) => ({ id: r.id, name: r.name }))}
+            onMatchFound={(match) => {
+              setMonitorAlert(match);
+              void loadData();
+            }}
+          />
+
+          {monitorAlert && (
+            <div
+              role="alert"
+              className="flex flex-col gap-3 rounded-xl border border-[#2055FD]/30 bg-gradient-to-r from-[#2055FD]/10 via-white to-[#0EB87A]/10 p-4 shadow-[0_8px_30px_rgba(32,85,253,0.12)] sm:flex-row sm:items-center sm:justify-between"
+            >
+              <div className="flex min-w-0 items-start gap-3">
+                <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-[#2055FD]/15">
+                  <Radar className="size-5 text-[#2055FD]" />
+                </div>
+                <div className="min-w-0 space-y-1">
+                  <p className="text-sm font-semibold text-[#0A0A0A]">
+                    F.R.I.D.A.Y. Monitor Agent — new match detected
+                  </p>
+                  <p className="text-sm text-[#46464b]">
+                    <span className="font-medium">{monitorAlert.role}</span> at{" "}
+                    <span className="font-medium">{monitorAlert.company}</span>{" "}
+                    via {monitorAlert.portal}. JD parsed, tailored resume created (
+                    {monitorAlert.tailoredResumeName}), and a Saved card is ready
+                    for review.
+                  </p>
+                </div>
+              </div>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-sm"
+                className="shrink-0 self-end sm:self-center"
+                onClick={() => setMonitorAlert(null)}
+                aria-label="Dismiss alert"
+              >
+                <X className="size-4" />
+              </Button>
+            </div>
+          )}
 
           <div className="grid gap-4 sm:grid-cols-3">
             <Card className={cn(workspaceCardClass, "border-0 shadow-none")}>

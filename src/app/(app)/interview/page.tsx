@@ -61,7 +61,8 @@ import {
   typeBadgeClass,
 } from "@/lib/interview-utils";
 import { createClient } from "@/lib/supabase/client";
-import { streamSsePost } from "@/lib/stream-sse";
+import { safeStreamSsePost } from "@/lib/safe-sse-stream";
+import { PROFILE_VAULT_SLUG } from "@/lib/profile-vault";
 import type { Resume, ResumeContent } from "@/types/database";
 import { cn } from "@/lib/utils";
 import type { InterviewQuestion, InterviewQuestionType } from "@/types/interview";
@@ -138,8 +139,11 @@ export default function Page() {
   const [starDraft, setStarDraft] = useState("");
   const [starResult, setStarResult] = useState("");
   const [isStarImproving, setIsStarImproving] = useState(false);
+  const [mockFeedbackDegraded, setMockFeedbackDegraded] = useState(false);
 
   const chatScrollRef = useRef<HTMLDivElement>(null);
+  const feedbackAbortRef = useRef<AbortController | null>(null);
+  const questionsAbortRef = useRef<AbortController | null>(null);
 
   const selectedResume = savedResumes.find((r) => r.id === selectedResumeId);
 
@@ -172,7 +176,7 @@ export default function Page() {
 
     const { data, error } = await supabase
       .from("resumes")
-      .select("id, name, content")
+      .select("id, name, slug, content")
       .eq("user_id", user.id)
       .order("updated_at", { ascending: false });
 
@@ -183,7 +187,12 @@ export default function Page() {
       return;
     }
 
-    const options = (data ?? []).map((row) => {
+    const options = (data ?? [])
+      .filter((row) => {
+        const resume = row as Pick<Resume, "slug">;
+        return resume.slug !== PROFILE_VAULT_SLUG;
+      })
+      .map((row) => {
       const resume = row as Pick<Resume, "id" | "name" | "content">;
       return {
         id: resume.id,
@@ -212,6 +221,18 @@ export default function Page() {
   useEffect(() => {
     loadResumes();
   }, [loadResumes]);
+
+  useEffect(() => {
+    return () => {
+      feedbackAbortRef.current?.abort();
+      questionsAbortRef.current?.abort();
+    };
+  }, []);
+
+  useEffect(() => {
+    feedbackAbortRef.current?.abort();
+    feedbackAbortRef.current = null;
+  }, [activeTab]);
 
   const scrollChatToBottom = useCallback(() => {
     const el = chatScrollRef.current;
@@ -314,23 +335,36 @@ export default function Page() {
     question: string,
     answer: string,
     onChunk: (text: string) => void,
+    signal?: AbortSignal,
   ): Promise<string> => {
-    let accumulated = "";
-
-    await streamSsePost(
+    const result = await safeStreamSsePost(
       "/api/interview/feedback",
       {
         question,
         answer,
         jobContext: jobDescription.trim() || "General professional role",
       },
-      (chunk) => {
-        accumulated += chunk;
-        onChunk(chunk);
+      {
+        signal,
+        onChunk,
       },
     );
 
-    return accumulated;
+    if (result.aborted) {
+      throw new Error("Feedback stream cancelled");
+    }
+
+    if (result.error && !result.text.trim()) {
+      throw new Error(result.error);
+    }
+
+    if (result.error && result.text.trim()) {
+      toast.error(
+        "Connection interrupted — showing partial coach feedback.",
+      );
+    }
+
+    return result.text;
   };
 
   const handleStartMockInterview = async () => {
@@ -342,6 +376,8 @@ export default function Page() {
     setChatMessages([]);
     setQuestionIndex(0);
     setMockAnswer("");
+    setMockFeedbackDegraded(false);
+    questionsAbortRef.current?.abort();
 
     try {
       const generated = await fetchQuestions(MOCK_QUESTION_COUNT);
@@ -372,6 +408,11 @@ export default function Page() {
     if (!currentQuestion) return;
 
     setIsMockSubmitting(true);
+    setMockFeedbackDegraded(false);
+
+    feedbackAbortRef.current?.abort();
+    const abortController = new AbortController();
+    feedbackAbortRef.current = abortController;
 
     const userMessageId = crypto.randomUUID();
     const feedbackMessageId = crypto.randomUUID();
@@ -382,6 +423,23 @@ export default function Page() {
       { id: feedbackMessageId, sender: "feedback", text: "" },
     ]);
     setMockAnswer("");
+
+    const advanceToNextQuestion = () => {
+      const nextIndex = questionIndex + 1;
+      if (nextIndex < mockQuestions.length) {
+        setQuestionIndex(nextIndex);
+        setChatMessages((prev) => [
+          ...prev,
+          {
+            id: crypto.randomUUID(),
+            sender: "interviewer",
+            text: mockQuestions[nextIndex].question,
+          },
+        ]);
+      } else {
+        toast.success("You completed all mock interview questions");
+      }
+    };
 
     try {
       const fullFeedback = await streamFeedback(
@@ -396,6 +454,7 @@ export default function Page() {
             ),
           );
         },
+        abortController.signal,
       );
 
       const rating = parseRatingStars(fullFeedback);
@@ -403,31 +462,48 @@ export default function Page() {
         setSessionRatings((prev) => [...prev, rating]);
       }
 
-      const nextIndex = questionIndex + 1;
-
-      if (nextIndex < mockQuestions.length) {
-        setQuestionIndex(nextIndex);
-        setChatMessages((prev) => [
-          ...prev,
-          {
-            id: crypto.randomUUID(),
-            sender: "interviewer",
-            text: mockQuestions[nextIndex].question,
-          },
-        ]);
-      } else {
-        toast.success("You completed all mock interview questions");
-      }
+      advanceToNextQuestion();
     } catch (error) {
-      setChatMessages((prev) =>
-        prev.filter((m) => m.id !== feedbackMessageId),
-      );
       const message =
         error instanceof Error ? error.message : "Feedback stream failed";
+
+      setMockFeedbackDegraded(true);
+      setChatMessages((prev) =>
+        prev.map((m) =>
+          m.id === feedbackMessageId
+            ? {
+                ...m,
+                text: `**Coach feedback unavailable** — ${message}\n\nYour answer is preserved in the timeline. Use *Continue* to proceed to the next question.`,
+              }
+            : m,
+        ),
+      );
       toast.error(message);
     } finally {
       setIsMockSubmitting(false);
+      if (feedbackAbortRef.current === abortController) {
+        feedbackAbortRef.current = null;
+      }
     }
+  };
+
+  const handleSkipToNextMockQuestion = () => {
+    if (questionIndex + 1 >= mockQuestions.length) {
+      toast.success("You completed all mock interview questions");
+      return;
+    }
+
+    setMockFeedbackDegraded(false);
+    const nextIndex = questionIndex + 1;
+    setQuestionIndex(nextIndex);
+    setChatMessages((prev) => [
+      ...prev,
+      {
+        id: crypto.randomUUID(),
+        sender: "interviewer",
+        text: mockQuestions[nextIndex].question,
+      },
+    ]);
   };
 
   const handleEndMockInterview = () => {
@@ -471,23 +547,38 @@ export default function Page() {
     setIsStarImproving(true);
     setStarResult("");
 
+    feedbackAbortRef.current?.abort();
+    const abortController = new AbortController();
+    feedbackAbortRef.current = abortController;
+
     try {
       let full = "";
-      await streamFeedback(starQuestion.trim(), starDraft.trim(), (chunk) => {
-        full += chunk;
-        const suggested = extractSuggestedStarAnswer(full);
-        setStarResult(suggested || full);
-      });
+      const streamed = await streamFeedback(
+        starQuestion.trim(),
+        starDraft.trim(),
+        (chunk) => {
+          full += chunk;
+          const suggested = extractSuggestedStarAnswer(full);
+          setStarResult(suggested || full);
+        },
+        abortController.signal,
+      );
 
-      const suggested = extractSuggestedStarAnswer(full);
-      setStarResult(suggested || full);
+      const suggested = extractSuggestedStarAnswer(streamed);
+      setStarResult(suggested || streamed);
       toast.success("STAR response ready");
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "STAR improvement failed";
+      setStarResult(
+        `**STAR coaching unavailable** — ${message}\n\nYour draft is unchanged below. Try again when your connection stabilizes.\n\n---\n\n${starDraft.trim()}`,
+      );
       toast.error(message);
     } finally {
       setIsStarImproving(false);
+      if (feedbackAbortRef.current === abortController) {
+        feedbackAbortRef.current = null;
+      }
     }
   };
 
@@ -890,6 +981,18 @@ export default function Page() {
                       )}
                       Send Answer
                     </Button>
+                    {mockFeedbackDegraded && (
+                      <Button
+                        variant="secondary"
+                        onClick={handleSkipToNextMockQuestion}
+                        disabled={
+                          isMockSubmitting ||
+                          questionIndex >= mockQuestions.length
+                        }
+                      >
+                        Continue to next question
+                      </Button>
+                    )}
                     <Button
                       variant="outline"
                       onClick={handleEndMockInterview}
