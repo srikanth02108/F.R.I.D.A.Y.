@@ -200,7 +200,7 @@ export default function LoginPage() {
             </div>
           </div>
 
-          <AuthGoogleButton disabled />
+          <AuthGoogleButton />
 
           <p className="mt-10 text-center text-base text-[#6B6B6B] dark:text-zinc-400">
             Don&apos;t have an account?{" "}

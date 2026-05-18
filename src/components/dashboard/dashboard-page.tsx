@@ -328,7 +328,7 @@ export function DashboardPage() {
       const [resumesResult, applicationsResult] = await Promise.all([
         supabase
           .from("resumes")
-          .select("id, title, template, ats_score, updated_at, slug")
+          .select("id, name, template, ats_score, updated_at, slug")
           .eq("user_id", user.id)
           .order("updated_at", { ascending: false }),
         supabase
@@ -339,7 +339,7 @@ export function DashboardPage() {
 
       const resumeRows = (resumesResult.data ?? []) as Pick<
         Resume,
-        "id" | "title" | "template" | "ats_score" | "updated_at" | "slug"
+        "id" | "name" | "template" | "ats_score" | "updated_at" | "slug"
       >[];
 
       const visibleResumes = resumeRows.filter(
@@ -387,7 +387,7 @@ export function DashboardPage() {
       setRecentResumes(
         visibleResumes.slice(0, 3).map((row) => ({
           id: row.id,
-          name: row.title,
+          name: row.name,
           template: row.template,
           modified: new Date(row.updated_at),
           atsScore: row.ats_score,

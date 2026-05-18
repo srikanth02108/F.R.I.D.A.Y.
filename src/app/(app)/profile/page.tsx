@@ -263,7 +263,7 @@ export default function Page() {
         const { error: vaultError } = await supabase
           .from("resumes")
           .update({
-            title: PROFILE_VAULT_TITLE,
+            name: PROFILE_VAULT_TITLE,
             content: vaultContent,
             updated_at: new Date().toISOString(),
           })
@@ -277,7 +277,7 @@ export default function Page() {
           .from("resumes")
           .insert({
             user_id: user.id,
-            title: PROFILE_VAULT_TITLE,
+            name: PROFILE_VAULT_TITLE,
             template: "classic",
             slug: PROFILE_VAULT_SLUG,
             content: vaultContent,

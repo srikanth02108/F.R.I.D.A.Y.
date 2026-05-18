@@ -78,7 +78,7 @@ const MonacoEditor = dynamic(() => import("@monaco-editor/react"), {
 
 type SavedResumeOption = {
   id: string;
-  title: string;
+  name: string;
   template: string;
   latex: string;
 };
@@ -171,7 +171,7 @@ export default function Page() {
 
     const { data, error } = await supabase
       .from("resumes")
-      .select("id, title, template, content")
+      .select("id, name, template, content")
       .eq("user_id", user.id)
       .order("updated_at", { ascending: false });
 
@@ -183,10 +183,10 @@ export default function Page() {
     }
 
     const options = (data ?? []).map((row) => {
-      const resume = row as Pick<Resume, "id" | "title" | "template" | "content">;
+      const resume = row as Pick<Resume, "id" | "name" | "template" | "content">;
       return {
         id: resume.id,
-        title: resume.title,
+        name: resume.name,
         template: resume.template,
         latex: resume.content?.latexSource ?? "",
       };
@@ -455,7 +455,7 @@ export default function Page() {
         .from("resumes")
         .insert({
           user_id: user.id,
-          title: TAILORED_RESUME_TITLE,
+          name: TAILORED_RESUME_TITLE,
           template,
           slug: null,
           content: createEmptyResumeContent(latex),
@@ -499,13 +499,13 @@ export default function Page() {
 
       const latex = sanitizeGeneratedLatex(tailoredResumeLatex);
       const template = selectedResume?.template ?? "classic";
-      const title = selectedResume
-        ? `${selectedResume.title} (Tailored)`
+      const resumeName = selectedResume
+        ? `${selectedResume.name} (Tailored)`
         : TAILORED_RESUME_TITLE;
 
       const { error } = await supabase.from("resumes").insert({
         user_id: user.id,
-        title,
+        name: resumeName,
         template,
         slug: null,
         content: createEmptyResumeContent(latex),
@@ -671,7 +671,7 @@ export default function Page() {
       downloadPdfBlob(
         blob,
         sanitizeResumeFilename(
-          selectedResume?.title ?? TAILORED_RESUME_TITLE,
+          selectedResume?.name ?? TAILORED_RESUME_TITLE,
         ),
       );
       toast.success("PDF downloaded");
@@ -773,7 +773,7 @@ export default function Page() {
               <Label className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">Your Current Resume</Label>
               {selectedResume && !usePasteMode && (
                 <p className="mt-0.5 truncate text-xs text-[#2055FD]">
-                  {selectedResume.title}
+                  {selectedResume.name}
                 </p>
               )}
             </div>
@@ -812,7 +812,7 @@ export default function Page() {
                     <SelectContent>
                       {savedResumes.map((resume) => (
                         <SelectItem key={resume.id} value={resume.id}>
-                          {resume.title}
+                          {resume.name}
                         </SelectItem>
                       ))}
                     </SelectContent>

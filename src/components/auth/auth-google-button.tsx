@@ -1,5 +1,7 @@
 "use client";
 
+import toast from "react-hot-toast";
+
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -32,21 +34,25 @@ function GoogleIcon({ className }: { className?: string }) {
 }
 
 type AuthGoogleButtonProps = {
-  disabled?: boolean;
   className?: string;
 };
 
-export function AuthGoogleButton({
-  disabled = true,
-  className,
-}: AuthGoogleButtonProps) {
+export function AuthGoogleButton({ className }: AuthGoogleButtonProps) {
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    toast("OAuth integration is not added yet for this demo.", {
+      icon: "ℹ️",
+    });
+  };
+
   return (
     <Button
       type="button"
       variant="outline"
-      disabled={disabled}
+      onClick={handleClick}
       className={cn(
-        "h-auto w-full gap-3 rounded-lg border-[#c7c6cb] bg-white py-3 text-[15px] font-semibold text-[#1b1c1c] shadow-sm hover:bg-[#f5f3f3]",
+        "h-auto w-full cursor-pointer gap-3 rounded-lg border-[#c7c6cb] bg-white py-3 text-[15px] font-semibold text-[#1b1c1c] shadow-sm hover:bg-[#f5f3f3] dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50 dark:hover:bg-zinc-800",
         className,
       )}
     >

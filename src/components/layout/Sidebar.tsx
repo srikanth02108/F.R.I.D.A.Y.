@@ -6,6 +6,7 @@ import { useCallback, useEffect, useState } from "react";
 import { LogOut, Menu } from "lucide-react";
 import toast from "react-hot-toast";
 
+import { FridayLogo } from "@/components/brand/friday-logo";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,7 +17,6 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
-import { FridayLogo } from "@/components/brand/friday-logo";
 import { navItems } from "@/lib/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
@@ -30,6 +30,9 @@ type UserContext = {
   planLabel: string;
 };
 
+const sidebarShellClass =
+  "bg-zinc-950 text-zinc-100 border-r border-zinc-900 dark:bg-black";
+
 function getInitial(name: string, email: string): string {
   const source = name.trim() || email.trim();
   if (!source) return "?";
@@ -42,11 +45,16 @@ function getInitial(name: string, email: string): string {
 
 function SidebarBrand() {
   return (
-    <div className="flex h-16 shrink-0 items-center border-b border-slate-800 px-5">
+    <div
+      className={cn(
+        "flex h-16 shrink-0 items-center border-b border-zinc-900 px-5",
+        sidebarShellClass,
+      )}
+    >
       <FridayLogo
         size={36}
         href="/app/dashboard"
-        wordmarkClassName="text-sm text-white"
+        wordmarkClassName="text-sm text-zinc-100"
       />
     </div>
   );
@@ -74,14 +82,14 @@ function SidebarNav({
             className={cn(
               "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
               isActive
-                ? "bg-slate-800 text-white"
-                : "text-slate-400 hover:bg-slate-800/60 hover:text-white",
+                ? "bg-zinc-900 text-white ring-1 ring-purple-500/20"
+                : "text-zinc-400 hover:bg-zinc-900/80 hover:text-zinc-50",
             )}
           >
             <Icon
               className={cn(
                 "size-[18px] shrink-0",
-                isActive ? "text-violet-400" : "text-slate-500",
+                isActive ? "text-purple-400" : "text-zinc-500",
               )}
             />
             {item.title}
@@ -102,17 +110,22 @@ function SidebarUserDeck({
   onSignOut: () => void;
 }) {
   return (
-    <div className="shrink-0 space-y-3 border-t border-slate-800 p-4">
+    <div className="shrink-0 space-y-3 border-t border-zinc-900 p-4">
       {loadingUser ? (
         <div className="flex items-center gap-3">
-          <Skeleton className="size-10 rounded-full bg-slate-700" />
+          <Skeleton className="size-10 rounded-full bg-zinc-800" />
           <div className="flex-1 space-y-2">
-            <Skeleton className="h-3.5 w-24 bg-slate-700" />
-            <Skeleton className="h-3 w-32 bg-slate-700" />
+            <Skeleton className="h-3.5 w-24 bg-zinc-800" />
+            <Skeleton className="h-3 w-32 bg-zinc-800" />
           </div>
         </div>
       ) : userContext ? (
-        <div className="flex items-center gap-3 rounded-lg bg-slate-800/50 px-2 py-2">
+        <div
+          className={cn(
+            "flex items-center gap-3 rounded-lg bg-zinc-900/60 px-2 py-2 transition-all duration-300",
+            "hover:ring-1 hover:ring-purple-500/50 hover:shadow-[0_0_15px_rgba(168,85,247,0.15)]",
+          )}
+        >
           <Avatar size="sm" className="size-10">
             {userContext.avatarUrl ? (
               <AvatarImage
@@ -120,32 +133,32 @@ function SidebarUserDeck({
                 alt={userContext.displayName}
               />
             ) : null}
-            <AvatarFallback className="bg-violet-600 text-sm font-semibold text-white">
+            <AvatarFallback className="bg-purple-600 text-sm font-semibold text-white">
               {userContext.initial}
             </AvatarFallback>
           </Avatar>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-medium text-white">
+            <p className="truncate text-sm font-medium text-zinc-50">
               {userContext.displayName}
             </p>
-            <p className="truncate text-xs text-slate-400">
+            <p className="truncate text-xs text-zinc-500">
               {userContext.email}
             </p>
           </div>
         </div>
       ) : (
-        <p className="text-xs text-slate-500">Sign in to sync your vault</p>
+        <p className="text-xs text-zinc-500">Sign in to sync your vault</p>
       )}
 
       {userContext ? (
-        <p className="text-xs text-slate-500">{userContext.planLabel}</p>
+        <p className="text-xs text-zinc-500">{userContext.planLabel}</p>
       ) : null}
 
       <Button
         type="button"
         variant="ghost"
         size="sm"
-        className="w-full justify-start gap-2 text-slate-400 hover:bg-slate-800 hover:text-white"
+        className="w-full justify-start gap-2 text-zinc-400 hover:bg-zinc-900 hover:text-zinc-50"
         onClick={onSignOut}
         disabled={loadingUser}
       >
@@ -198,8 +211,7 @@ export function Sidebar() {
           displayName = row.full_name.trim();
         }
         avatarUrl = row.avatar_url;
-        const planName =
-          row.plan === "pro" ? "Pro Plan" : "Free Plan";
+        const planName = row.plan === "pro" ? "Pro Plan" : "Free Plan";
         planLabel = `${planName} · ${row.resumes_used}/${row.resumes_limit} resumes`;
       }
 
@@ -237,7 +249,7 @@ export function Sidebar() {
 
       setUserContext(null);
       toast.success("Signed out successfully");
-      window.location.href = "/auth/login";
+      window.location.href = "/";
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "Could not sign out";
@@ -249,12 +261,16 @@ export function Sidebar() {
 
   return (
     <>
-      {/* Mobile fixed header + sheet */}
-      <header className="fixed top-0 right-0 left-0 z-50 flex h-14 items-center justify-between border-b border-slate-800 bg-slate-900 px-4 lg:hidden">
+      <header
+        className={cn(
+          "fixed top-0 right-0 left-0 z-50 flex h-14 items-center justify-between border-b border-zinc-900 px-4 lg:hidden",
+          sidebarShellClass,
+        )}
+      >
         <FridayLogo
           size={32}
           href="/app/dashboard"
-          wordmarkClassName="text-sm text-white"
+          wordmarkClassName="text-sm text-zinc-100"
         />
         <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
           <SheetTrigger asChild>
@@ -262,7 +278,7 @@ export function Sidebar() {
               type="button"
               variant="ghost"
               size="icon"
-              className="text-white hover:bg-slate-800 hover:text-white"
+              className="text-zinc-100 hover:bg-zinc-900 hover:text-white"
               aria-label="Open navigation menu"
             >
               <Menu className="size-5" />
@@ -270,7 +286,10 @@ export function Sidebar() {
           </SheetTrigger>
           <SheetContent
             side="left"
-            className="w-72 border-slate-800 bg-slate-900 p-0 text-white sm:max-w-xs"
+            className={cn(
+              "w-72 border-zinc-900 p-0 text-zinc-100 sm:max-w-xs",
+              sidebarShellClass,
+            )}
             showCloseButton
           >
             <SheetHeader className="sr-only">
@@ -292,8 +311,12 @@ export function Sidebar() {
         </Sheet>
       </header>
 
-      {/* Desktop sidebar */}
-      <aside className="fixed top-0 left-0 z-40 hidden h-screen w-60 flex-col bg-slate-900 text-white lg:flex">
+      <aside
+        className={cn(
+          "fixed top-0 left-0 z-40 hidden h-screen w-60 flex-col lg:flex",
+          sidebarShellClass,
+        )}
+      >
         <SidebarBrand />
         <SidebarNav pathname={pathname} />
         <SidebarUserDeck

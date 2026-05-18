@@ -81,7 +81,7 @@ export type UserProfile = {
 export type Resume = {
   id: string;
   user_id: string;
-  title: string;
+  name: string;
   template: string;
   slug: string | null;
   content: ResumeContent;

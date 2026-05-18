@@ -145,11 +145,11 @@ export function ResumeEditor() {
       createDefaultLatex();
 
     setResumeId(resume.id);
-    setResumeName(resume.title);
+    setResumeName(resume.name);
     setSelectedTemplate(resume.template);
     setLatexContent(latex);
     setSavedLatex(latex);
-    setSavedName(resume.title);
+    setSavedName(resume.name);
     setSavedTemplate(resume.template);
   }, [resumeIdParam]);
 
@@ -286,7 +286,7 @@ export function ResumeEditor() {
     }
 
     const resumeFields = {
-      title: resumeName.trim() || "My Resume",
+      name: resumeName.trim() || "My Resume",
       template: selectedTemplate,
       slug: null,
       content: createEmptyResumeContent(latexContent),

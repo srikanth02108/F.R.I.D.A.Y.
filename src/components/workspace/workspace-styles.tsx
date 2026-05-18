@@ -61,7 +61,7 @@ export function WorkspacePageHeader({
             {badge}
           </span>
         ) : null}
-        <h2 className="text-[28px] font-bold tracking-tight text-[#0A0A0A] md:text-[32px] md:leading-10 dark:text-zinc-50">
+        <h2 className="text-3xl font-extrabold tracking-tight text-zinc-900 md:text-4xl dark:text-zinc-50">
           {title}
         </h2>
         <p className="mt-1 max-w-2xl text-base text-[#6B6B6B] dark:text-zinc-400">

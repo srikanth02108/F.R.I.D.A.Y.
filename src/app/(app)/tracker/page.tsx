@@ -73,7 +73,7 @@ import { cn } from "@/lib/utils";
 
 type ResumeOption = {
   id: string;
-  title: string;
+  name: string;
   ats_score: number | null;
 };
 
@@ -120,7 +120,7 @@ function mapJobRow(
 
   return {
     ...row,
-    resumeTitle: resume?.title ?? null,
+    resumeTitle: resume?.name ?? null,
     atsScore: resume?.ats_score ?? null,
     displayNotes: notes,
     displayJobDescription: jobDescription,
@@ -169,7 +169,7 @@ export default function Page() {
           .order("created_at", { ascending: false }),
         supabase
           .from("resumes")
-          .select("id, title, ats_score")
+          .select("id, name, ats_score")
           .eq("user_id", user.id)
           .order("updated_at", { ascending: false }),
       ]);
@@ -846,7 +846,7 @@ export default function Page() {
                   <SelectItem value="none">No resume linked</SelectItem>
                   {resumesList.map((resume) => (
                     <SelectItem key={resume.id} value={resume.id}>
-                      {resume.title}
+                      {resume.name}
                       {resume.ats_score != null
                         ? ` (ATS ${resume.ats_score})`
                         : ""}

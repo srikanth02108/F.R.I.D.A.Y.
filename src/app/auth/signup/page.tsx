@@ -170,7 +170,7 @@ export default function SignupPage() {
             <div className="grow border-t border-[#e9e8e7] dark:border-zinc-800" />
           </div>
 
-          <AuthGoogleButton disabled />
+          <AuthGoogleButton />
 
           <p className="pt-4 text-center text-sm text-[#46464b] dark:text-zinc-400">
             Already have an account?{" "}

@@ -249,7 +249,7 @@ export default function Page() {
         .from("resumes")
         .insert({
           user_id: user.id,
-          title: AI_RESUME_TITLE,
+          name: AI_RESUME_TITLE,
           template: selectedTemplate,
           slug: null,
           content: createEmptyResumeContent(latex),

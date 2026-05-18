@@ -79,7 +79,7 @@ import {
 
 type SavedResumeOption = {
   id: string;
-  title: string;
+  name: string;
   content: ResumeContent;
   latex: string;
 };
@@ -172,7 +172,7 @@ export default function Page() {
 
     const { data, error } = await supabase
       .from("resumes")
-      .select("id, title, content")
+      .select("id, name, content")
       .eq("user_id", user.id)
       .order("updated_at", { ascending: false });
 
@@ -184,10 +184,10 @@ export default function Page() {
     }
 
     const options = (data ?? []).map((row) => {
-      const resume = row as Pick<Resume, "id" | "title" | "content">;
+      const resume = row as Pick<Resume, "id" | "name" | "content">;
       return {
         id: resume.id,
-        title: resume.title,
+        name: resume.name,
         content: resume.content ?? {
           summary: null,
           workExperience: [],
@@ -524,7 +524,7 @@ export default function Page() {
         <SelectContent>
           {savedResumes.map((resume) => (
             <SelectItem key={resume.id} value={resume.id}>
-              {resume.title}
+              {resume.name}
             </SelectItem>
           ))}
         </SelectContent>
