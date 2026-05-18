@@ -3,13 +3,17 @@ import { randomUUID } from "crypto";
 import Groq from "groq-sdk";
 import { NextResponse } from "next/server";
 
+import { getGroqModelForPlan } from "@/lib/plan-access";
+import {
+  assertAiGenerationAllowed,
+  assertProModelsAllowed,
+  getAuthenticatedUserPlan,
+} from "@/lib/plan-server";
 import type {
   InterviewQuestion,
   InterviewQuestionDifficulty,
   InterviewQuestionType,
 } from "@/types/interview";
-
-const GROQ_MODEL = "llama-3.3-70b-versatile";
 const MAX_QUESTION_COUNT = 25;
 
 const SYSTEM_PROMPT = `You are a elite technical recruiter, engineering manager, and expert interviewer at a top-tier tech firm. Your job is to analyze a candidate's resume against a specific job description and generate deeply contextual interview questions.
@@ -210,10 +214,26 @@ export async function POST(request: Request) {
 
     const questionCount = Math.min(count, MAX_QUESTION_COUNT);
 
+    const authPlan = await getAuthenticatedUserPlan();
+    if (!authPlan.ok) {
+      return authPlan.response;
+    }
+
+    const generationBlocked = assertAiGenerationAllowed(authPlan.snapshot);
+    if (generationBlocked) {
+      return generationBlocked;
+    }
+
+    const proBlocked = assertProModelsAllowed(authPlan.snapshot);
+    if (proBlocked) {
+      return proBlocked;
+    }
+
+    const model = getGroqModelForPlan(authPlan.snapshot.plan);
     const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
     const completion = await groq.chat.completions.create({
-      model: GROQ_MODEL,
+      model,
       temperature: 0.1,
       max_tokens: 3000,
       response_format: { type: "json_object" },

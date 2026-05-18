@@ -17,6 +17,8 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useUserPlan } from "@/components/providers/user-plan-provider";
+import { getPlanSidebarLabel } from "@/lib/plan-access";
 import { navItems } from "@/lib/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
@@ -171,6 +173,7 @@ function SidebarUserDeck({
 
 export function Sidebar() {
   const pathname = usePathname();
+  const { snapshot: planSnapshot } = useUserPlan();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [userContext, setUserContext] = useState<UserContext | null>(null);
   const [loadingUser, setLoadingUser] = useState(true);
@@ -194,26 +197,21 @@ export function Sidebar() {
       let displayName =
         (user.user_metadata?.full_name as string | undefined)?.trim() ?? "";
       let avatarUrl: string | null = null;
-      let planLabel = "Free Plan";
-
       const { data: profile } = await supabase
         .from("user_profiles")
-        .select("full_name, avatar_url, plan, resumes_used, resumes_limit")
+        .select("full_name, avatar_url")
         .eq("id", user.id)
         .maybeSingle();
 
       if (profile) {
-        const row = profile as Pick<
-          UserProfile,
-          "full_name" | "avatar_url" | "plan" | "resumes_used" | "resumes_limit"
-        >;
+        const row = profile as Pick<UserProfile, "full_name" | "avatar_url">;
         if (row.full_name?.trim()) {
           displayName = row.full_name.trim();
         }
         avatarUrl = row.avatar_url;
-        const planName = row.plan === "pro" ? "Pro Plan" : "Free Plan";
-        planLabel = `${planName} · ${row.resumes_used}/${row.resumes_limit} resumes`;
       }
+
+      const planLabel = getPlanSidebarLabel(planSnapshot);
 
       if (!displayName) {
         displayName = email.split("@")[0] || "User";
@@ -232,7 +230,7 @@ export function Sidebar() {
     } finally {
       setLoadingUser(false);
     }
-  }, []);
+  }, [planSnapshot]);
 
   useEffect(() => {
     void loadUserContext();

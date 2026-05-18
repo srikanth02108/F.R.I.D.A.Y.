@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 
 import { LandingPage } from "@/components/landing/landing-page";
 import { BRAND_FULL_NAME } from "@/lib/brand";
+import { fetchUserPlanSnapshot } from "@/lib/plan-server";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
@@ -14,10 +15,11 @@ export const metadata: Metadata = {
 export default async function Home() {
   const supabase = await createClient();
   const {
-    data: { session },
-  } = await supabase.auth.getSession();
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  if (session) {
+  if (user) {
+    await fetchUserPlanSnapshot(user.id);
     redirect("/app/dashboard");
   }
 

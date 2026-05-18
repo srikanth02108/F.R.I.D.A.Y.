@@ -1,9 +1,13 @@
 import Groq from "groq-sdk";
 import { NextResponse } from "next/server";
 
+import { getGroqModelForPlan } from "@/lib/plan-access";
+import {
+  assertAiGenerationAllowed,
+  assertProModelsAllowed,
+  getAuthenticatedUserPlan,
+} from "@/lib/plan-server";
 import type { AtsIssue, AtsScoreResult } from "@/types/ats-score";
-
-const GROQ_MODEL = "llama-3.3-70b-versatile";
 
 const SYSTEM_PROMPT = `You are an expert ATS (Applicant Tracking System) compatibility auditor and professional technical recruiter. Your job is to deeply analyze resumes for parsing compatibility, keyword matching, metric quantification, and structural clarity. 
 
@@ -180,10 +184,28 @@ export async function POST(request: Request) {
     const jobDescription = body.jobDescription?.trim();
     const hasJobDescription = Boolean(jobDescription);
 
+    const authPlan = await getAuthenticatedUserPlan();
+    if (!authPlan.ok) {
+      return authPlan.response;
+    }
+
+    const generationBlocked = assertAiGenerationAllowed(authPlan.snapshot);
+    if (generationBlocked) {
+      return generationBlocked;
+    }
+
+    if (hasJobDescription) {
+      const proBlocked = assertProModelsAllowed(authPlan.snapshot);
+      if (proBlocked) {
+        return proBlocked;
+      }
+    }
+
+    const model = getGroqModelForPlan(authPlan.snapshot.plan);
     const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
     const completion = await groq.chat.completions.create({
-      model: GROQ_MODEL,
+      model,
       temperature: 0.1,
       max_tokens: 3000,
       response_format: { type: "json_object" },

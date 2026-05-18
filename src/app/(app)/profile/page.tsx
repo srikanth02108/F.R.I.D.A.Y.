@@ -54,10 +54,17 @@ import { createEmptyResumeContent } from "@/lib/resume-content";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import type { ParsedLinkedInProfile } from "@/types/linkedin-import";
+import {
+  buildUserProfileUpdatePayload,
+  buildUserProfileUpsertRow,
+  mapRowToProfileFormState,
+  USER_PROFILE_FORM_SELECT,
+} from "@/lib/user-profile-persistence";
 import type {
   Education,
   ResumeContent,
   Skill,
+  UserProfile,
   WorkExperience,
 } from "@/types/database";
 
@@ -174,20 +181,26 @@ export default function Page() {
         return;
       }
 
-      const { data: profileRow } = await supabase
+      const { data: profileRow, error: profileLoadError } = await supabase
         .from("user_profiles")
-        .select("*")
+        .select(USER_PROFILE_FORM_SELECT)
         .eq("id", user.id)
         .maybeSingle();
 
+      if (profileLoadError) {
+        throw new Error(profileLoadError.message);
+      }
+
       if (profileRow) {
-        setFullName(profileRow.full_name ?? "");
-        setHeadline(profileRow.headline ?? "");
-        setLocation(profileRow.location ?? "");
-        setPhone(profileRow.phone ?? "");
-        setLinkedinUrl(profileRow.linkedin_url ?? "");
-        setGithubUrl(profileRow.github_url ?? "");
-        setWebsiteUrl(profileRow.website_url ?? "");
+        const profile = profileRow as UserProfile;
+        const formState = mapRowToProfileFormState(profile);
+        setFullName(formState.fullName);
+        setHeadline(formState.headline);
+        setLocation(formState.location);
+        setPhone(formState.phone);
+        setLinkedinUrl(formState.linkedinUrl);
+        setGithubUrl(formState.githubUrl);
+        setWebsiteUrl(formState.websiteUrl);
       }
 
       const { data: vaultRow } = await supabase
@@ -232,22 +245,51 @@ export default function Page() {
         throw new Error("You must be signed in to save your profile");
       }
 
-      const { error: profileError } = await supabase
-        .from("user_profiles")
-        .update({
-          full_name: fullName.trim() || null,
-          headline: headline.trim() || null,
-          location: location.trim() || null,
-          phone: phone.trim() || null,
-          linkedin_url: linkedinUrl.trim() || null,
-          github_url: githubUrl.trim() || null,
-          website_url: websiteUrl.trim() || null,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", user.id);
+      const profileForm = {
+        fullName,
+        headline,
+        location,
+        phone,
+        linkedinUrl,
+        githubUrl,
+        websiteUrl,
+      };
 
-      if (profileError) {
-        throw new Error(profileError.message);
+      const profileUpdate = buildUserProfileUpdatePayload(profileForm);
+
+      const { data: existingProfile, error: existingError } = await supabase
+        .from("user_profiles")
+        .select("id, plan, resumes_used, resumes_limit")
+        .eq("id", user.id)
+        .maybeSingle();
+
+      if (existingError) {
+        throw new Error(existingError.message);
+      }
+
+      if (existingProfile) {
+        const { error: profileError } = await supabase
+          .from("user_profiles")
+          .update(profileUpdate)
+          .eq("id", user.id);
+
+        if (profileError) {
+          throw new Error(profileError.message);
+        }
+      } else {
+        const { error: insertError } = await supabase
+          .from("user_profiles")
+          .insert(
+            buildUserProfileUpsertRow(
+              user.id,
+              user.email ?? "",
+              profileForm,
+            ),
+          );
+
+        if (insertError) {
+          throw new Error(insertError.message);
+        }
       }
 
       const vaultContent: ResumeContent = {

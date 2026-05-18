@@ -1,7 +1,11 @@
 import Groq from "groq-sdk";
 import { NextResponse } from "next/server";
 
-const GROQ_MODEL = "llama-3.3-70b-versatile";
+import { getGroqModelForPlan } from "@/lib/plan-access";
+import {
+  assertAiGenerationAllowed,
+  getAuthenticatedUserPlan,
+} from "@/lib/plan-server";
 
 const SYSTEM_PROMPT = `You are an expert resume writer and LaTeX typesetter. You help job seekers create professional, ATS-optimized resumes. When given a user's background description and their profile information, you generate a complete, valid LaTeX resume document. 
 
@@ -90,10 +94,21 @@ export async function POST(request: Request) {
       );
     }
 
+    const authPlan = await getAuthenticatedUserPlan();
+    if (!authPlan.ok) {
+      return authPlan.response;
+    }
+
+    const generationBlocked = assertAiGenerationAllowed(authPlan.snapshot);
+    if (generationBlocked) {
+      return generationBlocked;
+    }
+
+    const model = getGroqModelForPlan(authPlan.snapshot.plan);
     const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
     const completionStream = await groq.chat.completions.create({
-      model: GROQ_MODEL,
+      model,
       temperature: 0.2,
       max_tokens: 4000,
       stream: true,

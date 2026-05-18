@@ -11,11 +11,13 @@ import {
   Download,
   FileText,
   Lightbulb,
+  Lock,
   Mail,
   Sparkles,
   TrendingUp,
 } from "lucide-react";
 
+import { useUserPlan } from "@/components/providers/user-plan-provider";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -135,6 +137,41 @@ function MetricValue({
     >
       {formatValue ? formatValue(value) : value}
     </span>
+  );
+}
+
+function ProFeatureLock({
+  locked,
+  label,
+  children,
+}: {
+  locked: boolean;
+  label: string;
+  children: React.ReactNode;
+}) {
+  if (!locked) {
+    return <>{children}</>;
+  }
+
+  return (
+    <div className="relative">
+      <div className="pointer-events-none select-none opacity-50 blur-[1px]">
+        {children}
+      </div>
+      <div className="absolute inset-0 flex flex-col items-center justify-center rounded-xl bg-white/85 p-4 text-center backdrop-blur-[2px]">
+        <Lock className="mb-2 size-5 text-amber-600" aria-hidden />
+        <p className="max-w-[200px] text-sm font-medium text-[#1b1c1c]">
+          {label}
+        </p>
+        <Button
+          size="sm"
+          asChild
+          className="mt-3 border-0 bg-gradient-to-r from-amber-500 to-orange-500 font-semibold text-white hover:brightness-110"
+        >
+          <Link href="/pricing/pro">Upgrade to Pro</Link>
+        </Button>
+      </div>
+    </div>
   );
 }
 
@@ -285,6 +322,7 @@ function PipelineRow({
 
 export function DashboardPage() {
   const router = useRouter();
+  const { canViewProDashboardMetrics } = useUserPlan();
   const today = format(new Date(), "EEEE, MMMM d, yyyy");
 
   const [metricsLoading, setMetricsLoading] = useState(true);
@@ -470,12 +508,16 @@ export function DashboardPage() {
             <section>
               <SectionLabel>Performance Metrics</SectionLabel>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                <PerformanceMetricCard
-                  loading={metricsLoading}
-                  label="Avg. ATS Score"
-                  icon={BadgeCheck}
-                  iconClassName="text-[#0EB87A]"
+                <ProFeatureLock
+                  locked={!canViewProDashboardMetrics}
+                  label="Advanced ATS analytics are available on Pro and Team plans."
                 >
+                  <PerformanceMetricCard
+                    loading={metricsLoading}
+                    label="Avg. ATS Score"
+                    icon={BadgeCheck}
+                    iconClassName="text-[#0EB87A]"
+                  >
                   <div className="flex items-baseline gap-1">
                     <MetricValue
                       loading={metricsLoading}
@@ -499,7 +541,8 @@ export function DashboardPage() {
                       />
                     )}
                   </div>
-                </PerformanceMetricCard>
+                  </PerformanceMetricCard>
+                </ProFeatureLock>
 
                 <PerformanceMetricCard
                   loading={metricsLoading}
@@ -521,21 +564,26 @@ export function DashboardPage() {
                   </p>
                 </PerformanceMetricCard>
 
-                <PerformanceMetricCard
-                  loading={metricsLoading}
-                  label="Interview Invites"
-                  icon={Mail}
-                  iconClassName="text-[#6B6B6B]"
+                <ProFeatureLock
+                  locked={!canViewProDashboardMetrics}
+                  label="Pipeline and interview metrics unlock with Pro or Team."
                 >
-                  <MetricValue
+                  <PerformanceMetricCard
                     loading={metricsLoading}
-                    value={metrics.interviewsScheduled}
-                  />
-                  <p className="mt-2 text-sm text-[#6B6B6B]">
-                    {metrics.jobsApplied} active application
-                    {metrics.jobsApplied === 1 ? "" : "s"}
-                  </p>
-                </PerformanceMetricCard>
+                    label="Interview Invites"
+                    icon={Mail}
+                    iconClassName="text-[#6B6B6B]"
+                  >
+                    <MetricValue
+                      loading={metricsLoading}
+                      value={metrics.interviewsScheduled}
+                    />
+                    <p className="mt-2 text-sm text-[#6B6B6B]">
+                      {metrics.jobsApplied} active application
+                      {metrics.jobsApplied === 1 ? "" : "s"}
+                    </p>
+                  </PerformanceMetricCard>
+                </ProFeatureLock>
               </div>
             </section>
 
@@ -601,6 +649,10 @@ export function DashboardPage() {
           <div className="flex flex-col gap-8 xl:col-span-4">
             <section>
               <SectionLabel icon={Lightbulb}>AI Insights</SectionLabel>
+              <ProFeatureLock
+                locked={!canViewProDashboardMetrics}
+                label="AI insights and interview coaching require Pro or Team."
+              >
               <Card className="relative overflow-hidden rounded-xl border-0 bg-[#191b22] text-white shadow-md">
                 <div className="pointer-events-none absolute -top-10 -right-10 size-32 rounded-full bg-[#2055FD]/30 blur-2xl" />
                 <CardContent className="relative z-10 space-y-4 p-6">
@@ -645,6 +697,7 @@ export function DashboardPage() {
                   </div>
                 </CardContent>
               </Card>
+              </ProFeatureLock>
             </section>
 
             <section>
@@ -657,6 +710,10 @@ export function DashboardPage() {
                   Tracker
                 </Link>
               </div>
+              <ProFeatureLock
+                locked={!canViewProDashboardMetrics}
+                label="Application pipeline tracking is a Pro and Team feature."
+              >
               <Card className="rounded-xl border-[#c7c6cb] bg-white p-4 shadow-sm">
                 <CardContent className="flex flex-col gap-1 p-0">
                   <PipelineRow
@@ -682,6 +739,7 @@ export function DashboardPage() {
                   />
                 </CardContent>
               </Card>
+              </ProFeatureLock>
             </section>
 
             <section>

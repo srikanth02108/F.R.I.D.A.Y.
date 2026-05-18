@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import toast from "react-hot-toast";
 
+import { useUserPlan } from "@/components/providers/user-plan-provider";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -103,6 +104,7 @@ function ProgressStep({
 
 export default function Page() {
   const router = useRouter();
+  const { canRunAiGeneration, canUseProModels } = useUserPlan();
 
   const [description, setDescription] = useState("");
   const [selectedTemplate, setSelectedTemplate] = useState(DEFAULT_TEMPLATE);
@@ -164,6 +166,21 @@ export default function Page() {
     if (!description.trim()) {
       toast.error("Please describe your background first");
       return;
+    }
+
+    if (!canRunAiGeneration) {
+      toast.error(
+        "You have reached your free generation limit. Upgrade to Pro for unlimited AI generations.",
+      );
+      router.push("/pricing/pro");
+      return;
+    }
+
+    if (!canUseProModels) {
+      toast(
+        "Using standard AI model on Free plan. Upgrade to Pro for advanced Llama 3.3 70B.",
+        { icon: "✨" },
+      );
     }
 
     setIsGenerating(true);

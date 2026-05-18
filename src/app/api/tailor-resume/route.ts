@@ -1,7 +1,12 @@
 import Groq from "groq-sdk";
 import { NextResponse } from "next/server";
 
-const GROQ_MODEL = "llama-3.3-70b-versatile";
+import { getGroqModelForPlan } from "@/lib/plan-access";
+import {
+  assertAiGenerationAllowed,
+  assertProModelsAllowed,
+  getAuthenticatedUserPlan,
+} from "@/lib/plan-server";
 
 const SYSTEM_PROMPT_MASTER = `You are an elite ATS optimization engineer and LaTeX resume architect operating on Llama 3.3 70B. Your mandate is to produce a job-tailored resume that would score 95+ on enterprise ATS keyword matrices while remaining 100% truthful to the candidate's verified Profile Vault data.
 
@@ -140,10 +145,28 @@ export async function POST(request: Request) {
       );
     }
 
+    const authPlan = await getAuthenticatedUserPlan();
+    if (!authPlan.ok) {
+      return authPlan.response;
+    }
+
+    const generationBlocked = assertAiGenerationAllowed(authPlan.snapshot);
+    if (generationBlocked) {
+      return generationBlocked;
+    }
+
+    if (useMasterResume) {
+      const proBlocked = assertProModelsAllowed(authPlan.snapshot);
+      if (proBlocked) {
+        return proBlocked;
+      }
+    }
+
+    const model = getGroqModelForPlan(authPlan.snapshot.plan);
     const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
     const completionStream = await groq.chat.completions.create({
-      model: GROQ_MODEL,
+      model,
       temperature: 0.12,
       max_tokens: 8192,
       stream: true,
