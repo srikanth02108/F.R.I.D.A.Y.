@@ -154,53 +154,76 @@ export const modernTemplate = String.raw`\documentclass[11pt,a4paper]{article}
 \end{document}
 `;
 
-export const minimalTemplate = String.raw`\documentclass[11pt,a4paper]{article}
+export const executiveTemplate = String.raw`\documentclass[11pt,a4paper]{article}
 
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
 \usepackage{parskip}
-\setlength{\parskip}{6pt} % Space between paragraphs
-\setlength{\parindent}{0pt} % No indentation at the start of paragraphs
-\usepackage[margin=1in]{geometry}
+\setlength{\parskip}{6pt}
+\setlength{\parindent}{0pt}
+\usepackage[margin=0.85in]{geometry}
 \usepackage{enumitem}
 \usepackage{titlesec}
 \usepackage{hyperref}
 
 \hypersetup{colorlinks=true, linkcolor=black, urlcolor=black}
 
-\titleformat{\section}{\normalsize\bfseries}{}{0em}{}
-\titlespacing*{\section}{0pt}{14pt}{6pt}
+\titleformat{\section}{\large\bfseries\scshape}{}{0em}{}
+\titlespacing*{\section}{0pt}{12pt}{6pt}
 
 \pagestyle{empty}
-\setlength{\parskip}{6pt}
 
 \begin{document}
 
 \begin{center}
-  John Doe\\[2pt]
-  \small
-  john.doe@email.com \quad (555) 123-4567 \quad San Francisco, CA
+  {\LARGE\bfseries John Doe}\\[6pt]
+  {\large Vice President of Engineering}\\[10pt]
+  \href{mailto:john.doe@email.com}{john.doe@email.com} \textbar\
+  (555) 123-4567 \textbar\
+  San Francisco, CA \textbar\
+  \href{https://linkedin.com/in/johndoe}{linkedin.com/in/johndoe}
 \end{center}
 
-\section{Summary}
-Software engineer focused on clarity, reliability, and thoughtful product development.
+\section{Executive Summary}
+Strategic technology leader with 12+ years driving digital transformation, P\&L accountability, and high-performing engineering organizations. Proven record scaling platforms to \$50M+ ARR while improving operational efficiency and talent retention.
 
-\section{Experience}
-\textbf{Senior Software Engineer}, Acme Technologies \hfill 2021 -- Present\\
-Led platform modernization and mentored engineers on best practices.
+\section{Leadership Highlights}
+\begin{itemize}[leftmargin=*, nosep]
+  \item Scaled engineering organization from 18 to 65 across three global hubs while maintaining 92\% retention.
+  \item Delivered \$4.2M annual cost savings through cloud modernization and vendor consolidation.
+  \item Partnered with C-suite on product strategy, M\&A diligence, and board-level technology roadmaps.
+\end{itemize}
 
-\textbf{Software Engineer}, Bright Labs \hfill 2018 -- 2021\\
-Built React applications and improved system performance across core services.
+\section{Professional Experience}
+\textbf{Vice President of Engineering} \hfill Jan 2022 -- Present\\
+\textit{Acme Technologies, San Francisco, CA}
+\begin{itemize}[leftmargin=*, nosep]
+  \item Own platform reliability, security posture, and release governance for a \$50M ARR SaaS portfolio.
+  \item Established engineering OKR cadence adopted company-wide; improved on-time delivery from 68\% to 91\%.
+  \item Led acquisition integration of two startups, unifying tech stacks within nine months.
+\end{itemize}
+
+\vspace{6pt}
+\textbf{Director of Engineering} \hfill Mar 2018 -- Dec 2021\\
+\textit{Bright Labs, Austin, TX}
+\begin{itemize}[leftmargin=*, nosep]
+  \item Directed 4 product squads shipping enterprise analytics used by Fortune 500 clients.
+  \item Reduced incident MTTR by 55\% through SRE practices and executive war-room protocols.
+\end{itemize}
 
 \section{Education}
-\textbf{B.S. Computer Science}, University of California, Berkeley \hfill 2018
+\textbf{M.B.A., Technology Management} \hfill 2016\\
+Stanford Graduate School of Business\\[4pt]
+\textbf{B.S. Computer Science} \hfill 2012\\
+University of California, Berkeley
 
-\section{Skills}
-JavaScript, TypeScript, React, Node.js, Python, SQL, AWS
+\section{Board \& Advisory}
+\textbf{Advisor}, TechForward Nonprofit \hfill 2023 -- Present\\
+\textbf{Guest Lecturer}, UC Berkeley Haas School of Business \hfill 2021 -- Present
 
-\section{Projects}
-DevFlow CLI --- Developer automation tool.\\
-Portfolio --- \href{https://johndoe.dev}{johndoe.dev}
+\section{Core Competencies}
+Strategic Planning \textbar\ Organizational Design \textbar\ Cloud Architecture \textbar\
+Stakeholder Management \textbar\ Budgeting \textbar\ M\&A Integration
 
 \end{document}
 `;
@@ -369,11 +392,11 @@ export const TEMPLATES: TemplateMeta[] = [
       "Contemporary split design: sidebar for contact, skills, and education; main column for summary and experience.",
   },
   {
-    id: "minimal",
-    name: "Minimal",
-    description: "Ultra-clean design with generous whitespace and understated typography.",
+    id: "executive",
+    name: "Executive",
+    description: "Leadership-focused layout with highlights, board roles, and strategic competencies.",
     preview_description:
-      "Sparse, elegant formatting focused on readability with minimal visual noise.",
+      "C-suite oriented design emphasizing executive summary, leadership wins, and advisory experience.",
   },
   {
     id: "ats-safe",
@@ -394,7 +417,7 @@ export const TEMPLATES: TemplateMeta[] = [
 export const TEMPLATE_LATEX: Record<string, string> = {
   classic: classicTemplate,
   modern: modernTemplate,
-  minimal: minimalTemplate,
+  executive: executiveTemplate,
   "ats-safe": atsSafeTemplate,
   technical: technicalTemplate,
 };

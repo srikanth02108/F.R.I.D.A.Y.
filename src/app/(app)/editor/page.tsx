@@ -14,8 +14,8 @@ import {
   Loader2,
   Play,
   Save,
+  FileStack,
   Share2,
-  User,
   Wand2,
 } from "lucide-react";
 import toast from "react-hot-toast";
@@ -30,13 +30,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { EditorTemplateSelect } from "@/components/editor/editor-template-select";
 import {
   workspaceAzureButtonClass,
   workspaceLabelClass,
@@ -50,7 +44,7 @@ import {
 } from "@/lib/compile-latex";
 import { createClient } from "@/lib/supabase/client";
 import { createEmptyResumeContent } from "@/lib/resume-content";
-import { getTemplateLatex, TEMPLATES } from "@/lib/templates";
+import { getTemplateLatex } from "@/lib/templates";
 import type { Resume } from "@/types/database";
 import { cn } from "@/lib/utils";
 
@@ -92,9 +86,14 @@ export function ResumeEditor() {
   const [exporting, setExporting] = useState(false);
   const [copying, setCopying] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [sharing, setSharing] = useState(false);
+  const [masterPdfLoading, setMasterPdfLoading] = useState(false);
+  const [isPublic, setIsPublic] = useState(false);
+  const [shareToken, setShareToken] = useState<string | null>(null);
   const [loadingResume, setLoadingResume] = useState(Boolean(resumeIdParam));
 
-  const isBusy = compiling || exporting || copying || saving;
+  const isBusy =
+    compiling || exporting || copying || saving || sharing || masterPdfLoading;
 
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [lastCompiled, setLastCompiled] = useState<Date | null>(null);
@@ -151,6 +150,8 @@ export function ResumeEditor() {
     setSavedLatex(latex);
     setSavedName(resume.name);
     setSavedTemplate(resume.template);
+    setIsPublic(resume.is_public);
+    setShareToken(resume.content?.shareToken ?? null);
   }, [resumeIdParam]);
 
   useEffect(() => {
@@ -289,9 +290,12 @@ export function ResumeEditor() {
       name: resumeName.trim() || "My Resume",
       template: selectedTemplate,
       slug: null,
-      content: createEmptyResumeContent(latexContent),
+      content: {
+        ...createEmptyResumeContent(latexContent),
+        ...(shareToken ? { shareToken } : {}),
+      },
       ats_score: null,
-      is_public: false,
+      is_public: isPublic,
     };
 
     let errorMessage: string | null = null;
@@ -332,8 +336,109 @@ export function ResumeEditor() {
     toast.success("Resume saved");
   };
 
-  const handleLoadMyInfo = () => {
-    toast("Load My Info coming soon", { icon: "ℹ️" });
+  const handleMasterPdf = async () => {
+    setMasterPdfLoading(true);
+
+    try {
+      const response = await fetch("/api/master-pdf", { method: "POST" });
+      if (!response.ok) {
+        const payload = (await response.json().catch(() => null)) as {
+          error?: string;
+        } | null;
+        throw new Error(payload?.error ?? "Master PDF generation failed");
+      }
+
+      const blob = await response.blob();
+      downloadPdfBlob(blob, "master-portfolio.pdf");
+      toast.success("Master portfolio PDF downloaded");
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Master PDF download failed";
+      toast.error(message);
+    } finally {
+      setMasterPdfLoading(false);
+    }
+  };
+
+  const handleShare = async () => {
+    setSharing(true);
+    const supabase = createClient();
+
+    try {
+      const {
+        data: { user },
+        error: authError,
+      } = await supabase.auth.getUser();
+
+      if (authError || !user) {
+        toast.error("You must be signed in to share");
+        router.push("/auth/login");
+        return;
+      }
+
+      let activeResumeId = resumeId;
+      const token = shareToken ?? crypto.randomUUID();
+
+      if (!activeResumeId) {
+        const { data, error } = await supabase
+          .from("resumes")
+          .insert({
+            user_id: user.id,
+            name: resumeName.trim() || "My Resume",
+            template: selectedTemplate,
+            slug: null,
+            content: {
+              ...createEmptyResumeContent(latexContent),
+              shareToken: token,
+            },
+            ats_score: null,
+            is_public: true,
+          })
+          .select("id")
+          .single();
+
+        if (error || !data) {
+          throw new Error(error?.message ?? "Could not create resume for sharing");
+        }
+
+        activeResumeId = data.id;
+        setResumeId(data.id);
+        router.replace(`/app/editor?id=${data.id}`, { scroll: false });
+      } else {
+        const { error } = await supabase
+          .from("resumes")
+          .update({
+            is_public: true,
+            content: {
+              ...createEmptyResumeContent(latexContent),
+              shareToken: token,
+            },
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", activeResumeId)
+          .eq("user_id", user.id);
+
+        if (error) {
+          throw new Error(error.message);
+        }
+      }
+
+      setIsPublic(true);
+      setShareToken(token);
+      setSavedLatex(latexContent);
+      setSavedName(resumeName);
+      setSavedTemplate(selectedTemplate);
+
+      const shareUrl = `${window.location.origin}/share/${activeResumeId}`;
+      await navigator.clipboard.writeText(shareUrl);
+      toast.success("Public share link copied to clipboard");
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Failed to create share link";
+      toast.error(message);
+    } finally {
+      setSharing(false);
+    }
   };
 
   if (loadingResume) {
@@ -369,35 +474,26 @@ export function ResumeEditor() {
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
-            <Select
+            <EditorTemplateSelect
               value={selectedTemplate}
               onValueChange={handleTemplateChange}
               disabled={isBusy}
-            >
-              <SelectTrigger
-                className="h-9 w-[130px] border-[#c7c6cb] bg-white text-sm md:w-[150px]"
-                size="sm"
-              >
-                <SelectValue placeholder="Template" />
-              </SelectTrigger>
-              <SelectContent>
-                {TEMPLATES.map((template) => (
-                  <SelectItem key={template.id} value={template.id}>
-                    {template.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            />
 
             <Button
               variant="outline"
               size="sm"
-              className={cn("hidden sm:inline-flex", workspaceOutlineButtonClass)}
-              onClick={handleLoadMyInfo}
+              className={cn("hidden md:inline-flex", workspaceOutlineButtonClass)}
+              onClick={handleMasterPdf}
               disabled={isBusy}
             >
-              <User className="size-3.5" />
-              Load My Info
+              {masterPdfLoading ? (
+                <Loader2 className="size-3.5 animate-spin" />
+              ) : (
+                <FileStack className="size-3.5" />
+              )}
+              <span className="hidden lg:inline">Master PDF</span>
+              <span className="lg:hidden">Master</span>
             </Button>
 
             <Button
@@ -434,9 +530,13 @@ export function ResumeEditor() {
               size="sm"
               className={cn("hidden lg:inline-flex", workspaceOutlineButtonClass)}
               disabled={isBusy}
-              onClick={() => toast("Share link coming soon", { icon: "ℹ️" })}
+              onClick={handleShare}
             >
-              <Share2 className="size-3.5" />
+              {sharing ? (
+                <Loader2 className="size-3.5 animate-spin" />
+              ) : (
+                <Share2 className="size-3.5" />
+              )}
               Share
             </Button>
 

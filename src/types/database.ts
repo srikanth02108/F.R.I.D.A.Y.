@@ -48,12 +48,30 @@ export type Skill = {
   category: string;
 };
 
+export type Certification = {
+  id: string;
+  name: string;
+  issuer: string;
+  date: string;
+};
+
+export type CareerEvent = {
+  id: string;
+  title: string;
+  date: string;
+  description: string;
+};
+
 export type ResumeContent = {
   summary: string | null;
   workExperience: WorkExperience[];
   education: Education[];
   projects: Project[];
   skills: Skill[];
+  certifications?: Certification[];
+  careerEvents?: CareerEvent[];
+  /** Public share tracking token (set when resume is shared) */
+  shareToken?: string;
   /** Full LaTeX source stored by the resume editor */
   latexSource?: string;
 };

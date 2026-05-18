@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-const LATEX_ONLINE_URL = "https://latexonline.cc/compile";
+import { compileLatexToPdfBuffer } from "@/lib/latex-compile-server";
 
 export async function POST(request: Request) {
   try {
@@ -29,26 +29,7 @@ export async function POST(request: Request) {
       );
     }
 
-    let response = await fetch(LATEX_ONLINE_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({ text: latex }),
-    });
-
-    if (!response.ok) {
-      const compileUrl = `${LATEX_ONLINE_URL}?text=${encodeURIComponent(latex)}`;
-      response = await fetch(compileUrl, { method: "GET" });
-    }
-
-    if (!response.ok) {
-      const errorText = await response.text().catch(() => "Compilation failed");
-      return NextResponse.json(
-        { error: errorText || "LaTeX compilation failed" },
-        { status: response.status || 500 },
-      );
-    }
-
-    const pdfBuffer = await response.arrayBuffer();
+    const pdfBuffer = await compileLatexToPdfBuffer(latex);
 
     return new NextResponse(pdfBuffer, {
       status: 200,
