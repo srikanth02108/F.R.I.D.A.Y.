@@ -1,14 +1,18 @@
-import Groq from "groq-sdk";
+import {
+  GoogleGenerativeAI,
+  HarmCategory,
+  HarmBlockThreshold,
+} from "@google/generative-ai";
 import { NextResponse } from "next/server";
 
-import { getGroqModelForPlan } from "@/lib/plan-access";
+import { getGeminiModelForPlan } from "@/lib/plan-access";
 import {
   assertAiGenerationAllowed,
   assertProModelsAllowed,
   getAuthenticatedUserPlan,
 } from "@/lib/plan-server";
 
-const SYSTEM_PROMPT_MASTER = `You are an elite ATS optimization engineer and LaTeX resume architect operating on Llama 3.3 70B. Your mandate is to produce a job-tailored resume that would score 95+ on enterprise ATS keyword matrices while remaining 100% truthful to the candidate's verified Profile Vault data.
+const SYSTEM_PROMPT_MASTER = `You are an elite ATS optimization engineer and LaTeX resume architect. Your mandate is to produce a job-tailored resume that would score 95+ on enterprise ATS keyword matrices while remaining 100% truthful to the candidate's verified Profile Vault data.
 
 MANDATORY OPTIMIZATION PIPELINE (execute in order):
 1. SEMANTIC KEYWORD CLUSTERING — Extract noun phrases, tools, certifications, seniority signals, and domain verbs from the job description. Cluster them into: hard skills, soft skills, industry terms, and role-specific phrases. Map every cluster to vault-backed evidence.
@@ -23,13 +27,14 @@ MASTER RESUME MODE:
 
 OUTPUT CONTRACT (non-negotiable):
 - Return ONLY raw, complete, valid LaTeX. First character must be backslash-documentclass. Last line must be backslash-end-document.
+- Do NOT use markdown code blocks (\`\`\`latex). Output the raw LaTeX string starting with \\documentclass.
 - NO markdown fences, NO commentary, NO preamble or postamble text.
 - Use: geometry, hyperref, enumitem, titlesec, fontenc, inputenc, parskip (use \\usepackage{parskip} without optional args).
 - Target 95+ simulated ATS match. One page unless vault depth requires two pages maximum.
 
 TRUTHFULNESS: Never fabricate employers, degrees, tools, or dates not supported by vault or provided resume data.`;
 
-const SYSTEM_PROMPT_LATEX_ONLY = `You are an elite ATS optimization engineer and LaTeX resume architect operating on Llama 3.3 70B. Rewrite ONLY the provided LaTeX source for the target job description. Do NOT import external profile data, vault fields, or skills not already present in the source document unless they are clearly implied by existing content.
+const SYSTEM_PROMPT_LATEX_ONLY = `You are an elite ATS optimization engineer and LaTeX resume architect. Rewrite ONLY the provided LaTeX source for the target job description. Do NOT import external profile data, vault fields, or skills not already present in the source document unless they are clearly implied by existing content.
 
 MANDATORY OPTIMIZATION PIPELINE (execute in order):
 1. SEMANTIC KEYWORD CLUSTERING — Extract and cluster JD keywords; map each to existing resume content only.
@@ -40,6 +45,7 @@ MANDATORY OPTIMIZATION PIPELINE (execute in order):
 
 OUTPUT CONTRACT (non-negotiable):
 - Return ONLY raw, complete, valid LaTeX from \\documentclass through \\end{document}.
+- Do NOT use markdown code blocks (\`\`\`latex). Output the raw LaTeX string starting with \\documentclass.
 - NO markdown fences, NO commentary.
 - Target 95+ simulated ATS match on the given JD.
 - Strict rewrite of the input string only — no external vault parameters.`;
@@ -84,26 +90,25 @@ ${currentResume}
 Deliver a 95+ ATS-aligned LaTeX resume. Apply keyword clustering, phrase alignment, section re-ordering, and metric density. Output clean raw LaTeX only.`;
 }
 
-function getErrorMessage(error: unknown): string {
-  if (error instanceof Groq.APIError) {
-    if (error.status === 429) {
-      return "Groq rate limit exceeded. Please try again in a moment.";
-    }
-    return error.message || "Groq API request failed";
-  }
+const SAFETY_SETTINGS = [
+  { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
+  { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
+  { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
+  { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
+];
 
+function getErrorMessage(error: unknown): string {
   if (error instanceof Error) {
     return error.message;
   }
-
   return "Failed to tailor resume";
 }
 
 export async function POST(request: Request) {
   try {
-    if (!process.env.GROQ_API_KEY) {
+    if (!process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
       return NextResponse.json(
-        { error: "Groq API key is not configured" },
+        { error: "Google AI API key is not configured" },
         { status: 500 },
       );
     }
@@ -162,41 +167,37 @@ export async function POST(request: Request) {
       }
     }
 
-    const model = getGroqModelForPlan(authPlan.snapshot.plan);
-    const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
-
-    const completionStream = await groq.chat.completions.create({
-      model,
-      temperature: 0.12,
-      max_tokens: 8192,
-      stream: true,
-      messages: [
-        {
-          role: "system",
-          content: useMasterResume
-            ? SYSTEM_PROMPT_MASTER
-            : SYSTEM_PROMPT_LATEX_ONLY,
-        },
-        {
-          role: "user",
-          content: buildUserMessage(
-            jobDescription,
-            currentResume,
-            useMasterResume,
-            userProfile,
-            profileVault,
-          ),
-        },
-      ],
+    const modelName = getGeminiModelForPlan(authPlan.snapshot.plan);
+    const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GENERATIVE_AI_API_KEY);
+    const model = genAI.getGenerativeModel({
+      model: modelName,
+      safetySettings: SAFETY_SETTINGS,
+      generationConfig: {
+        temperature: 0.12,
+        maxOutputTokens: 8192,
+      },
+      systemInstruction: useMasterResume
+        ? SYSTEM_PROMPT_MASTER
+        : SYSTEM_PROMPT_LATEX_ONLY,
     });
+
+    const userMessage = buildUserMessage(
+      jobDescription,
+      currentResume,
+      useMasterResume,
+      userProfile,
+      profileVault,
+    );
+
+    const result = await model.generateContentStream(userMessage);
 
     const encoder = new TextEncoder();
 
     const stream = new ReadableStream({
       async start(controller) {
         try {
-          for await (const chunk of completionStream) {
-            const text = chunk.choices[0]?.delta?.content ?? "";
+          for await (const chunk of result.stream) {
+            const text = chunk.text();
             if (text) {
               controller.enqueue(
                 encoder.encode(`data: ${JSON.stringify({ text })}\n\n`),

@@ -40,7 +40,7 @@ import { createEmptyResumeContent } from "@/lib/resume-content";
 import { sanitizeGeneratedLatex } from "@/lib/sanitize-latex";
 import { createClient } from "@/lib/supabase/client";
 import { streamGenerateResume } from "@/lib/stream-generate-resume";
-import { getTemplateById, TEMPLATES } from "@/lib/templates";
+import { useTemplates } from "@/hooks/use-templates";
 import type { UserProfile } from "@/types/database";
 import { cn } from "@/lib/utils";
 
@@ -117,7 +117,8 @@ export default function Page() {
   const [isSaving, setIsSaving] = useState(false);
 
   const pdfUrlRef = useRef<string | null>(null);
-  const selectedTemplateMeta = getTemplateById(selectedTemplate);
+  const { templates, getLatex } = useTemplates();
+  const selectedTemplateMeta = templates.find((t) => t.id === selectedTemplate);
 
   const isComplete = generatedLatex.length > 0 && !isGenerating;
   const isBusy = isGenerating || isCompiling || isSaving;
@@ -212,10 +213,13 @@ export default function Page() {
 
       let accumulated = "";
 
+      const templateCode = getLatex(selectedTemplate);
+
       await streamGenerateResume(
         {
           description: description.trim(),
           template: selectedTemplate,
+          templateCode: templateCode,
           userProfile,
         },
         (chunk) => {
@@ -303,11 +307,19 @@ export default function Page() {
         sanitizeGeneratedLatex(generatedLatex),
       );
 
+      // Revoke old URL before creating a new one
       if (pdfUrlRef.current) {
         URL.revokeObjectURL(pdfUrlRef.current);
+        pdfUrlRef.current = null;
       }
 
-      const url = URL.createObjectURL(blob);
+      // Guarantee correct MIME type so the browser renders it as a PDF
+      const pdfBlob =
+        blob.type === "application/pdf"
+          ? blob
+          : new Blob([blob], { type: "application/pdf" });
+
+      const url = URL.createObjectURL(pdfBlob);
       pdfUrlRef.current = url;
       setPdfBlobUrl(url);
       toast.success("PDF preview ready");
@@ -444,7 +456,7 @@ export default function Page() {
               </p>
 
               <div className="flex max-h-[420px] flex-col gap-3 overflow-y-auto pr-1">
-                {TEMPLATES.map((template) => {
+                {templates.map((template) => {
                   const isSelected = selectedTemplate === template.id;
                   return (
                     <button
@@ -556,6 +568,7 @@ export default function Page() {
 
           {pdfBlobUrl ? (
             <iframe
+              key={pdfBlobUrl}
               title="Compiled resume preview"
               src={pdfBlobUrl}
               className="mt-4 h-[min(600px,50vh)] w-full rounded-xl border border-[#c7c6cb] bg-white shadow-sm"

@@ -1,7 +1,11 @@
-import Groq from "groq-sdk";
+import {
+  GoogleGenerativeAI,
+  HarmCategory,
+  HarmBlockThreshold,
+} from "@google/generative-ai";
 import { NextResponse } from "next/server";
 
-const GROQ_MODEL = "llama-3.3-70b-versatile";
+import { GEMINI_FLASH_MODEL } from "@/lib/plan-access";
 
 const SYSTEM_PROMPT = `You are an expert executive career coach, communication expert, and technical advisor. Your job is to critique a candidate's practice interview answer rigorously but constructively, providing actionable upgrades.
 
@@ -42,25 +46,24 @@ ${jobContext}
 Provide your detailed streaming critique following the structured coaching format rules.`;
 }
 
-function getErrorMessage(error: unknown): string {
-  if (error instanceof Groq.APIError) {
-    if (error.status === 429) {
-      return "Groq rate limit exceeded. Please try again in a moment.";
-    }
-    return error.message || "Groq API request failed";
-  }
+const SAFETY_SETTINGS = [
+  { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
+  { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
+  { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
+  { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
+];
 
+function getErrorMessage(error: unknown): string {
   if (error instanceof Error) {
     return error.message;
   }
-
   return "Failed to generate interview feedback";
 }
 
 export async function POST(request: Request) {
   try {
-    if (!process.env.GROQ_API_KEY) {
-      console.error("[interview/feedback] GROQ_API_KEY is not configured");
+    if (!process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
+      console.error("[interview/feedback] GOOGLE_GENERATIVE_AI_API_KEY is not configured");
       return NextResponse.json(
         { error: "Interview feedback generation failed" },
         { status: 500 },
@@ -104,29 +107,28 @@ export async function POST(request: Request) {
       );
     }
 
-    const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
-
-    const completionStream = await groq.chat.completions.create({
-      model: GROQ_MODEL,
-      temperature: 0.3,
-      max_tokens: 2500,
-      stream: true,
-      messages: [
-        { role: "system", content: SYSTEM_PROMPT },
-        {
-          role: "user",
-          content: buildUserMessage(question, answer, jobContext),
-        },
-      ],
+    const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GENERATIVE_AI_API_KEY);
+    const model = genAI.getGenerativeModel({
+      model: GEMINI_FLASH_MODEL,
+      safetySettings: SAFETY_SETTINGS,
+      generationConfig: {
+        temperature: 0.3,
+        maxOutputTokens: 2500,
+      },
+      systemInstruction: SYSTEM_PROMPT,
     });
+
+    const result = await model.generateContentStream(
+      buildUserMessage(question, answer, jobContext),
+    );
 
     const encoder = new TextEncoder();
 
     const stream = new ReadableStream({
       async start(controller) {
         try {
-          for await (const chunk of completionStream) {
-            const text = chunk.choices[0]?.delta?.content ?? "";
+          for await (const chunk of result.stream) {
+            const text = chunk.text();
             if (text) {
               controller.enqueue(
                 encoder.encode(`data: ${JSON.stringify({ text })}\n\n`),

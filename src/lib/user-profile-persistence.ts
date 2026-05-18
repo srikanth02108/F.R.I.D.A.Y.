@@ -2,7 +2,7 @@ import type { Database, UserProfile } from "@/types/database";
 
 /** Columns loaded/saved from the profile vault personal-info form. */
 export const USER_PROFILE_FORM_SELECT =
-  "id, email, full_name, avatar_url, headline, location, phone, linkedin_url, github_url, website_url, plan, resumes_used, resumes_limit, created_at, updated_at" as const;
+  "id, email, full_name, avatar_url, headline, location, phone, linkedin_url, github_url, website_url, plan, resumes_used, created_at, updated_at" as const;
 
 export type UserProfileFormState = {
   fullName: string;
@@ -58,13 +58,12 @@ export function buildUserProfileUpdatePayload(
 
 export type UserProfileInsertDefaults = Pick<
   UserProfile,
-  "plan" | "resumes_used" | "resumes_limit"
+  "plan" | "resumes_used"
 >;
 
 const DEFAULT_INSERT_DEFAULTS: UserProfileInsertDefaults = {
   plan: "free",
   resumes_used: 0,
-  resumes_limit: 5,
 };
 
 export function buildUserProfileUpsertRow(
@@ -82,6 +81,5 @@ export function buildUserProfileUpsertRow(
     ...buildUserProfileUpdatePayload(form),
     plan: defaults.plan,
     resumes_used: defaults.resumes_used,
-    resumes_limit: defaults.resumes_limit,
   };
 }

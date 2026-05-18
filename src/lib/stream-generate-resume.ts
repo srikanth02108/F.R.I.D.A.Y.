@@ -1,6 +1,7 @@
 type GenerateResumePayload = {
   description: string;
   template: string;
+  templateCode?: string;
   userProfile: Record<string, unknown>;
 };
 

@@ -1,6 +1,11 @@
-import Groq from "groq-sdk";
+import {
+  GoogleGenerativeAI,
+  HarmCategory,
+  HarmBlockThreshold,
+} from "@google/generative-ai";
 import { NextResponse } from "next/server";
 
+import { GEMINI_FLASH_MODEL } from "@/lib/plan-access";
 import { packJobNotes } from "@/lib/tracker-utils";
 import { pickDemoMatch } from "@/lib/tracker-monitor-catalog";
 import { sanitizeGeneratedLatex } from "@/lib/sanitize-latex";
@@ -9,8 +14,6 @@ import { getTemplateLatex } from "@/lib/templates";
 import { createEmptyResumeContent } from "@/lib/resume-content";
 import type { MonitorAgentMatch, MonitorAgentScanResult } from "@/types/tracker-monitor";
 
-const GROQ_MODEL = "llama-3.3-70b-versatile";
-
 type MonitorAgentBody = {
   companies?: string[];
   jobTitles?: string[];
@@ -18,10 +21,14 @@ type MonitorAgentBody = {
   tick?: number;
 };
 
+const SAFETY_SETTINGS = [
+  { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
+  { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
+  { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
+  { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
+];
+
 function getErrorMessage(error: unknown): string {
-  if (error instanceof Groq.APIError) {
-    return error.message || "Groq API request failed";
-  }
   if (error instanceof Error) {
     return error.message;
   }
@@ -35,27 +42,27 @@ async function analyzeJobDescription(jd: string): Promise<MonitorAgentMatch["jdA
     jobLevel: "Mid",
   };
 
-  if (!process.env.GROQ_API_KEY) {
+  if (!process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
     return fallback;
   }
 
   try {
-    const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
-    const completion = await groq.chat.completions.create({
-      model: GROQ_MODEL,
-      temperature: 0.1,
-      max_tokens: 600,
-      messages: [
-        {
-          role: "system",
-          content:
-            "Return ONLY valid JSON: { \"keySkills\": string[], \"requiredExperience\": string, \"jobLevel\": \"Junior\"|\"Mid\"|\"Senior\" }",
-        },
-        { role: "user", content: jd.slice(0, 6000) },
-      ],
+    const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GENERATIVE_AI_API_KEY);
+    const model = genAI.getGenerativeModel({
+      model: GEMINI_FLASH_MODEL,
+      safetySettings: SAFETY_SETTINGS,
+      generationConfig: {
+        temperature: 0.1,
+        maxOutputTokens: 600,
+        responseMimeType: "application/json",
+      },
+      systemInstruction:
+        'Return ONLY valid JSON: { "keySkills": string[], "requiredExperience": string, "jobLevel": "Junior"|"Mid"|"Senior" }',
     });
 
-    const raw = completion.choices[0]?.message?.content ?? "";
+    const result = await model.generateContent(jd.slice(0, 6000));
+    const raw = result.response.text();
+
     const cleaned = raw
       .trim()
       .replace(/^```json\s*/i, "")
@@ -90,30 +97,28 @@ async function tailorResumeForRole(
   company: string,
   role: string,
 ): Promise<string> {
-  if (!process.env.GROQ_API_KEY) {
+  if (!process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
     return sourceLatex;
   }
 
   try {
-    const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
-    const completion = await groq.chat.completions.create({
-      model: GROQ_MODEL,
-      temperature: 0.12,
-      max_tokens: 4096,
-      messages: [
-        {
-          role: "system",
-          content:
-            "You are an ATS resume tailoring engine. Return ONLY raw LaTeX from \\documentclass through \\end{document}. No markdown fences. Mirror JD keywords truthfully.",
-        },
-        {
-          role: "user",
-          content: `Company: ${company}\nRole: ${role}\n\nJob Description:\n${jobDescription}\n\nSource LaTeX:\n${sourceLatex.slice(0, 12000)}\n\nTailor this resume for the role.`,
-        },
-      ],
+    const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GENERATIVE_AI_API_KEY);
+    const model = genAI.getGenerativeModel({
+      model: GEMINI_FLASH_MODEL,
+      safetySettings: SAFETY_SETTINGS,
+      generationConfig: {
+        temperature: 0.12,
+        maxOutputTokens: 4096,
+      },
+      systemInstruction:
+        "You are an ATS resume tailoring engine. Return ONLY raw LaTeX from \\documentclass through \\end{document}. No markdown fences. Mirror JD keywords truthfully.",
     });
 
-    const raw = completion.choices[0]?.message?.content ?? "";
+    const result = await model.generateContent(
+      `Company: ${company}\nRole: ${role}\n\nJob Description:\n${jobDescription}\n\nSource LaTeX:\n${sourceLatex.slice(0, 12000)}\n\nTailor this resume for the role.`,
+    );
+
+    const raw = result.response.text();
     const sanitized = sanitizeGeneratedLatex(raw);
     return sanitized || sourceLatex;
   } catch {

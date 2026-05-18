@@ -15,7 +15,7 @@ export async function fetchUserPlanSnapshot(
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("user_profiles")
-    .select("plan, resumes_used, resumes_limit")
+    .select("plan, resumes_used")
     .eq("id", userId)
     .maybeSingle();
 
@@ -26,7 +26,6 @@ export async function fetchUserPlanSnapshot(
   return {
     plan: normalizePlan(data.plan),
     resumes_used: data.resumes_used ?? DEFAULT_PLAN_SNAPSHOT.resumes_used,
-    resumes_limit: data.resumes_limit ?? DEFAULT_PLAN_SNAPSHOT.resumes_limit,
   };
 }
 

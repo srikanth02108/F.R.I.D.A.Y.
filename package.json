@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.96.0",
+    "@google/generative-ai": "^0.24.1",
     "@monaco-editor/react": "^4.7.0",
     "@react-pdf/renderer": "^4.5.1",
     "@supabase/ssr": "^0.10.3",

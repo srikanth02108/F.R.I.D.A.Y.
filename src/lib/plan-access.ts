@@ -1,19 +1,23 @@
 import type { Plan } from "@/types/database";
 
-export const PRO_GROQ_MODEL = "llama-3.3-70b-versatile";
-export const FREE_GROQ_MODEL = "llama-3.1-8b-instant";
+/** Gemini models used across the platform. */
+export const GEMINI_FLASH_MODEL = "gemini-1.5-flash";
+export const GEMINI_PRO_MODEL = "gemini-1.5-pro";
 
 export type UserPlanSnapshot = {
   plan: Plan;
   resumes_used: number;
-  resumes_limit: number;
 };
 
 export const DEFAULT_PLAN_SNAPSHOT: UserPlanSnapshot = {
   plan: "free",
   resumes_used: 0,
-  resumes_limit: 5,
 };
+
+/** Free users get 5, paid users are unlimited. */
+export function getResumesLimit(plan: Plan): number {
+  return hasPaidPlan(plan) ? Infinity : 5;
+}
 
 export function normalizePlan(value: string | null | undefined): Plan {
   if (value === "pro" || value === "team") return value;
@@ -30,15 +34,12 @@ export function canUseProModels(plan: Plan): boolean {
 
 export function canRunAiGeneration(snapshot: UserPlanSnapshot): boolean {
   if (hasPaidPlan(snapshot.plan)) return true;
-  return snapshot.resumes_used < snapshot.resumes_limit;
+  return snapshot.resumes_used < getResumesLimit(snapshot.plan);
 }
 
-export function canViewProDashboardMetrics(plan: Plan): boolean {
-  return hasPaidPlan(plan);
-}
-
-export function getGroqModelForPlan(plan: Plan): string {
-  return canUseProModels(plan) ? PRO_GROQ_MODEL : FREE_GROQ_MODEL;
+/** Returns the Gemini model appropriate for the user's plan tier. */
+export function getGeminiModelForPlan(plan: Plan): string {
+  return canUseProModels(plan) ? GEMINI_PRO_MODEL : GEMINI_FLASH_MODEL;
 }
 
 export function getPlanSidebarLabel(snapshot: UserPlanSnapshot): string {
@@ -48,7 +49,9 @@ export function getPlanSidebarLabel(snapshot: UserPlanSnapshot): string {
       : snapshot.plan === "pro"
         ? "Pro Plan"
         : "Free Plan";
-  return `${planName} · ${snapshot.resumes_used}/${snapshot.resumes_limit} resumes`;
+  const limit = getResumesLimit(snapshot.plan);
+  const limitStr = limit === Infinity ? "∞" : String(limit);
+  return `${planName} · ${snapshot.resumes_used}/${limitStr} resumes`;
 }
 
 export function getMemberBadgeLabel(plan: Plan): string | null {

@@ -1,7 +1,11 @@
-import Groq from "groq-sdk";
+import {
+  GoogleGenerativeAI,
+  HarmCategory,
+  HarmBlockThreshold,
+} from "@google/generative-ai";
 import { NextResponse } from "next/server";
 
-const GROQ_MODEL = "llama-3.3-70b-versatile";
+import { GEMINI_FLASH_MODEL } from "@/lib/plan-access";
 
 const SYSTEM_PROMPT = `You are an elite professional cover letter copywriter, executive storyteller, and corporate branding strategist. Your job is to draft compelling, deeply personalized, persuasive cover letters that command attention and land interviews. 
 
@@ -44,26 +48,25 @@ Requested Copywriting Tone:
 ${tone} (Adjust pacing: Professional = elegant/authoritative; Enthusiastic = passionate/high-energy; Casual = conversational/modern-startup style).`;
 }
 
-function getErrorMessage(error: unknown): string {
-  if (error instanceof Groq.APIError) {
-    if (error.status === 429) {
-      return "Groq rate limit exceeded. Please try again in a moment.";
-    }
-    return error.message || "Groq API request failed";
-  }
+const SAFETY_SETTINGS = [
+  { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
+  { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
+  { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
+  { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
+];
 
+function getErrorMessage(error: unknown): string {
   if (error instanceof Error) {
     return error.message;
   }
-
   return "Failed to generate cover letter";
 }
 
 export async function POST(request: Request) {
   try {
-    if (!process.env.GROQ_API_KEY) {
+    if (!process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
       return NextResponse.json(
-        { error: "Groq API key is not configured" },
+        { error: "Google AI API key is not configured" },
         { status: 500 },
       );
     }
@@ -105,34 +108,28 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "tone is required" }, { status: 400 });
     }
 
-    const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
-
-    const completionStream = await groq.chat.completions.create({
-      model: GROQ_MODEL,
-      temperature: 0.4,
-      max_tokens: 2000,
-      stream: true,
-      messages: [
-        { role: "system", content: SYSTEM_PROMPT },
-        {
-          role: "user",
-          content: buildUserMessage(
-            jobDescription,
-            resumeText,
-            userProfile,
-            tone,
-          ),
-        },
-      ],
+    const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GENERATIVE_AI_API_KEY);
+    const model = genAI.getGenerativeModel({
+      model: GEMINI_FLASH_MODEL,
+      safetySettings: SAFETY_SETTINGS,
+      generationConfig: {
+        temperature: 0.4,
+        maxOutputTokens: 2000,
+      },
+      systemInstruction: SYSTEM_PROMPT,
     });
+
+    const result = await model.generateContentStream(
+      buildUserMessage(jobDescription, resumeText, userProfile, tone),
+    );
 
     const encoder = new TextEncoder();
 
     const stream = new ReadableStream({
       async start(controller) {
         try {
-          for await (const chunk of completionStream) {
-            const text = chunk.choices[0]?.delta?.content ?? "";
+          for await (const chunk of result.stream) {
+            const text = chunk.text();
             if (text) {
               controller.enqueue(
                 encoder.encode(`data: ${JSON.stringify({ text })}\n\n`),

@@ -8,19 +8,33 @@ export async function compileLatexToPdfBlob(latex: string): Promise<Blob> {
   });
 
   if (!response.ok) {
-    const payload = (await response.json().catch(() => null)) as {
-      error?: string;
-    } | null;
-    throw new Error(payload?.error ?? "LaTeX compilation failed");
+    // Try to read a structured JSON error first, then fall back to raw text
+    let errorMessage = "LaTeX compilation failed";
+    try {
+      const payload = (await response.clone().json()) as { error?: string } | null;
+      if (payload?.error) {
+        errorMessage = payload.error;
+      }
+    } catch {
+      const text = await response.text().catch(() => "");
+      if (text.trim()) errorMessage = text.trim();
+    }
+    throw new Error(errorMessage);
   }
 
-  const blob = await response.blob();
+  // Read raw bytes then explicitly re-wrap with application/pdf so browsers
+  // always treat the ObjectURL as a PDF, regardless of what fetch infers.
+  const rawBlob = await response.blob();
 
-  if (blob.type && !blob.type.includes("pdf") && blob.size === 0) {
-    throw new Error("LaTeX compilation failed");
+  if (rawBlob.size === 0) {
+    throw new Error(
+      "Compiler returned an empty file. Check your LaTeX source for errors.",
+    );
   }
 
-  return blob;
+  // Re-wrap with an explicit MIME type so PDF.js / the iframe never complains.
+  const pdfBlob = new Blob([rawBlob], { type: "application/pdf" });
+  return pdfBlob;
 }
 
 export function sanitizeResumeFilename(name: string): string {
@@ -29,7 +43,12 @@ export function sanitizeResumeFilename(name: string): string {
 }
 
 export function downloadPdfBlob(blob: Blob, filename: string): void {
-  const url = URL.createObjectURL(blob);
+  // Always ensure the download blob has the correct MIME type too
+  const pdfBlob = blob.type === "application/pdf"
+    ? blob
+    : new Blob([blob], { type: "application/pdf" });
+
+  const url = URL.createObjectURL(pdfBlob);
   const link = document.createElement("a");
   link.href = url;
   link.download = filename.endsWith(".pdf") ? filename : `${filename}.pdf`;

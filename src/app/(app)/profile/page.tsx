@@ -259,7 +259,7 @@ export default function Page() {
 
       const { data: existingProfile, error: existingError } = await supabase
         .from("user_profiles")
-        .select("id, plan, resumes_used, resumes_limit")
+        .select("id, plan, resumes_used")
         .eq("id", user.id)
         .maybeSingle();
 

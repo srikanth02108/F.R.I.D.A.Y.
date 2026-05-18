@@ -90,7 +90,6 @@ export type UserProfile = {
   website_url: string | null;
   plan: Plan;
   resumes_used: number;
-  resumes_limit: number;
   created_at: string;
   updated_at: string;
 };

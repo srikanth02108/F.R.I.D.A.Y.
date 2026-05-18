@@ -12,7 +12,6 @@ import {
 import {
   canRunAiGeneration,
   canUseProModels,
-  canViewProDashboardMetrics,
   DEFAULT_PLAN_SNAPSHOT,
   normalizePlan,
   type UserPlanSnapshot,
@@ -27,7 +26,6 @@ type UserPlanContextValue = {
   isPaid: boolean;
   canUseProModels: boolean;
   canRunAiGeneration: boolean;
-  canViewProDashboardMetrics: boolean;
 };
 
 const UserPlanContext = createContext<UserPlanContextValue | null>(null);
@@ -45,7 +43,7 @@ async function loadPlanFromClient(): Promise<UserPlanSnapshot> {
 
   const { data, error } = await supabase
     .from("user_profiles")
-    .select("plan, resumes_used, resumes_limit")
+    .select("plan, resumes_used")
     .eq("id", user.id)
     .maybeSingle();
 
@@ -56,7 +54,6 @@ async function loadPlanFromClient(): Promise<UserPlanSnapshot> {
   return {
     plan: normalizePlan(data.plan as Plan | string),
     resumes_used: data.resumes_used ?? 0,
-    resumes_limit: data.resumes_limit ?? 5,
   };
 }
 
@@ -106,7 +103,6 @@ export function UserPlanProvider({
       isPaid,
       canUseProModels: canUseProModels(snapshot.plan),
       canRunAiGeneration: canRunAiGeneration(snapshot),
-      canViewProDashboardMetrics: canViewProDashboardMetrics(snapshot.plan),
     };
   }, [snapshot, loading, refresh]);
 

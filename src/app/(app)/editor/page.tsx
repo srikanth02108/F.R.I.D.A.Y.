@@ -30,6 +30,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { EditorTemplateSelect } from "@/components/editor/editor-template-select";
 import {
   workspaceAzureButtonClass,
@@ -45,6 +46,7 @@ import {
 import { createClient } from "@/lib/supabase/client";
 import { createEmptyResumeContent } from "@/lib/resume-content";
 import { getTemplateLatex } from "@/lib/templates";
+import { useTemplates } from "@/hooks/use-templates";
 import type { Resume } from "@/types/database";
 import { cn } from "@/lib/utils";
 
@@ -101,6 +103,12 @@ export function ResumeEditor() {
   const [pendingTemplate, setPendingTemplate] = useState<string | null>(null);
   const [templateDialogOpen, setTemplateDialogOpen] = useState(false);
 
+  const [customTemplateDialogOpen, setCustomTemplateDialogOpen] = useState(false);
+  const [customTemplateName, setCustomTemplateName] = useState("");
+  const [isSavingTemplate, setIsSavingTemplate] = useState(false);
+
+  const { templates, getLatex, refreshTemplates } = useTemplates();
+
   const containerRef = useRef<HTMLDivElement>(null);
   const pdfUrlRef = useRef<string | null>(null);
 
@@ -110,11 +118,11 @@ export function ResumeEditor() {
     selectedTemplate !== savedTemplate;
 
   const applyTemplate = useCallback((templateId: string) => {
-    const latex = getTemplateLatex(templateId);
+    const latex = getLatex(templateId);
     if (!latex) return;
     setLatexContent(latex);
     setSelectedTemplate(templateId);
-  }, []);
+  }, [getLatex]);
 
   const loadResume = useCallback(async () => {
     if (!resumeIdParam) {
@@ -140,7 +148,7 @@ export function ResumeEditor() {
     const resume = data as Resume;
     const latex =
       resume.content?.latexSource ??
-      getTemplateLatex(resume.template) ??
+      getLatex(resume.template) ??
       createDefaultLatex();
 
     setResumeId(resume.id);
@@ -152,7 +160,7 @@ export function ResumeEditor() {
     setSavedTemplate(resume.template);
     setIsPublic(resume.is_public);
     setShareToken(resume.content?.shareToken ?? null);
-  }, [resumeIdParam]);
+  }, [resumeIdParam, getLatex]);
 
   useEffect(() => {
     loadResume();
@@ -162,6 +170,7 @@ export function ResumeEditor() {
     return () => {
       if (pdfUrlRef.current) {
         URL.revokeObjectURL(pdfUrlRef.current);
+        pdfUrlRef.current = null;
       }
     };
   }, []);
@@ -214,11 +223,21 @@ export function ResumeEditor() {
   }, [isDragging]);
 
   const setPreviewFromBlob = useCallback((blob: Blob) => {
+    // Revoke previous ObjectURL to free memory
     if (pdfUrlRef.current) {
       URL.revokeObjectURL(pdfUrlRef.current);
+      pdfUrlRef.current = null;
     }
 
-    const url = URL.createObjectURL(blob);
+    // Guarantee the blob has the correct MIME type regardless of what the
+    // server or fetch layer returned — some browsers refuse to render an
+    // iframe if the type is missing or wrong.
+    const pdfBlob =
+      blob.type === "application/pdf"
+        ? blob
+        : new Blob([blob], { type: "application/pdf" });
+
+    const url = URL.createObjectURL(pdfBlob);
     pdfUrlRef.current = url;
     setPdfUrl(url);
     setLastCompiled(new Date());
@@ -334,6 +353,43 @@ export function ResumeEditor() {
     setSavedName(resumeName);
     setSavedTemplate(selectedTemplate);
     toast.success("Resume saved");
+  };
+
+  const handleSaveCustomTemplate = async () => {
+    if (!customTemplateName.trim()) {
+      toast.error("Please enter a template name");
+      return;
+    }
+    setIsSavingTemplate(true);
+    const supabase = createClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      setIsSavingTemplate(false);
+      toast.error("You must be signed in to save templates");
+      return;
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await (supabase as any)
+      .from("custom_templates")
+      .insert({
+        user_id: user.id,
+        name: customTemplateName.trim(),
+        latex_code: latexContent,
+      });
+
+    setIsSavingTemplate(false);
+
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+
+    toast.success(`Template '${customTemplateName}' saved to your library!`);
+    setCustomTemplateDialogOpen(false);
+    setCustomTemplateName("");
+    refreshTemplates();
   };
 
   const handleMasterPdf = async () => {
@@ -478,6 +534,7 @@ export function ResumeEditor() {
               value={selectedTemplate}
               onValueChange={handleTemplateChange}
               disabled={isBusy}
+              templates={templates}
             />
 
             <Button
@@ -523,6 +580,16 @@ export function ResumeEditor() {
                 <Save className="size-3.5" />
               )}
               Save
+            </Button>
+
+            <Button
+              variant="outline"
+              size="sm"
+              className={cn("hidden md:inline-flex", workspaceOutlineButtonClass)}
+              onClick={() => setCustomTemplateDialogOpen(true)}
+              disabled={isBusy}
+            >
+              Save as Template ✨
             </Button>
 
             <Button
@@ -677,8 +744,9 @@ export function ResumeEditor() {
                 </div>
               ) : (
                 <iframe
+                  key={pdfUrl}
                   title="Resume preview"
-                  src={pdfUrl}
+                  src={pdfUrl ?? undefined}
                   className="mx-auto h-full min-h-[600px] w-full max-w-3xl rounded-sm border border-[#e9e8e7] bg-white shadow-[0px_10px_30px_rgba(0,0,0,0.1)]"
                 />
               )}
@@ -712,6 +780,48 @@ export function ResumeEditor() {
               onClick={confirmTemplateChange}
             >
               Switch template
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={customTemplateDialogOpen} onOpenChange={setCustomTemplateDialogOpen}>
+        <DialogContent className="border-[#c7c6cb] sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Create Custom Template</DialogTitle>
+            <DialogDescription>
+              Save your current LaTeX layout to use as a template for future resumes.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <Label htmlFor="template-name" className="text-sm font-semibold text-[#0A0A0A] mb-2 block">
+              Template Name
+            </Label>
+            <Input
+              id="template-name"
+              value={customTemplateName}
+              onChange={(e) => setCustomTemplateName(e.target.value)}
+              placeholder="e.g. My Startup Resume"
+              className="h-9 w-full"
+            />
+          </div>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button
+              variant="outline"
+              className={workspaceOutlineButtonClass}
+              onClick={() => setCustomTemplateDialogOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              className={workspacePrimaryButtonClass}
+              onClick={handleSaveCustomTemplate}
+              disabled={isSavingTemplate}
+            >
+              {isSavingTemplate ? (
+                <Loader2 className="size-4 animate-spin mr-2" />
+              ) : null}
+              Save Template
             </Button>
           </DialogFooter>
         </DialogContent>

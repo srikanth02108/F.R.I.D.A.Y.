@@ -1,7 +1,11 @@
-import Groq from "groq-sdk";
+import {
+  GoogleGenerativeAI,
+  HarmCategory,
+  HarmBlockThreshold,
+} from "@google/generative-ai";
 import { NextResponse } from "next/server";
 
-const GROQ_MODEL = "llama-3.3-70b-versatile";
+import { GEMINI_FLASH_MODEL } from "@/lib/plan-access";
 
 type JobLevel = "Junior" | "Mid" | "Senior";
 
@@ -14,21 +18,6 @@ type AnalyzeJdResult = {
   requiredExperience: string;
   jobLevel: JobLevel;
 };
-
-function getErrorMessage(error: unknown): string {
-  if (error instanceof Groq.APIError) {
-    if (error.status === 429) {
-      return "Groq rate limit exceeded. Please try again in a moment.";
-    }
-    return error.message || "Groq API request failed";
-  }
-
-  if (error instanceof Error) {
-    return error.message;
-  }
-
-  return "Failed to analyze job description";
-}
 
 function normalizeJobLevel(value: string): JobLevel {
   const normalized = value.toLowerCase();
@@ -70,11 +59,25 @@ function parseAnalyzeResult(raw: string): AnalyzeJdResult {
   };
 }
 
+const SAFETY_SETTINGS = [
+  { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
+  { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
+  { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
+  { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
+];
+
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) {
+    return error.message;
+  }
+  return "Failed to analyze job description";
+}
+
 export async function POST(request: Request) {
   try {
-    if (!process.env.GROQ_API_KEY) {
+    if (!process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
       return NextResponse.json(
-        { error: "Groq API key is not configured" },
+        { error: "Google AI API key is not configured" },
         { status: 500 },
       );
     }
@@ -99,26 +102,24 @@ export async function POST(request: Request) {
       );
     }
 
-    const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
-
-    const completion = await groq.chat.completions.create({
-      model: GROQ_MODEL,
-      temperature: 0.15,
-      max_tokens: 600,
-      messages: [
-        {
-          role: "system",
-          content:
-            "You extract structured hiring requirements from job descriptions. Respond with ONLY valid JSON, no markdown fences. Schema: {\"keySkills\": string[], \"requiredExperience\": string, \"jobLevel\": \"Junior\"|\"Mid\"|\"Senior\"}. keySkills: 5-10 concise skill/tool phrases. requiredExperience: one sentence summary. jobLevel: pick the best single level.",
-        },
-        {
-          role: "user",
-          content: `Analyze this job description:\n\n${jobDescription}`,
-        },
-      ],
+    const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GENERATIVE_AI_API_KEY);
+    const model = genAI.getGenerativeModel({
+      model: GEMINI_FLASH_MODEL,
+      safetySettings: SAFETY_SETTINGS,
+      generationConfig: {
+        temperature: 0.15,
+        maxOutputTokens: 600,
+        responseMimeType: "application/json",
+      },
+      systemInstruction:
+        'You extract structured hiring requirements from job descriptions. Respond with ONLY valid JSON, no markdown fences. Schema: {"keySkills": string[], "requiredExperience": string, "jobLevel": "Junior"|"Mid"|"Senior"}. keySkills: 5-10 concise skill/tool phrases. requiredExperience: one sentence summary. jobLevel: pick the best single level.',
     });
 
-    const raw = completion.choices[0]?.message?.content ?? "";
+    const result = await model.generateContent(
+      `Analyze this job description:\n\n${jobDescription}`,
+    );
+
+    const raw = result.response.text();
 
     if (!raw.trim()) {
       return NextResponse.json(
@@ -127,9 +128,9 @@ export async function POST(request: Request) {
       );
     }
 
-    const result = parseAnalyzeResult(raw);
+    const analyzed = parseAnalyzeResult(raw);
 
-    return NextResponse.json(result);
+    return NextResponse.json(analyzed);
   } catch (error) {
     return NextResponse.json(
       { error: getErrorMessage(error) },

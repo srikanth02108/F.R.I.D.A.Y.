@@ -1,7 +1,11 @@
-import Groq from "groq-sdk";
+import {
+  GoogleGenerativeAI,
+  HarmCategory,
+  HarmBlockThreshold,
+} from "@google/generative-ai";
 import { NextResponse } from "next/server";
 
-import { getGroqModelForPlan } from "@/lib/plan-access";
+import { GEMINI_PRO_MODEL } from "@/lib/plan-access";
 import {
   assertAiGenerationAllowed,
   assertProModelsAllowed,
@@ -197,28 +201,27 @@ function normalizeSkillsGapResult(raw: unknown): SkillsGapResult {
   };
 }
 
-function getErrorDetails(error: unknown): string {
-  if (error instanceof Groq.APIError) {
-    if (error.status === 429) {
-      return "Groq rate limit exceeded. Please try again in a moment.";
-    }
-    return error.message;
-  }
+const SAFETY_SETTINGS = [
+  { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
+  { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
+  { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
+  { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
+];
 
+function getErrorDetails(error: unknown): string {
   if (error instanceof Error) {
     return error.message;
   }
-
   return "Unknown error";
 }
 
 export async function POST(request: Request) {
   try {
-    if (!process.env.GROQ_API_KEY) {
+    if (!process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
       return NextResponse.json(
         {
           error: "Skills Gap Analysis failed to compile structurally",
-          details: "Groq API key is not configured",
+          details: "Google AI API key is not configured",
         },
         { status: 500 },
       );
@@ -267,30 +270,30 @@ export async function POST(request: Request) {
       return proBlocked;
     }
 
-    const model = getGroqModelForPlan(authPlan.snapshot.plan);
-    const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
-
-    const completion = await groq.chat.completions.create({
-      model,
-      temperature: 0.1,
-      max_tokens: 3000,
-      response_format: { type: "json_object" },
-      messages: [
-        { role: "system", content: SYSTEM_PROMPT },
-        {
-          role: "user",
-          content: buildUserMessage(resumeText, jobDescription),
-        },
-      ],
+    // Skills gap analysis uses gemini-1.5-pro for higher reasoning quality
+    const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GENERATIVE_AI_API_KEY);
+    const model = genAI.getGenerativeModel({
+      model: GEMINI_PRO_MODEL,
+      safetySettings: SAFETY_SETTINGS,
+      generationConfig: {
+        temperature: 0.1,
+        maxOutputTokens: 3000,
+        responseMimeType: "application/json",
+      },
+      systemInstruction: SYSTEM_PROMPT,
     });
 
-    const rawContent = completion.choices[0]?.message?.content ?? "";
+    const result = await model.generateContent(
+      buildUserMessage(resumeText, jobDescription),
+    );
+
+    const rawContent = result.response.text();
 
     if (!rawContent.trim()) {
       return NextResponse.json(
         {
           error: "Skills Gap Analysis failed to compile structurally",
-          details: "Groq returned an empty response",
+          details: "Gemini returned an empty response",
         },
         { status: 500 },
       );
@@ -298,9 +301,9 @@ export async function POST(request: Request) {
 
     const sanitized = sanitizeJsonContent(rawContent);
     const parsed = JSON.parse(sanitized) as unknown;
-    const result = normalizeSkillsGapResult(parsed);
+    const normalizedResult = normalizeSkillsGapResult(parsed);
 
-    return NextResponse.json(result, { status: 200 });
+    return NextResponse.json(normalizedResult, { status: 200 });
   } catch (error) {
     console.error("[skills-gap] Request failed", error);
     return NextResponse.json(

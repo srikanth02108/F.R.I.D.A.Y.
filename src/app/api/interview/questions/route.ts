@@ -1,9 +1,13 @@
 import { randomUUID } from "crypto";
 
-import Groq from "groq-sdk";
+import {
+  GoogleGenerativeAI,
+  HarmCategory,
+  HarmBlockThreshold,
+} from "@google/generative-ai";
 import { NextResponse } from "next/server";
 
-import { getGroqModelForPlan } from "@/lib/plan-access";
+import { getGeminiModelForPlan } from "@/lib/plan-access";
 import {
   assertAiGenerationAllowed,
   assertProModelsAllowed,
@@ -14,13 +18,14 @@ import type {
   InterviewQuestionDifficulty,
   InterviewQuestionType,
 } from "@/types/interview";
+
 const MAX_QUESTION_COUNT = 25;
 
 const SYSTEM_PROMPT = `You are a elite technical recruiter, engineering manager, and expert interviewer at a top-tier tech firm. Your job is to analyze a candidate's resume against a specific job description and generate deeply contextual interview questions.
 
 CRITICAL OUTPUT RULES:
 - You must respond with a SINGLE, VALID JSON ARRAY containing precisely the requested number of question objects.
-- Absolutely NO conversational conversational filler text or introductory/closing remarks.
+- Absolutely NO conversational filler text or introductory/closing remarks.
 - Do NOT wrap the code in markdown code fences (no \`\`\`json or \`\`\` blocks). The output string must start immediately with '[' and end with ']'.
 - Ensure types match the schema definitions perfectly.`;
 
@@ -147,25 +152,24 @@ function parseQuestionsPayload(raw: string, expectedCount: number): InterviewQue
   return normalized.slice(0, expectedCount);
 }
 
-function getErrorMessage(error: unknown): string {
-  if (error instanceof Groq.APIError) {
-    if (error.status === 429) {
-      return "Groq rate limit exceeded. Please try again in a moment.";
-    }
-    return error.message || "Groq API request failed";
-  }
+const SAFETY_SETTINGS = [
+  { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
+  { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
+  { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
+  { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
+];
 
+function getErrorMessage(error: unknown): string {
   if (error instanceof Error) {
     return error.message;
   }
-
   return "Failed to generate interview questions";
 }
 
 export async function POST(request: Request) {
   try {
-    if (!process.env.GROQ_API_KEY) {
-      console.error("[interview/questions] GROQ_API_KEY is not configured");
+    if (!process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
+      console.error("[interview/questions] GOOGLE_GENERATIVE_AI_API_KEY is not configured");
       return NextResponse.json(
         { error: "Interview question generation failed" },
         { status: 500 },
@@ -229,27 +233,28 @@ export async function POST(request: Request) {
       return proBlocked;
     }
 
-    const model = getGroqModelForPlan(authPlan.snapshot.plan);
-    const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
-
-    const completion = await groq.chat.completions.create({
-      model,
-      temperature: 0.1,
-      max_tokens: 3000,
-      response_format: { type: "json_object" },
-      messages: [
-        { role: "system", content: SYSTEM_PROMPT },
-        {
-          role: "user",
-          content: buildUserMessage(resumeText, jobDescription, questionCount),
-        },
-      ],
+    const modelName = getGeminiModelForPlan(authPlan.snapshot.plan);
+    const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GENERATIVE_AI_API_KEY);
+    const model = genAI.getGenerativeModel({
+      model: modelName,
+      safetySettings: SAFETY_SETTINGS,
+      generationConfig: {
+        temperature: 0.1,
+        maxOutputTokens: 3000,
+        // JSON mode ensures the array output is well-formed
+        responseMimeType: "application/json",
+      },
+      systemInstruction: SYSTEM_PROMPT,
     });
 
-    const rawContent = completion.choices[0]?.message?.content ?? "";
+    const result = await model.generateContent(
+      buildUserMessage(resumeText, jobDescription, questionCount),
+    );
+
+    const rawContent = result.response.text();
 
     if (!rawContent.trim()) {
-      console.error("[interview/questions] Empty Groq response");
+      console.error("[interview/questions] Empty Gemini response");
       return NextResponse.json(
         { error: "Interview question generation failed" },
         { status: 500 },

@@ -10,21 +10,23 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { TEMPLATES } from "@/lib/templates";
 import { cn } from "@/lib/utils";
+import type { ExtendedTemplateMeta } from "@/hooks/use-templates";
 
 type EditorTemplateSelectProps = {
   value: string;
   onValueChange: (templateId: string) => void;
   disabled?: boolean;
+  templates: ExtendedTemplateMeta[];
 };
 
 export function EditorTemplateSelect({
   value,
   onValueChange,
   disabled,
+  templates,
 }: EditorTemplateSelectProps) {
-  const active = TEMPLATES.find((t) => t.id === value);
+  const active = templates.find((t) => t.id === value);
 
   return (
     <Select value={value} onValueChange={onValueChange} disabled={disabled}>
@@ -58,7 +60,7 @@ export function EditorTemplateSelect({
           <p className="px-2 py-1.5 text-[10px] font-semibold tracking-wider text-[#6B6B6B] uppercase">
             Resume templates
           </p>
-          {TEMPLATES.map((template, index) => (
+          {templates.map((template, index) => (
             <motion.div
               key={template.id}
               initial={{ opacity: 0, y: -4 }}

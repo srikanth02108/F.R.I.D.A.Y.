@@ -1,9 +1,13 @@
-import Groq from "groq-sdk";
+import {
+  GoogleGenerativeAI,
+  HarmCategory,
+  HarmBlockThreshold,
+} from "@google/generative-ai";
 import { NextResponse } from "next/server";
 
 import type { ParsedLinkedInProfile } from "@/types/linkedin-import";
 
-const GROQ_MODEL = "llama-3.3-70b-versatile";
+import { GEMINI_FLASH_MODEL } from "@/lib/plan-access";
 
 const SYSTEM_PROMPT = `You are an expert data migration engine, resume parser, and professional talent mapper. Your task is to extract unformatted, messy text copied from a LinkedIn profile or PDF export and structure it perfectly into a valid JSON resume schema.
 
@@ -184,26 +188,25 @@ function parseLinkedInResult(raw: string): ParsedLinkedInProfile {
   };
 }
 
-function getErrorMessage(error: unknown): string {
-  if (error instanceof Groq.APIError) {
-    if (error.status === 429) {
-      return "Groq rate limit exceeded. Please try again in a moment.";
-    }
-    return error.message || "Groq API request failed";
-  }
+const SAFETY_SETTINGS = [
+  { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
+  { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
+  { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
+  { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
+];
 
+function getErrorMessage(error: unknown): string {
   if (error instanceof Error) {
     return error.message;
   }
-
   return "Failed to parse LinkedIn profile";
 }
 
 export async function POST(request: Request) {
   try {
-    if (!process.env.GROQ_API_KEY) {
+    if (!process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
       return NextResponse.json(
-        { error: "Groq API key is not configured" },
+        { error: "Google AI API key is not configured" },
         { status: 500 },
       );
     }
@@ -230,23 +233,23 @@ export async function POST(request: Request) {
 
     const linkedinUrl = body.linkedinUrl?.trim() ?? "";
 
-    const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
-
-    const completion = await groq.chat.completions.create({
-      model: GROQ_MODEL,
-      temperature: 0.1,
-      max_tokens: 3000,
-      response_format: { type: "json_object" },
-      messages: [
-        { role: "system", content: SYSTEM_PROMPT },
-        {
-          role: "user",
-          content: buildUserMessage(linkedinUrl, profileText),
-        },
-      ],
+    const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GENERATIVE_AI_API_KEY);
+    const model = genAI.getGenerativeModel({
+      model: GEMINI_FLASH_MODEL,
+      safetySettings: SAFETY_SETTINGS,
+      generationConfig: {
+        temperature: 0.1,
+        maxOutputTokens: 3000,
+        responseMimeType: "application/json",
+      },
+      systemInstruction: SYSTEM_PROMPT,
     });
 
-    const raw = completion.choices[0]?.message?.content ?? "";
+    const result = await model.generateContent(
+      buildUserMessage(linkedinUrl, profileText),
+    );
+
+    const raw = result.response.text();
 
     if (!raw.trim()) {
       return NextResponse.json(
@@ -255,9 +258,9 @@ export async function POST(request: Request) {
       );
     }
 
-    const result = parseLinkedInResult(raw);
+    const profile = parseLinkedInResult(raw);
 
-    return NextResponse.json(result);
+    return NextResponse.json(profile);
   } catch (error) {
     return NextResponse.json(
       { error: getErrorMessage(error) },
